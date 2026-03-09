@@ -236,7 +236,7 @@
   function bindShopButtons(){
     const buy = document.getElementById('shop-buy-btn');
     const refresh = document.getElementById('shop-refresh-btn');
-    const exit = document.getElementById('shop-exit-btn');
+    const exit = document.getElementById('shop-exit-btn') || document.querySelector('[data-shop-action="exit"]');
     if(buy && buy.dataset.bound !== '1'){
       buy.dataset.bound = '1';
       buy.addEventListener('click', function(e){ e.preventDefault(); shopBuySelected(); });
@@ -260,5 +260,4 @@
   }
   document.addEventListener('DOMContentLoaded', bindShopButtons);
 })();
-
 

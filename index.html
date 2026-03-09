@@ -40,6 +40,12 @@
 <!-- SELECT -->
 <!-- SELECT -->
 <div class="screen active" id="screen-select">
+<div class="sky-parallax" aria-hidden="true">
+<span class="fly fly-1">🕊️</span>
+<span class="fly fly-2">🦜</span>
+<span class="fly fly-3">🦅</span>
+<span class="fly fly-4">🪽</span>
+</div>
 <div class="sel-intro">
 <h2>Choose Your Champion</h2>
 <p style="color:var(--text-dim);font-style:italic">Your fate is written in feathers.</p>
@@ -82,6 +88,10 @@
 <button class="view-toggle-btn" onclick="setSelView('class',this)">By Class</button>
 </div>
 <span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
+</div>
+<div class="class-filter-wrap">
+<button class="class-filter-btn" id="class-filter-btn" onclick="toggleClassMenu()">Choose Class: All ▾</button>
+<div class="class-filter-menu" id="class-filter-menu"></div>
 </div>
 <div id="bird-grid"></div>
 </div>
@@ -235,7 +245,7 @@
 <div class="shop-btn-row">
 <button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
 <button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (5🌟)</button>
-<button class="shop-exit-btn" data-shop-action="exit">Continue ›</button>
+<button class="shop-exit-btn" data-shop-action="exit" id="shop-exit-btn">Continue ›</button>
 </div>
 <p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 5🌟</p>
 </div>

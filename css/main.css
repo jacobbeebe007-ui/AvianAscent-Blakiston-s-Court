@@ -21,6 +21,15 @@ header{text-align:center;padding:24px 0 16px;border-bottom:1px solid rgba(201,16
 header h1{font-family:'Cinzel',serif;font-size:2.6rem;font-weight:900;letter-spacing:.1em;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .screen{display:none;}.screen.active{display:block;}
+#screen-select{position:relative;overflow:hidden;background:radial-gradient(ellipse at top, rgba(36,48,76,.22), transparent 55%),linear-gradient(180deg,rgba(9,12,20,.95),rgba(10,8,4,.98));border:1px solid rgba(201,168,76,.12);border-radius:12px;padding:6px 8px 12px;}
+.sky-parallax{pointer-events:none;position:absolute;inset:0;overflow:hidden;z-index:0;opacity:.38;}
+.fly{position:absolute;font-size:1.1rem;filter:drop-shadow(0 0 6px rgba(232,201,106,.15));animation:flyAcross linear infinite;}
+.fly-1{top:14%;left:-8%;animation-duration:20s;}
+.fly-2{top:28%;left:-14%;animation-duration:27s;animation-delay:-7s;}
+.fly-3{top:12%;left:-20%;animation-duration:24s;animation-delay:-3s;}
+.fly-4{top:34%;left:-10%;animation-duration:31s;animation-delay:-12s;}
+@keyframes flyAcross{0%{transform:translateX(0) translateY(0)}50%{transform:translateX(58vw) translateY(-8px)}100%{transform:translateX(120vw) translateY(4px)}}
+#screen-select > *:not(.sky-parallax){position:relative;z-index:1;}
 
 
 /* ===== OPENING MENU ===== */
@@ -63,6 +72,12 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .view-toggle{display:flex;gap:0;justify-content:center;margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid rgba(80,70,50,.4);width:fit-content;margin:0 auto 14px;}
 .view-toggle-btn{padding:6px 18px;background:rgba(20,15,5,.7);color:var(--text-dim);font-size:.75rem;font-family:'Cinzel',serif;letter-spacing:.05em;cursor:pointer;border:none;transition:all .2s;}
 .view-toggle-btn.active{background:rgba(80,60,18,.95);color:var(--gold);}
+.class-filter-wrap{display:flex;justify-content:flex-start;position:relative;margin-bottom:10px;}
+.class-filter-btn{padding:7px 14px;background:rgba(20,15,5,.72);border:1px solid rgba(201,168,76,.28);border-radius:8px;color:var(--gold-light);font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.05em;cursor:pointer;}
+.class-filter-menu{display:none;position:absolute;top:38px;left:0;min-width:240px;max-height:270px;overflow:auto;background:rgba(9,12,20,.98);border:1px solid rgba(201,168,76,.28);border-radius:10px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.38);z-index:20;}
+.class-filter-menu.open{display:block;}
+.class-opt{padding:7px 10px;border-radius:8px;color:var(--text);font-size:.78rem;cursor:pointer;display:flex;justify-content:space-between;gap:8px;}
+.class-opt:hover,.class-opt.active{background:rgba(201,168,76,.12);color:var(--gold-light);}
 
 /* SIZE SECTION HEADERS */
 .size-section{margin-bottom:6px;}
@@ -180,6 +195,7 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .status-badge::before{font-size:.64rem;opacity:.9;letter-spacing:.03em;color:currentColor;}
 .status-badge.poison::before{content:'PSN';}
 .status-badge.burning::before{content:'BRN';}
+.status-badge.bleed::before{content:'BLD';}
 .status-badge.weaken::before{content:'WKN';}
 .status-badge.paralyzed::before{content:'PAR';}
 .status-badge.slow::before{content:'SLW';}
@@ -199,12 +215,16 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .status-badge.weaken{background:rgba(180,140,60,.15);border-color:#c9a840;color:#e8c840;}
 .status-badge.paralyzed{background:rgba(200,200,60,.15);border-color:#c8c840;color:#e8e840;}
 .status-badge.burning{background:rgba(220,100,30,.15);border-color:#dc641e;color:#ff8c40;}
+.status-badge.bleed{background:rgba(190,56,76,.18);border-color:#be384c;color:#ff8396;}
 .status-badge.delayed{background:rgba(200,80,200,.15);border-color:#c850c8;color:#e870e8;}
 .status-badge.mud{background:rgba(139,90,43,.2);border-color:#8b5a2b;color:#c8a060;}
 .status-badge.slow{background:rgba(120,170,220,.18);border-color:#78aee8;color:#9fd0ff;}
 .stats-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;font-size:.8rem;margin-top:7px;}
 .stat-mini{color:var(--text-dim);}
 .stat-mini span{color:var(--silver);}
+.stat-trend{font-size:.62rem;margin-left:2px;font-weight:700;vertical-align:middle;}
+.stat-trend.up{color:#6ab89a;}
+.stat-trend.down{color:var(--red-light);}
 .enemy-stats-mini{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.76rem;margin-top:6px;padding-top:5px;border-top:1px solid var(--border);}
 .est{color:var(--text-dim);}.est span{color:var(--silver);}
 .enemy-abilities-list{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
@@ -1226,5 +1246,4 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 /* Energy colors */
 .energy-orb{background:#3aa0ff;} /* normal EN blue */
 .energy-orb.bonus{background:#36c36c;} /* bonus EN green */
-
 

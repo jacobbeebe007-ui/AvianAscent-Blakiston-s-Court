@@ -2719,6 +2719,7 @@ const CLASS_ORDER = ['assassin','knight','mage','bard','tank','ranger','summoner
 const CLASS_LABELS = {assassin:'⚔️ Assassin',knight:'🛡️ Knight',mage:'✨ Mage',bard:'🎵 Bard',tank:'🪨 Tank',ranger:'🏹 Ranger',summoner:'🌊 Summoner'};
 const CLASS_FLAVOR = {assassin:'Burst dmg, crit fishing, evasive.',knight:'Balanced physical, DEF/ACC.',mage:'Pure songs/spells, debuff control.',bard:'Song mix + physical hybrid.',tank:'Sustain bricks, high HP.',ranger:'Projectile pressure, pierce and slows.',summoner:'Mob caller, flock tactics.'};
 let G_selView = 'size';
+let G_classFilter = 'all';
 let shopPurchaseMade = false;
 
 function initSelection() {
@@ -2738,6 +2739,33 @@ function initSelection() {
   buildDifficultyPicker();
 
   // Build bird grid
+  buildClassFilterMenu();
+  buildBirdGrid(G_selView);
+}
+
+function buildClassFilterMenu(){
+  const menu=document.getElementById('class-filter-menu');
+  const btn=document.getElementById('class-filter-btn');
+  if(!menu||!btn) return;
+  const opts=[['all','🌐 All Classes'], ...CLASS_ORDER.map(c=>[c, CLASS_LABELS[c]||c])];
+  menu.innerHTML = opts.map(([id,label])=>`<div class="class-opt ${G_classFilter===id?'active':''}" onclick="selectClassFilter('${id}')"><span>${label}</span><span>${id===G_classFilter?'✓':''}</span></div>`).join('');
+  const activeLabel = idToClassLabel(G_classFilter);
+  btn.textContent = `Choose Class: ${activeLabel} ▾`;
+}
+function idToClassLabel(id){
+  if(id==='all') return 'All';
+  return (CLASS_LABELS[id]||id).replace(/^.*\s/,'');
+}
+function toggleClassMenu(){
+  const menu=document.getElementById('class-filter-menu');
+  if(!menu) return;
+  menu.classList.toggle('open');
+}
+function selectClassFilter(id){
+  G_classFilter=id||'all';
+  const menu=document.getElementById('class-filter-menu');
+  if(menu) menu.classList.remove('open');
+  buildClassFilterMenu();
   buildBirdGrid(G_selView);
 }
 
@@ -2852,9 +2880,10 @@ function buildBirdGrid(view='size') {
   if(!grid) return;
   grid.innerHTML = '';
 
-  const safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
+  let safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
     return !!(b && b.stats && Number.isFinite(b.stats.hp) && Number.isFinite(b.stats.atk) && Number.isFinite(b.stats.def));
   });
+  if(G_classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>String(b.class||'').toLowerCase()===G_classFilter);
   const fallbackStarters = ['sparrow','goose','blackbird','crow','macaw','robin'];
 
   // Compute global max stats for bars
@@ -2918,7 +2947,7 @@ function buildBirdGrid(view='size') {
   });
 
   const label = document.getElementById('bird-count-label');
-  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available`;
+  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available${G_classFilter!=='all' ? ` · ${idToClassLabel(G_classFilter)}`:''}`;
 
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
@@ -2937,6 +2966,13 @@ function buildBirdGrid(view='size') {
     if(label) label.textContent='6/6 available (fallback)';
   }
 }
+
+document.addEventListener('click', (e)=>{
+  const menu=document.getElementById('class-filter-menu');
+  const btn=document.getElementById('class-filter-btn');
+  if(!menu||!btn) return;
+  if(menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
+});
 
 function buildBirdCard(key, bird, locked, globalMax) {
   const card = document.createElement('div');
@@ -3370,19 +3406,20 @@ function refreshBattleUI() {
   const _effAcc=Math.min(100,p.acc+(G.battleHymnActive?G.battleHymnACC:0));
   const _effDodge=getEffectiveDodge(G.player);
   const _effMDodge=getEffectiveMdodge(G.player);
-  const _weakenAtk=G.playerStatus.weaken&&G.playerStatus.weaken>0?'↓':G.warcryActive?'↑':'';
+  const _trendTag = (diff) => diff>0 ? '<small class="stat-trend up">↑</small>' : (diff<0 ? '<small class="stat-trend down">↓</small>' : '');
+  const _atkDiff = G.warcryActive ? 1 : (G.playerStatus.weaken ? -1 : 0);
   const _atkColor=G.warcryActive?'#6ab89a':G.playerStatus.weaken?'var(--red-light)':'var(--silver)';
   const _effAtk=G.warcryActive?Math.floor(p.atk*(1+G.warcryATK/100)):p.atk;
   const _critChance = Math.min(100,(p.critChance||5)+(G.playerStatus.burning>0?20:0));
   const _critMult = p.goldCritMult||1.8;
   document.getElementById('player-stats-mini').innerHTML =
-    `<div class="stat-mini stat-atk">ATK <span style="color:${_atkColor}">${_effAtk}${_weakenAtk}</span></div>
-     <div class="stat-mini stat-def">DEF <span style="color:${_effDef>p.def?'#6ab89a':'var(--silver)'}">${_effDef}${_effDef>p.def?' ↑':''}</span></div>
+    `<div class="stat-mini stat-atk">ATK <span style="color:${_atkColor}">${_effAtk}${_trendTag(_atkDiff)}</span></div>
+     <div class="stat-mini stat-def">DEF <span style="color:${_effDef>p.def?'#6ab89a':'var(--silver)'}">${_effDef}${_trendTag(_effDef-p.def)}</span></div>
      <div class="stat-mini stat-spd">SPD <span>${p.spd}</span></div>
-     <div class="stat-mini stat-dodge" title="Physical Dodge">Dodge <span style="color:${_effDodge>p.dodge?'#6ab89a':_effDodge<p.dodge?'var(--red-light)':'var(--silver)'}">${_effDodge}%${_effDodge>p.dodge?' ↑':_effDodge<p.dodge?' ↓':''}</span></div>
-     <div class="stat-mini stat-magic" title="Magic Dodge — deflects enemy spells">✦Dodge <span style="color:${_effMDodge>getBaseMdodge(G.player)?'#6ab89a':'#6ae8e8'}">${_effMDodge}%${_effMDodge>getBaseMdodge(G.player)?' ↑':''}</span></div>
-     <div class="stat-mini stat-acc">ACC <span style="color:${_effAcc>p.acc?'#6ab89a':_effAcc<p.acc?'var(--red-light)':'var(--silver)'}">${_effAcc}%${_effAcc>p.acc?' ↑':_effAcc<p.acc?' ↓':''}</span></div>
-     <div class="stat-mini stat-crit" title="Crit Chance">🎯CC <span style="color:${_critChance>5?'#6ab89a':'var(--silver)'}">${_critChance}%${_critChance>5?' ↑':''}</span></div>
+     <div class="stat-mini stat-dodge" title="Physical Dodge">Dodge <span style="color:${_effDodge>p.dodge?'#6ab89a':_effDodge<p.dodge?'var(--red-light)':'var(--silver)'}">${_effDodge}%${_trendTag(_effDodge-p.dodge)}</span></div>
+     <div class="stat-mini stat-magic" title="Magic Dodge — deflects enemy spells">✦Dodge <span style="color:${_effMDodge>getBaseMdodge(G.player)?'#6ab89a':'#6ae8e8'}">${_effMDodge}%${_trendTag(_effMDodge-getBaseMdodge(G.player))}</span></div>
+     <div class="stat-mini stat-acc">ACC <span style="color:${_effAcc>p.acc?'#6ab89a':_effAcc<p.acc?'var(--red-light)':'var(--silver)'}">${_effAcc}%${_trendTag(_effAcc-p.acc)}</span></div>
+     <div class="stat-mini stat-crit" title="Crit Chance">🎯CC <span style="color:${_critChance>5?'#6ab89a':'var(--silver)'}">${_critChance}%${_trendTag(_critChance-5)}</span></div>
      <div class="stat-mini stat-crit" title="Crit Damage">💥CD <span style="color:${_critMult>1.5?'#e8c96a':'var(--silver)'}">${_critMult.toFixed(1)}×</span></div>
      <div class="stat-mini" title="Magic Attack — improves spell/ailment potency" style="color:#6ae8e8">✦ATK <span>${p.matk||8}</span></div>
      <div class="stat-mini" title="Magic Defence — resists enemy spells and ailments" style="color:#6ae8e8">✦DEF <span>${p.mdef||8}</span></div>`;
@@ -3468,28 +3505,60 @@ function setHpBar(who,hp,max) {
 
 function renderStatuses(id, statuses) {
   const el=document.getElementById(id); el.innerHTML='';
+  const owner = id === 'player-status' ? 'player' : 'enemy';
+  const ownerStats = owner === 'player' ? G?.player?.stats : G?.enemy?.stats;
+  const poisonCap = G?.player ? (G.player.poisonCap||5) : 5;
+  const nextTickInfo = (key, value) => {
+    if(key==='poison' && value?.stacks>0) {
+      const mult = owner === 'player' ? (G?.player?.poisonTickMult || 1) : 1;
+      return `Next tick: ${Math.max(1, Math.floor(value.stacks * mult))} damage.`;
+    }
+    if(key==='bleed' && value?.stacks>0){
+      return `Next tick: ${Math.max(1, Math.floor(value.stacks * 1.5))} damage.`;
+    }
+    if(key==='burning' && ownerStats?.maxHp){
+      return `Next tick: ${Math.max(1, Math.floor(ownerStats.maxHp * 0.04))} damage.`;
+    }
+    if(key==='delayed' && value?.dmg){
+      return `Next tick: ${Math.max(1, Math.floor(value.dmg))} damage.`;
+    }
+    return '';
+  };
+  const detailText = (key, value, summary='') => {
+    const turns = typeof value==='number' ? value : (value?.turns ?? null);
+    const stacks = typeof value==='object' && typeof value?.stacks==='number' ? value.stacks : null;
+    const bits = [];
+    if(turns!==null) bits.push(`Duration: ${turns} turn${turns===1?'':'s'}.`);
+    if(stacks!==null) bits.push(`Stacks: ${stacks}.`);
+    const next = nextTickInfo(key, value);
+    if(next) bits.push(next);
+    if(summary) bits.push(summary);
+    return bits.join(' ');
+  };
   Object.entries(statuses).forEach(([k,v])=>{
     if (!v && v!==0) return;
     if (v===0 || (typeof v==='object' && !v.turns && !v.stacks && !v.dmg)) return;
     const b=document.createElement('span');
     b.className=`status-badge ${k}`;
-    if (k==='poison') { const cap=G.player?(G.player.poisonCap||5):5; b.textContent=`☣ Flu×${v.stacks}/${cap}(${v.turns}t)`; }
+    let tooltipSummary='';
+    if (k==='poison') { b.textContent=`☣ Flu×${v.stacks}/${poisonCap}(${v.turns}t)`; tooltipSummary='Inflicts poison damage over time.'; }
+    else if (k==='bleed') { b.className='status-badge bleed'; b.textContent=`🩸 Bleed×${v.stacks}(${v.turns}t)`; tooltipSummary='Physical damage over time that scales with stacks.'; }
     else if (k==='weaken') { b.textContent=`🐔 Weaken(${v}t)`; }
     else if (k==='paralyzed') { b.textContent=`⚡ Para(${v}t)`; }
     else if (k==='burning') { b.textContent=`🔥 Burn(${v}t)`; }
     else if (k==='delayed') { b.textContent=`🎵 Resonance(${v.dmg}dmg)`; }
     else if (k==='confused') { b.className='status-badge confused'; b.textContent=`🌀 Confused(${v.turns}t,${v.skipChance}%)`; }
     else if (k==='tookie') { b.className='status-badge stunned'; b.textContent=`🦜 Tookie(+${v.atkBonus}%atk,${v.turns}t)`; }
-    else if (k==='humDodge') { b.className='status-badge evading'; b.textContent=`🎵 Hum+${v.bonus}%(${v.turns}t)`; return; }
-    else if (k==='flamingoATK') { b.className='status-badge buffed'; b.textContent=`🦩 +20%ATK(${v.turns}t)`; return; }
-    else if (k==='lastStandBuff') { b.className='status-badge crit'; b.textContent=`🦅 LstStnd+${v.atkBonus}ATK(${v.turns}t)`; return; }
+    else if (k==='humDodge') { b.className='status-badge evading'; b.textContent=`🎵 Hum+${v.bonus}%(${v.turns}t)`; }
+    else if (k==='flamingoATK') { b.className='status-badge buffed'; b.textContent=`🦩 +20%ATK(${v.turns}t)`; }
+    else if (k==='lastStandBuff') { b.className='status-badge crit'; b.textContent=`🦅 LstStnd+${v.atkBonus}ATK(${v.turns}t)`; }
     // MDodge card bonus badge (only shown when non-zero)
-    else if (k==='mdodgeCard' && v>0) { b.className='status-badge evading'; b.textContent=`✦${v}%MDdg`; return; }
-    else if (k==='warcry') { b.className='status-badge stunned'; b.textContent=`🎺 Warcry+${v.atkBonus}%(${v.turns}t)`; return; }
-    else if (k==='battleHymn') { b.className='status-badge evading'; b.textContent=`🎼 Hymn(${v.turns}t)`; return; }
+    else if (k==='mdodgeCard' && v>0) { b.className='status-badge evading'; b.textContent=`✦${v}%MDdg`; }
+    else if (k==='warcry') { b.className='status-badge stunned'; b.textContent=`🎺 Warcry+${v.atkBonus}%(${v.turns}t)`; }
+    else if (k==='battleHymn') { b.className='status-badge evading'; b.textContent=`🎼 Hymn(${v.turns}t)`; }
     else if (k==='stunned') { b.className='status-badge stunned'; b.textContent=`😵 Stunned(${v}t)`; }
-    else if (k==='mud') { b.className='status-badge delayed'; b.textContent=`🟤 Slowed(${v.turns}t)`; return; }
-    else if (k==='slow') { b.className='status-badge slow'; b.textContent=`🐌 Slow(${v.turns}t,-${v.spdPenalty} SPD,-${v.dodgePenalty}% DODGE)`; return; }
+    else if (k==='mud') { b.className='status-badge delayed'; b.textContent=`🟤 Slowed(${v.turns}t)`; }
+    else if (k==='slow') { b.className='status-badge slow'; b.textContent=`🐌 Slow(${v.turns}t,-${v.spdPenalty} SPD,-${v.dodgePenalty}% DODGE)`; }
     else if (k==='feared') { b.className='status-badge feared'; b.textContent=`😨 Feared(${v}t)`; }
     else if (k==='lullabied') { b.className='status-badge lullabied'; b.textContent=`💤 Lulled(${v}t)`; }
     else if (k==='evading') { b.className='status-badge evading'; b.textContent=`💨 Evade(${v}t)`; }
@@ -3507,6 +3576,8 @@ function renderStatuses(id, statuses) {
     else if (k==='sonicSkip') { b.className='status-badge paralyzed'; b.textContent=`🔊 Dirge(${v.turns}t,${v.chance}%skip)`; }
     else { return; }
     b.title=b.textContent.replace(/\s+/g,' ').trim();
+    b.dataset.statusId = k;
+    b.dataset.statusDetail = detailText(k, v, tooltipSummary);
     el.appendChild(b);
   });
 }
