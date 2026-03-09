@@ -143,7 +143,7 @@
     return 0;
   }
 
-  globalThis.applyAilment = function(target, ailId, stacks=1){
+  if(typeof globalThis.applyAilment !== 'function') globalThis.applyAilment = function(target, ailId, stacks=1){
     const status = target==='player' ? G.playerStatus : G.enemyStatus;
     codexMark('statuses', ailId, 'seen');
     if(target==='player' && G.player){
@@ -192,7 +192,7 @@
     return true;
   };
 
-  globalThis.tickDoTs = async function(who){
+  if(typeof globalThis.tickDoTs !== 'function') globalThis.tickDoTs = async function(who){
     const status=who==='player'?G.playerStatus:G.enemyStatus;
     const stats=who==='player'?G.player.stats:G.enemy.stats;
     const nm = who==='player' ? G.player.name : G.enemy.name;
@@ -840,5 +840,4 @@
     };
   }
 })();
-
 

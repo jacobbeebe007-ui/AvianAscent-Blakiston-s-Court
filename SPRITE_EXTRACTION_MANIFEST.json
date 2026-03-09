@@ -1,142 +1,142 @@
 [
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/sparrow_0e114b92bf75fd01.png",
+    "sprite_file": "assets/sprites/sparrow.png",
     "bytes": 1600925
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/goose_45a6c65eaa8db5e6.png",
+    "sprite_file": "assets/sprites/goose.png",
     "bytes": 996339
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/blackbird_9aab4ba552356f43.png",
+    "sprite_file": "assets/sprites/blackbird.png",
     "bytes": 1546247
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/crow_be383e7e0ad23c6d.png",
+    "sprite_file": "assets/sprites/crow.png",
     "bytes": 1522634
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/macaw_3e820f7ac7f5fe26.png",
+    "sprite_file": "assets/sprites/macaw.png",
     "bytes": 1719904
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/hummingbird_f961c46fb961cfd6.png",
+    "sprite_file": "assets/sprites/hummingbird.png",
     "bytes": 1590609
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/shoebill_3ff30f5f31a6d9f7.png",
+    "sprite_file": "assets/sprites/shoebill.png",
     "bytes": 1157492
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/secretarybird_5096cbe0f9169966.png",
+    "sprite_file": "assets/sprites/secretarybird.png",
     "bytes": 1181175
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/kookaburra_0d62d11f7377305a.png",
+    "sprite_file": "assets/sprites/kookaburra.png",
     "bytes": 1532918
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/kiwi_efe2f20e6da87ec8.png",
+    "sprite_file": "assets/sprites/kiwi.png",
     "bytes": 1708585
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/robin_d6c24949c45c683d.png",
+    "sprite_file": "assets/sprites/robin.png",
     "bytes": 1481152
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/flamingo_a4647eac4ef47d8d.png",
+    "sprite_file": "assets/sprites/flamingo.png",
     "bytes": 1319850
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/seagull_99616ee5e3ab3e2d.png",
+    "sprite_file": "assets/sprites/seagull.png",
     "bytes": 540935
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/emu_755f0a94e63c5cf4.png",
+    "sprite_file": "assets/sprites/emu.png",
     "bytes": 1779234
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/magpie_c01347413f20d463.png",
+    "sprite_file": "assets/sprites/magpie.png",
     "bytes": 1721282
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/penguin_057d605aff5ae58f.png",
+    "sprite_file": "assets/sprites/penguin.png",
     "bytes": 1591533
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/dukeblakiston_fd6f9d1386d74c2a.png",
+    "sprite_file": "assets/sprites/dukeblakiston.png",
     "bytes": 3599756
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/dove_c21e39caa89afe03.png",
+    "sprite_file": "assets/sprites/dove.png",
     "bytes": 1621504
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/seagull_09bed982d764a49c.png",
+    "sprite_file": "assets/sprites/seagull.png",
     "bytes": 1393876
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/albatross_e5851021f36713d0.png",
+    "sprite_file": "assets/sprites/albatross.png",
     "bytes": 1573703
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/raven_2166535c9108f81f.png",
+    "sprite_file": "assets/sprites/raven.png",
     "bytes": 1562269
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/peregrine_098518ffc756ac5b.png",
+    "sprite_file": "assets/sprites/peregrine.png",
     "bytes": 1756184
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/snowyowl_b5662e5e1a106124.png",
+    "sprite_file": "assets/sprites/snowyowl.png",
     "bytes": 1778085
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/lyrebird_3e80e83c379bba57.png",
+    "sprite_file": "assets/sprites/lyrebird.png",
     "bytes": 1872702
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/bowerbird_d1e9d315a64fe4ea.png",
+    "sprite_file": "assets/sprites/bowerbird.png",
     "bytes": 1726106
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/toucan_638fd6cf85306d4c.png",
+    "sprite_file": "assets/sprites/toucan.png",
     "bytes": 1645201
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/swan_c6663fb1ed6ac9a3.png",
+    "sprite_file": "assets/sprites/swan.png",
     "bytes": 1736914
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/toucan_638fd6cf85306d4c.png",
+    "sprite_file": "assets/sprites/toucan.png",
     "bytes": 1645201
   }
 ]

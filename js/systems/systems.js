@@ -79,12 +79,16 @@
   }
 
   // Status badge tooltips
+  function statusTooltipHtml(badge){
+    const cls = badge?.dataset?.statusId || [...badge.classList].find(c => STATUS_INFO[c]) || [...badge.classList][1];
+    const detail = badge?.dataset?.statusDetail || STATUS_INFO[cls] || 'Status effect.';
+    return `<div class="tt-name">${badge.textContent}</div><div class="tt-desc" style="margin-top:6px">${detail}</div>`;
+  }
+
   document.addEventListener('mouseover', (ev)=>{
     const badge = ev.target?.closest?.('.status-badge');
     if(!badge || window._isTouchDevice) return;
-    const cls = [...badge.classList].find(c => STATUS_INFO[c]) || [...badge.classList][1];
-    const html = `<div class="tt-name">${badge.textContent}</div><div class="tt-desc" style="margin-top:6px">${STATUS_INFO[cls] || 'Status effect.'}</div>`;
-    showRichTooltip(ev, html);
+    showRichTooltip(ev, statusTooltipHtml(badge));
   });
   document.addEventListener('mousemove', (ev)=>{
     if(window._isTouchDevice) return;
@@ -92,6 +96,13 @@
   });
   document.addEventListener('mouseout', (ev)=>{
     if(ev.target?.closest?.('.status-badge') && !window._isTouchDevice && typeof hideTooltip === 'function') hideTooltip();
+  });
+  document.addEventListener('click', (ev)=>{
+    const badge = ev.target?.closest?.('.status-badge');
+    if(!badge) return;
+    showRichTooltip(ev, statusTooltipHtml(badge));
+    ev.preventDefault();
+    ev.stopPropagation();
   });
 
   // Action button cooldown indicators + tooltip enrichment
@@ -746,8 +757,8 @@ cooldown('chargeUp',3);
 (function(){
   function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
 
-  // 1) Make DoTs actually tick for both sides.
-  globalThis.tickDoTs = async function(who){
+  // 1) Make DoTs actually tick for both sides (legacy fallback only).
+  if(typeof globalThis.tickDoTs !== 'function') globalThis.tickDoTs = async function(who){
     const status = who === 'player' ? G.playerStatus : G.enemyStatus;
     const stats  = who === 'player' ? G.player.stats : G.enemy.stats;
     const name   = who === 'player' ? G.player.name : G.enemy.name;
@@ -1323,5 +1334,3 @@ cooldown('chargeUp',3);
     ]
   );
 })();
-
-

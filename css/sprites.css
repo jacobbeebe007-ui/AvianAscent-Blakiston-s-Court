@@ -2,7 +2,7 @@
 
 /* ===== Duke Blakiston sprite ===== */
 .sprite-dukeblakiston{
-  background-image:url("../assets/sprites/dukeblakiston_fd6f9d1386d74c2a.png");
+  background-image:url("../assets/sprites/dukeblakiston.png");
 }
 /* Boss-scale render */
 .sprite4.boss.sprite-dukeblakiston,
@@ -40,7 +40,7 @@
 
 /* ===== Dove enemy sprite ===== */
 .sprite-dove {
-  background-image: url("../assets/sprites/dove_c21e39caa89afe03.png");
+  background-image: url("../assets/sprites/dove.png");
   background-size: 200% 200%;
   background-repeat: no-repeat;
   image-rendering: auto;
@@ -55,7 +55,7 @@
 
 /* ===== Seagull sprite replacement ===== */
 .sprite-seagull {
-  background-image: url("../assets/sprites/seagull_09bed982d764a49c.png");
+  background-image: url("../assets/sprites/seagull.png");
   background-size: 200% 200%;
   background-repeat: no-repeat;
 }
@@ -96,7 +96,7 @@
 
 /* ===== 08_albatross-sprite-replacement.css ===== */
 
-.sprite-albatross{background-image:url("../assets/sprites/albatross_e5851021f36713d0.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-albatross{background-image:url("../assets/sprites/albatross.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-albatross.frame-0{background-position:0% 0%;}
 .sprite-albatross.frame-1{background-position:100% 0%;}
 .sprite-albatross.frame-2{background-position:0% 100%;}
@@ -105,7 +105,7 @@
 
 /* ===== 09_raven-sprite-replacement.css ===== */
 
-.sprite-raven{background-image:url("../assets/sprites/raven_2166535c9108f81f.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-raven{background-image:url("../assets/sprites/raven.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-raven.frame-0{background-position:0% 0%;}
 .sprite-raven.frame-1{background-position:100% 0%;}
 .sprite-raven.frame-2{background-position:0% 100%;}
@@ -114,7 +114,7 @@
 
 /* ===== 10_peregrine-sprite-replacement.css ===== */
 
-.sprite-peregrine{background-image:url("../assets/sprites/peregrine_098518ffc756ac5b.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-peregrine{background-image:url("../assets/sprites/peregrine.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-peregrine.frame-0{background-position:0% 0%;}
 .sprite-peregrine.frame-1{background-position:100% 0%;}
 .sprite-peregrine.frame-2{background-position:0% 100%;}
@@ -137,7 +137,7 @@
 
 /* ===== 12_snowyowl-sprite-replacement.css ===== */
 
-.sprite-snowyowl{background-image:url("../assets/sprites/snowyowl_b5662e5e1a106124.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-snowyowl{background-image:url("../assets/sprites/snowyowl.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-snowyowl.frame-0{background-position:0% 0%;}
 .sprite-snowyowl.frame-1{background-position:100% 0%;}
 .sprite-snowyowl.frame-2{background-position:0% 100%;}
@@ -146,7 +146,7 @@
 
 /* ===== 13_lyrebird-sprite-replacement.css ===== */
 
-.sprite-lyrebird{background-image:url("../assets/sprites/lyrebird_3e80e83c379bba57.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-lyrebird{background-image:url("../assets/sprites/lyrebird.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-lyrebird.frame-0{background-position:0% 0%;}
 .sprite-lyrebird.frame-1{background-position:100% 0%;}
 .sprite-lyrebird.frame-2{background-position:0% 100%;}
@@ -155,7 +155,7 @@
 
 /* ===== 14_bowerbird-sprite-replacement.css ===== */
 
-.sprite-bowerbird{background-image:url("../assets/sprites/bowerbird_d1e9d315a64fe4ea.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-bowerbird{background-image:url("../assets/sprites/bowerbird.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-bowerbird.frame-0{background-position:0% 0%;}
 .sprite-bowerbird.frame-1{background-position:100% 0%;}
 .sprite-bowerbird.frame-2{background-position:0% 100%;}
@@ -164,7 +164,7 @@
 
 /* ===== 15_toucan-sprite-replacement.css ===== */
 
-.sprite-toucan{background-image:url("../assets/sprites/toucan_638fd6cf85306d4c.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-toucan{background-image:url("../assets/sprites/toucan.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-toucan.frame-0{background-position:0% 0%;}
 .sprite-toucan.frame-1{background-position:100% 0%;}
 .sprite-toucan.frame-2{background-position:0% 100%;}
@@ -173,7 +173,7 @@
 
 /* ===== 16_swan-sprite-replacement.css ===== */
 
-.sprite-swan{background-image:url("../assets/sprites/swan_c6663fb1ed6ac9a3.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-swan{background-image:url("../assets/sprites/swan.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-swan.frame-0{background-position:0% 0%;}
 .sprite-swan.frame-1{background-position:100% 0%;}
 .sprite-swan.frame-2{background-position:0% 100%;}
@@ -182,7 +182,7 @@
 
 /* ===== 17_toucan-final-authority.css ===== */
 
-.sprite-toucan{background-image:url("../assets/sprites/toucan_638fd6cf85306d4c.png") !important;background-size:200% 200% !important;background-repeat:no-repeat !important;}
+.sprite-toucan{background-image:url("../assets/sprites/toucan.png") !important;background-size:200% 200% !important;background-repeat:no-repeat !important;}
 .sprite-toucan.frame-0{background-position:0% 0% !important;}
 .sprite-toucan.frame-1{background-position:100% 0% !important;}
 .sprite-toucan.frame-2{background-position:0% 100% !important;}
