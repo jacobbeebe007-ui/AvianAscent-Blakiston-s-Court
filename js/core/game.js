@@ -2283,6 +2283,39 @@ function computePlayerMaxEnergy(){
 // ============================================================
 //  GAME STATE
 // ============================================================
+const AVIAN_EVENT_BUS = (()=>{
+  const listeners = new Map();
+  return {
+    on(evt, fn){
+      if(!evt || typeof fn!=='function') return ()=>{};
+      if(!listeners.has(evt)) listeners.set(evt, new Set());
+      listeners.get(evt).add(fn);
+      return ()=>listeners.get(evt)?.delete(fn);
+    },
+    emit(evt, payload={}){
+      const set = listeners.get(evt);
+      if(!set || !set.size) return;
+      for(const fn of [...set]){ try{ fn(payload); }catch(err){ console.error(err); } }
+    }
+  };
+})();
+globalThis.AvianEvents = AVIAN_EVENT_BUS;
+
+const GAME_MODULES = [];
+function registerGameModule(mod){
+  if(!mod || !mod.id || GAME_MODULES.some(m=>m.id===mod.id)) return;
+  GAME_MODULES.push(mod);
+}
+function runModuleHook(hook, payload){
+  for(const mod of GAME_MODULES){
+    const fn = mod && mod[hook];
+    if(typeof fn==='function'){
+      try{ fn(payload); }catch(err){ console.error(err); }
+    }
+  }
+}
+globalThis.registerGameModule = registerGameModule;
+
 let G = {
   player: null, enemy: null, stage: 1, turn: 'player', turnPhase:TURN.PLAYER,
   playerStatus:{}, enemyStatus:{},
@@ -2337,6 +2370,80 @@ let G = {
   actionBusy:false,
   speed:1,
 };
+
+const TELEMETRY_KEY='avianAscent_telemetry_v1';
+function loadTelemetry(){
+  try{return JSON.parse(localStorage.getItem(TELEMETRY_KEY)||'{"runs":[],"meta":{}}');}catch(_){return {runs:[],meta:{}};}
+}
+function saveTelemetry(data){
+  try{localStorage.setItem(TELEMETRY_KEY, JSON.stringify(data));}catch(_){ }
+}
+function telemetryPushRun(run){
+  const data = loadTelemetry();
+  data.runs = Array.isArray(data.runs) ? data.runs : [];
+  data.runs.unshift(run);
+  data.runs = data.runs.slice(0, 120);
+  saveTelemetry(data);
+}
+function exportCombatTelemetry(){
+  const data = loadTelemetry();
+  if(!Array.isArray(data.runs) || data.runs.length===0){
+    logMsg('📊 No telemetry runs yet. Finish a run first.', 'system');
+    return;
+  }
+  const payload = {
+    exportedAt: Date.now(),
+    summary: getTelemetrySummary(),
+    runs: data.runs,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `avian-ascent-telemetry-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  logMsg('📊 Telemetry exported.', 'system');
+}
+function getTelemetrySummary(){
+  const runs = loadTelemetry().runs||[];
+  if(!runs.length) return {runs:0, avgStage:0, topDeaths:[], winRateByBird:[]};
+  const deaths = new Map();
+  const birds = new Map();
+  let stageTotal = 0;
+  for(const r of runs){
+    stageTotal += Number(r.stageReached||1);
+    const death = String(r.deathCause||'unknown');
+    deaths.set(death, (deaths.get(death)||0)+1);
+    const b = String(r.bird||'unknown');
+    if(!birds.has(b)) birds.set(b, {bird:b, runs:0, wins:0});
+    const row = birds.get(b); row.runs++; if(r.won) row.wins++;
+  }
+  return {
+    runs:runs.length,
+    avgStage: +(stageTotal/runs.length).toFixed(2),
+    topDeaths:[...deaths.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5),
+    winRateByBird:[...birds.values()].map(x=>({...x, winRate:+((x.wins/Math.max(1,x.runs))*100).toFixed(1)})).sort((a,b)=>b.winRate-a.winRate)
+  };
+}
+globalThis.exportCombatTelemetry = exportCombatTelemetry;
+globalThis.getTelemetrySummary = getTelemetrySummary;
+
+registerGameModule({
+  id:'telemetry-persistence',
+  onRunEnd(ctx){
+    telemetryPushRun({
+      bird: ctx?.bird || G.player?.birdKey || 'unknown',
+      won: !!ctx?.won,
+      stageReached: ctx?.stageReached || G.stage || 1,
+      deathCause: ctx?.deathCause || 'unknown',
+      at: Date.now(),
+      endless: !!(ctx?.endless ?? G.endlessMode),
+    });
+  }
+});
 
 removeMimicEverywhere();
 
@@ -3030,6 +3137,9 @@ function startGame() {
   G.shinyObjects = 0;
   saveRun();
   G.phase='PLAYER';
+  const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
+  AvianEvents.emit('run:start', runStartEvt);
+  runModuleHook('onRunStart', runStartEvt);
   loadStage();
 }
 
@@ -3146,6 +3256,9 @@ function loadStage() {
   ed.energy=baseEnemyEnergy;
   ed.energyRegen=0;
   G.enemy = ed;
+  const stageEvt = {stage:G.stage, enemyId:G.enemy.id||G.enemy.name, isBoss:!!G.enemy.isBoss};
+  AvianEvents.emit('stage:loaded', stageEvt);
+  runModuleHook('onStageLoaded', stageEvt);
   if(!G.enemy.aiType) G.enemy.aiType=mapAiStyleToType(G.enemy.aiStyle);
   codexMark('enemies', G.enemy.id||G.enemy.name, 'seen');
   enforceAbilityCosts(G.player);
@@ -3193,6 +3306,9 @@ function loadStage() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const evt={id};
+  AvianEvents.emit('screen:change', evt);
+  runModuleHook('onScreenChange', evt);
 }
 
 // ============================================================
@@ -7052,6 +7168,7 @@ function showBattleCaption(text='Bird Slain', duration=520){
 function checkDeath() {
   if(G.battleOver&&(G.enemy.stats.hp<=0||G.player.stats.hp<=0))return true;
   if(G.enemy.stats.hp<=0){
+    G._lastDeathCause = 'enemy_defeated';
     G.battleOver=true;
     if(G.enemy.isBoss){
       G.bossKills++;
@@ -7067,6 +7184,7 @@ function checkDeath() {
     setTimeout(postCombat,700);return true;
   }
   if(G.player.stats.hp<=0){
+    G._lastDeathCause = 'player_hp_zero';
     // Bald Eagle Last Stand — survive at 1 HP once per battle
     if(!G.player._lastStandUsed){
       const _lsBd=BIRDS[G.player.birdKey];
@@ -7306,6 +7424,9 @@ function confirmReward() {
   }
 
   G._pendingReward.apply(G.player);
+  const rewardEvt={tier:G._pendingReward.tier, id:G._pendingReward.id||G._pendingReward.name};
+  AvianEvents.emit('reward:confirmed', rewardEvt);
+  runModuleHook('onRewardConfirmed', rewardEvt);
   codexMark('artifacts', G._pendingReward.id||G._pendingReward.name, 'seen');
   logMsg(`✦ Gained: ${G._pendingReward.name}!`,'system');
 
@@ -7650,6 +7771,15 @@ function advanceStage() {
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
+  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
+  if(signatureDue){
+    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
+    AvianEvents.emit('signature:event', sigEvt);
+    runModuleHook('onSignatureEvent', sigEvt);
+    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
+    setTimeout(()=>showGroveEvent(), 350);
+    return;
+  }
   if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
@@ -7947,6 +8077,9 @@ function showVictory(){
     return;
   }
   renderUnlockPopupsOnGameover();
+  const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:!!G.endlessMode};
+  AvianEvents.emit('run:end', endEvt);
+  runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
 }
 function showDefeat(){
@@ -7964,6 +8097,9 @@ function showDefeat(){
   document.getElementById('gameover-title').textContent='💀 Fallen';
   const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
+  const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
+  AvianEvents.emit('run:end', endEvt);
+  runModuleHook('onRunEnd', endEvt);
   showRunStats();
   renderUnlockPopupsOnGameover();
   showScreen('screen-gameover');
@@ -8094,7 +8230,7 @@ document.addEventListener('keydown', e => {
   if(screen.id==='screen-battle') {
     if(!G.animLock && G.turn==='player' && G.player) {
       const idx=parseInt(e.key)-1;
-      if(idx>=0&&idx<=3&&G.player.abilities[idx]) {
+      if(idx>=0&&idx<=8&&G.player.abilities[idx]) {
         const btn=document.querySelector(`[data-ab-idx="${idx}"]`);
         if(btn&&!btn.disabled) { btn.click(); return; }
       }
@@ -8106,9 +8242,28 @@ document.addEventListener('keydown', e => {
   }
   if(screen.id==='screen-select') {
     if(e.key==='Enter') { if(G.selected) startGame(); }
+    const cards=[...document.querySelectorAll('.bird-card:not(.bird-locked)')];
+    if(cards.length && ['ArrowRight','ArrowLeft','ArrowDown','ArrowUp'].includes(e.key)){
+      e.preventDefault();
+      const selected = cards.findIndex(c=>c.classList.contains('selected'));
+      const cur = selected>=0 ? selected : 0;
+      const delta = (e.key==='ArrowRight'||e.key==='ArrowDown') ? 1 : -1;
+      const nxt = (cur + delta + cards.length) % cards.length;
+      cards[nxt].click();
+      cards[nxt].scrollIntoView({block:'nearest', inline:'nearest'});
+    }
   }
   if(screen.id==='screen-reward') {
     if(e.key==='Enter') { const cb=document.getElementById('reward-confirm-btn'); if(cb&&cb.classList.contains('visible')) cb.click(); }
+    const cards=[...document.querySelectorAll('#reward-grid .reward-card')];
+    if(cards.length && ['ArrowRight','ArrowLeft'].includes(e.key)){
+      e.preventDefault();
+      const selected = cards.findIndex(c=>c.classList.contains('selected'));
+      const cur = selected>=0 ? selected : 0;
+      const delta = e.key==='ArrowRight' ? 1 : -1;
+      const nxt = (cur + delta + cards.length) % cards.length;
+      cards[nxt].click();
+    }
   }
 
   if(e.key.length===1) checkSecretUnlockChar(e.key);
@@ -9513,5 +9668,3 @@ SPRITE_KEYS_ALL.add('magpie');
     else if(typeof globalThis.initSelection === 'function') globalThis.initSelection();
   }catch(e){}
 })();
-
-
