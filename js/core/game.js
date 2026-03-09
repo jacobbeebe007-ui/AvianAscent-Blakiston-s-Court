@@ -2283,6 +2283,39 @@ function computePlayerMaxEnergy(){
 // ============================================================
 //  GAME STATE
 // ============================================================
+const AVIAN_EVENT_BUS = (()=>{
+  const listeners = new Map();
+  return {
+    on(evt, fn){
+      if(!evt || typeof fn!=='function') return ()=>{};
+      if(!listeners.has(evt)) listeners.set(evt, new Set());
+      listeners.get(evt).add(fn);
+      return ()=>listeners.get(evt)?.delete(fn);
+    },
+    emit(evt, payload={}){
+      const set = listeners.get(evt);
+      if(!set || !set.size) return;
+      for(const fn of [...set]){ try{ fn(payload); }catch(err){ console.error(err); } }
+    }
+  };
+})();
+globalThis.AvianEvents = AVIAN_EVENT_BUS;
+
+const GAME_MODULES = [];
+function registerGameModule(mod){
+  if(!mod || !mod.id || GAME_MODULES.some(m=>m.id===mod.id)) return;
+  GAME_MODULES.push(mod);
+}
+function runModuleHook(hook, payload){
+  for(const mod of GAME_MODULES){
+    const fn = mod && mod[hook];
+    if(typeof fn==='function'){
+      try{ fn(payload); }catch(err){ console.error(err); }
+    }
+  }
+}
+globalThis.registerGameModule = registerGameModule;
+
 let G = {
   player: null, enemy: null, stage: 1, turn: 'player', turnPhase:TURN.PLAYER,
   playerStatus:{}, enemyStatus:{},
@@ -2337,6 +2370,80 @@ let G = {
   actionBusy:false,
   speed:1,
 };
+
+const TELEMETRY_KEY='avianAscent_telemetry_v1';
+function loadTelemetry(){
+  try{return JSON.parse(localStorage.getItem(TELEMETRY_KEY)||'{"runs":[],"meta":{}}');}catch(_){return {runs:[],meta:{}};}
+}
+function saveTelemetry(data){
+  try{localStorage.setItem(TELEMETRY_KEY, JSON.stringify(data));}catch(_){ }
+}
+function telemetryPushRun(run){
+  const data = loadTelemetry();
+  data.runs = Array.isArray(data.runs) ? data.runs : [];
+  data.runs.unshift(run);
+  data.runs = data.runs.slice(0, 120);
+  saveTelemetry(data);
+}
+function exportCombatTelemetry(){
+  const data = loadTelemetry();
+  if(!Array.isArray(data.runs) || data.runs.length===0){
+    logMsg('📊 No telemetry runs yet. Finish a run first.', 'system');
+    return;
+  }
+  const payload = {
+    exportedAt: Date.now(),
+    summary: getTelemetrySummary(),
+    runs: data.runs,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `avian-ascent-telemetry-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  logMsg('📊 Telemetry exported.', 'system');
+}
+function getTelemetrySummary(){
+  const runs = loadTelemetry().runs||[];
+  if(!runs.length) return {runs:0, avgStage:0, topDeaths:[], winRateByBird:[]};
+  const deaths = new Map();
+  const birds = new Map();
+  let stageTotal = 0;
+  for(const r of runs){
+    stageTotal += Number(r.stageReached||1);
+    const death = String(r.deathCause||'unknown');
+    deaths.set(death, (deaths.get(death)||0)+1);
+    const b = String(r.bird||'unknown');
+    if(!birds.has(b)) birds.set(b, {bird:b, runs:0, wins:0});
+    const row = birds.get(b); row.runs++; if(r.won) row.wins++;
+  }
+  return {
+    runs:runs.length,
+    avgStage: +(stageTotal/runs.length).toFixed(2),
+    topDeaths:[...deaths.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5),
+    winRateByBird:[...birds.values()].map(x=>({...x, winRate:+((x.wins/Math.max(1,x.runs))*100).toFixed(1)})).sort((a,b)=>b.winRate-a.winRate)
+  };
+}
+globalThis.exportCombatTelemetry = exportCombatTelemetry;
+globalThis.getTelemetrySummary = getTelemetrySummary;
+
+registerGameModule({
+  id:'telemetry-persistence',
+  onRunEnd(ctx){
+    telemetryPushRun({
+      bird: ctx?.bird || G.player?.birdKey || 'unknown',
+      won: !!ctx?.won,
+      stageReached: ctx?.stageReached || G.stage || 1,
+      deathCause: ctx?.deathCause || 'unknown',
+      at: Date.now(),
+      endless: !!(ctx?.endless ?? G.endlessMode),
+    });
+  }
+});
 
 removeMimicEverywhere();
 
@@ -2488,6 +2595,9 @@ function codexMark(type, id, field='seen'){
   if(!G.codex[type]) G.codex[type]={};
   if(!G.codex[type][id]) G.codex[type][id]={seen:false,used:false};
   G.codex[type][id][field]=true;
+  if(document.getElementById('ref-guide-body')?.classList.contains('open')){
+    try{ buildRefGuide(); }catch(_){ }
+  }
 }
 
 // ============================================================
@@ -3030,6 +3140,9 @@ function startGame() {
   G.shinyObjects = 0;
   saveRun();
   G.phase='PLAYER';
+  const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
+  AvianEvents.emit('run:start', runStartEvt);
+  runModuleHook('onRunStart', runStartEvt);
   loadStage();
 }
 
@@ -3146,6 +3259,9 @@ function loadStage() {
   ed.energy=baseEnemyEnergy;
   ed.energyRegen=0;
   G.enemy = ed;
+  const stageEvt = {stage:G.stage, enemyId:G.enemy.id||G.enemy.name, isBoss:!!G.enemy.isBoss};
+  AvianEvents.emit('stage:loaded', stageEvt);
+  runModuleHook('onStageLoaded', stageEvt);
   if(!G.enemy.aiType) G.enemy.aiType=mapAiStyleToType(G.enemy.aiStyle);
   codexMark('enemies', G.enemy.id||G.enemy.name, 'seen');
   enforceAbilityCosts(G.player);
@@ -3193,6 +3309,9 @@ function loadStage() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const evt={id};
+  AvianEvents.emit('screen:change', evt);
+  runModuleHook('onScreenChange', evt);
 }
 
 // ============================================================
@@ -4560,9 +4679,10 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     }
     const _secbd=BIRDS[G.player.birdKey];
     if(_secbd&&_secbd.passive&&_secbd.passive.onPhysicalHit&&!isMagic) _secbd.passive.onPhysicalHit(G.player,G);
-    const playerClass=(BIRDS[G.player?.birdKey]?.class||'').toLowerCase();
     const abType=(srcAbility?.btnType||srcAbility?.type||G._activePlayerAbility?.btnType||G._activePlayerAbility?.type||'');
-    if(playerClass==='assassin' && (abType==='physical' || abType==='ranged')) applyAilment('enemy','bleed',1);
+    const canBleedHit = (abType==='physical' || abType==='ranged');
+    const bleedFromCrit = isCrit ? ((G.player?.critBleed||0) + (G.player?.passiveBleedOnCrit||0)) : 0;
+    if(canBleedHit && bleedFromCrit>0) applyAilment('enemy','bleed',bleedFromCrit);
     registerHit();
   }
   return {dmgDealt:dmg,wasDodged:false,wasBlocked,isCrit};
@@ -4746,8 +4866,8 @@ async function tickDoTs(who) {
   const stats=who==='player'?G.player.stats:G.enemy.stats;
   // Poison
   if (status.poison&&status.poison.stacks>0&&status.poison.turns>0) {
-    const tickMult = G.player ? (G.player.poisonTickMult||1) : 1;
-    const dmg=Math.floor(status.poison.stacks * tickMult);
+    const tickMult = who==='player' ? (G.player?.poisonTickMult||1) : 1;
+    const dmg=Math.max(1, Math.floor(status.poison.stacks * tickMult));
     stats.hp-=dmg;
     spawnFloat(who,`☣ -${dmg}`,'fn-poison');
     setHpBar(who,stats.hp,stats.maxHp);
@@ -4767,6 +4887,19 @@ async function tickDoTs(who) {
     if(who==='enemy') { BS.dmgDealt+=dmg; }
     status.bleed.turns--;
     if (status.bleed.turns<=0) { delete status.bleed; }
+    await delay(500);
+  }
+  if (status.burning && ((typeof status.burning==='number'&&status.burning>0) || (typeof status.burning==='object'&&status.burning.turns>0))) {
+    const turns = typeof status.burning==='number' ? status.burning : status.burning.turns;
+    const dmg=Math.max(1,Math.floor((stats.maxHp||1)*0.04));
+    stats.hp-=dmg;
+    spawnFloat(who,`🔥 -${dmg}`,'fn-burn');
+    setHpBar(who,stats.hp,stats.maxHp);
+    logMsg(`🔥 Burn deals ${dmg} damage to ${who==='player'?G.player.name:G.enemy.name}!`,'burn-tick');
+    if(who==='enemy') { BS.dmgDealt+=dmg; }
+    if(typeof status.burning==='number') status.burning=turns-1;
+    else status.burning.turns=turns-1;
+    if((typeof status.burning==='number'&&status.burning<=0) || (typeof status.burning==='object'&&status.burning.turns<=0)) delete status.burning;
     await delay(500);
   }
   // Delayed (Resonance)
@@ -7052,6 +7185,7 @@ function showBattleCaption(text='Bird Slain', duration=520){
 function checkDeath() {
   if(G.battleOver&&(G.enemy.stats.hp<=0||G.player.stats.hp<=0))return true;
   if(G.enemy.stats.hp<=0){
+    G._lastDeathCause = 'enemy_defeated';
     G.battleOver=true;
     if(G.enemy.isBoss){
       G.bossKills++;
@@ -7067,6 +7201,7 @@ function checkDeath() {
     setTimeout(postCombat,700);return true;
   }
   if(G.player.stats.hp<=0){
+    G._lastDeathCause = 'player_hp_zero';
     // Bald Eagle Last Stand — survive at 1 HP once per battle
     if(!G.player._lastStandUsed){
       const _lsBd=BIRDS[G.player.birdKey];
@@ -7306,6 +7441,9 @@ function confirmReward() {
   }
 
   G._pendingReward.apply(G.player);
+  const rewardEvt={tier:G._pendingReward.tier, id:G._pendingReward.id||G._pendingReward.name};
+  AvianEvents.emit('reward:confirmed', rewardEvt);
+  runModuleHook('onRewardConfirmed', rewardEvt);
   codexMark('artifacts', G._pendingReward.id||G._pendingReward.name, 'seen');
   logMsg(`✦ Gained: ${G._pendingReward.name}!`,'system');
 
@@ -7650,6 +7788,15 @@ function advanceStage() {
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
+  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
+  if(signatureDue){
+    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
+    AvianEvents.emit('signature:event', sigEvt);
+    runModuleHook('onSignatureEvent', sigEvt);
+    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
+    setTimeout(()=>showGroveEvent(), 350);
+    return;
+  }
   if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
@@ -7947,6 +8094,9 @@ function showVictory(){
     return;
   }
   renderUnlockPopupsOnGameover();
+  const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:!!G.endlessMode};
+  AvianEvents.emit('run:end', endEvt);
+  runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
 }
 function showDefeat(){
@@ -7964,6 +8114,9 @@ function showDefeat(){
   document.getElementById('gameover-title').textContent='💀 Fallen';
   const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
+  const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
+  AvianEvents.emit('run:end', endEvt);
+  runModuleHook('onRunEnd', endEvt);
   showRunStats();
   renderUnlockPopupsOnGameover();
   showScreen('screen-gameover');
@@ -8094,7 +8247,7 @@ document.addEventListener('keydown', e => {
   if(screen.id==='screen-battle') {
     if(!G.animLock && G.turn==='player' && G.player) {
       const idx=parseInt(e.key)-1;
-      if(idx>=0&&idx<=3&&G.player.abilities[idx]) {
+      if(idx>=0&&idx<=8&&G.player.abilities[idx]) {
         const btn=document.querySelector(`[data-ab-idx="${idx}"]`);
         if(btn&&!btn.disabled) { btn.click(); return; }
       }
@@ -8106,9 +8259,28 @@ document.addEventListener('keydown', e => {
   }
   if(screen.id==='screen-select') {
     if(e.key==='Enter') { if(G.selected) startGame(); }
+    const cards=[...document.querySelectorAll('.bird-card:not(.bird-locked)')];
+    if(cards.length && ['ArrowRight','ArrowLeft','ArrowDown','ArrowUp'].includes(e.key)){
+      e.preventDefault();
+      const selected = cards.findIndex(c=>c.classList.contains('selected'));
+      const cur = selected>=0 ? selected : 0;
+      const delta = (e.key==='ArrowRight'||e.key==='ArrowDown') ? 1 : -1;
+      const nxt = (cur + delta + cards.length) % cards.length;
+      cards[nxt].click();
+      cards[nxt].scrollIntoView({block:'nearest', inline:'nearest'});
+    }
   }
   if(screen.id==='screen-reward') {
     if(e.key==='Enter') { const cb=document.getElementById('reward-confirm-btn'); if(cb&&cb.classList.contains('visible')) cb.click(); }
+    const cards=[...document.querySelectorAll('#reward-grid .reward-card')];
+    if(cards.length && ['ArrowRight','ArrowLeft'].includes(e.key)){
+      e.preventDefault();
+      const selected = cards.findIndex(c=>c.classList.contains('selected'));
+      const cur = selected>=0 ? selected : 0;
+      const delta = e.key==='ArrowRight' ? 1 : -1;
+      const nxt = (cur + delta + cards.length) % cards.length;
+      cards[nxt].click();
+    }
   }
 
   if(e.key.length===1) checkSecretUnlockChar(e.key);
@@ -8157,7 +8329,6 @@ function renderRunHistory() {
 // ============================================================
 //  REFERENCE GUIDE — tabbed, dynamically built
 // ============================================================
-let _refBuilt = false;
 let _refActiveTab = 0;
 
 const ABILITIES_REFERENCE = {
@@ -8184,7 +8355,7 @@ function toggleRefGuide() {
   if (!body) return;
   const open = body.classList.toggle('open');
   chevron.classList.toggle('open', open);
-  if (open && !_refBuilt) { buildRefGuide(); _refBuilt = true; }
+  if (open) buildRefGuide();
 }
 
 function selectRefTab(idx) {
@@ -8225,11 +8396,12 @@ function buildRefGuide() {
     {k:'artifacts',label:'💎 Artefacts'},
     {k:'mechanics',label:'⚙ Mechanics'},
   ];
-  tabs.innerHTML = defs.map((t,i)=>`<div class="ref-tab${i===0?' active':''}" onclick="selectRefTab(${i})">${t.label}</div>`).join('');
+  const prevQ=(document.getElementById('ref-search-input')?.value||'').toLowerCase();
+  const prevShowLocked=!!document.getElementById('ref-show-locked')?.checked;
+  tabs.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:10px"><input id="ref-search-input" placeholder="Search codex..." style="flex:1;background:rgba(0,0,0,.25);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:8px"/><label style="font-size:.72rem;color:var(--text-dim)"><input id="ref-show-locked" type="checkbox"> Show locked</label></div>` + defs.map((t,i)=>`<div class="ref-tab${i===_refActiveTab?' active':''}" onclick="selectRefTab(${i})">${t.label}</div>`).join('');
 
-  const search=`<div style="display:flex;gap:8px;margin-bottom:10px"><input id="codex-search" placeholder="Search codex..." style="flex:1;background:rgba(0,0,0,.25);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:8px" oninput="buildRefGuide()"/><label style="font-size:.72rem;color:var(--text-dim)"><input id="codex-show-locked" type="checkbox" onchange="buildRefGuide()"> Show locked</label></div>`;
-  const q=(document.getElementById('codex-search')?.value||'').toLowerCase();
-  const showLocked=!!document.getElementById('codex-show-locked')?.checked;
+  const q=prevQ;
+  const showLocked=prevShowLocked;
   const isMatch=(txt)=>!q||String(txt||'').toLowerCase().includes(q);
   const card=(name,desc,unlocked,meta='')=>`<div class="ref-skill-card" style="opacity:${unlocked?1:0.55}"><div class="ref-skill-header"><span class="ref-skill-name">${unlocked?name:'???'}</span>${meta?`<span class="ref-skill-type utility">${meta}</span>`:''}</div><div class="ref-skill-base">${unlocked?desc:'Unlock by encountering this entry in a run.'}</div></div>`;
 
@@ -8255,7 +8427,8 @@ function buildRefGuide() {
     return card(e.name, `HP ${e.stats?.maxHp||e.hp||0} · ATK ${e.stats?.atk||e.atk||0} · AI: ${ai}`,u,ai);
   }).join('');
 
-  const statuses=['bleed','poison','weaken','feared','slow','paralyzed','burning','confused'].filter(id=>isMatch(id)).map(id=>{
+  const statusIds=[...new Set([...Object.keys(AILMENTS||{}), ...Object.keys(G.codex?.statuses||{})])];
+  const statuses=statusIds.filter(id=>isMatch(id)).map(id=>{
     const u=!!G.codex?.statuses?.[id]?.seen;
     if(!u&&!showLocked) return '';
     const d=(AILMENTS[id]?.desc)||'Status effect.';
@@ -8272,13 +8445,17 @@ function buildRefGuide() {
   </div>`;
 
   panels.innerHTML=`
-    <div class="ref-panel active" id="ref-panel-0">${search}<div class="ref-skills-grid">${birds||'<div class="ref-entry-desc">No matching birds.</div>'}</div></div>
-    <div class="ref-panel" id="ref-panel-1">${search}<div class="ref-skills-grid">${abilities||'<div class="ref-entry-desc">No matching abilities.</div>'}</div></div>
-    <div class="ref-panel" id="ref-panel-2">${search}<div class="ref-skills-grid">${enemies||'<div class="ref-entry-desc">No matching enemies.</div>'}</div></div>
-    <div class="ref-panel" id="ref-panel-3">${search}<div class="ref-skills-grid">${statuses||'<div class="ref-entry-desc">No matching statuses.</div>'}</div></div>
-    <div class="ref-panel" id="ref-panel-4">${search}<div class="ref-skills-grid">${arts}</div></div>
-    <div class="ref-panel" id="ref-panel-5">${mechanics}</div>
+    <div class="ref-panel ${_refActiveTab===0?'active':''}" id="ref-panel-0"><div class="ref-skills-grid">${birds||'<div class="ref-entry-desc">No matching birds.</div>'}</div></div>
+    <div class="ref-panel ${_refActiveTab===1?'active':''}" id="ref-panel-1"><div class="ref-skills-grid">${abilities||'<div class="ref-entry-desc">No matching abilities.</div>'}</div></div>
+    <div class="ref-panel ${_refActiveTab===2?'active':''}" id="ref-panel-2"><div class="ref-skills-grid">${enemies||'<div class="ref-entry-desc">No matching enemies.</div>'}</div></div>
+    <div class="ref-panel ${_refActiveTab===3?'active':''}" id="ref-panel-3"><div class="ref-skills-grid">${statuses||'<div class="ref-entry-desc">No matching statuses.</div>'}</div></div>
+    <div class="ref-panel ${_refActiveTab===4?'active':''}" id="ref-panel-4"><div class="ref-skills-grid">${arts}</div></div>
+    <div class="ref-panel ${_refActiveTab===5?'active':''}" id="ref-panel-5">${mechanics}</div>
   `;
+  const qEl=document.getElementById('ref-search-input');
+  const lEl=document.getElementById('ref-show-locked');
+  if(qEl){ qEl.value=prevQ; qEl.oninput=()=>buildRefGuide(); }
+  if(lEl){ lEl.checked=prevShowLocked; lEl.onchange=()=>buildRefGuide(); }
 }
 
 
@@ -9513,5 +9690,3 @@ SPRITE_KEYS_ALL.add('magpie');
     else if(typeof globalThis.initSelection === 'function') globalThis.initSelection();
   }catch(e){}
 })();
-
-
