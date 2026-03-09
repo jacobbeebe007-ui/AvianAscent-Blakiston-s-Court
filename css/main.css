@@ -687,14 +687,14 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .sprite4.frame-1{ background-position:100%   0%; }
 .sprite4.frame-2{ background-position:  0% 100%; }
 .sprite4.frame-3{ background-position:100% 100%; }
-.sprite-sparrow{background-image:url("../assets/sprites/sparrow_0e114b92bf75fd01.png");}
-.sprite-goose{background-image:url("../assets/sprites/goose_45a6c65eaa8db5e6.png");}
-.sprite-blackbird{background-image:url("../assets/sprites/blackbird_9aab4ba552356f43.png");}
-.sprite-crow{background-image:url("../assets/sprites/crow_be383e7e0ad23c6d.png");}
-.sprite-macaw{background-image:url("../assets/sprites/macaw_3e820f7ac7f5fe26.png");}
-.sprite-hummingbird{background-image:url("../assets/sprites/hummingbird_f961c46fb961cfd6.png");}
-.sprite-shoebill{background-image:url("../assets/sprites/shoebill_3ff30f5f31a6d9f7.png");}
-.sprite-secretarybird{background-image:url("../assets/sprites/secretarybird_5096cbe0f9169966.png");}
+.sprite-sparrow{background-image:url("../assets/sprites/sparrow.png");}
+.sprite-goose{background-image:url("../assets/sprites/goose.png");}
+.sprite-blackbird{background-image:url("../assets/sprites/blackbird.png");}
+.sprite-crow{background-image:url("../assets/sprites/crow.png");}
+.sprite-macaw{background-image:url("../assets/sprites/macaw.png");}
+.sprite-hummingbird{background-image:url("../assets/sprites/hummingbird.png");}
+.sprite-shoebill{background-image:url("../assets/sprites/shoebill.png");}
+.sprite-secretarybird{background-image:url("../assets/sprites/secretarybird.png");}
 
 /* Character Select portrait slot */
 .bird-portrait .sprite4.small{ margin:0 auto; display:block; }
@@ -723,7 +723,7 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 
 
 
-.sprite-kookaburra{background-image:url("../assets/sprites/kookaburra_0d62d11f7377305a.png");}
+.sprite-kookaburra{background-image:url("../assets/sprites/kookaburra.png");}
 
 
 
@@ -757,15 +757,15 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 
 
 /* ===== New bird sprite sheets ===== */
-.sprite-kiwi{background-image:url("../assets/sprites/kiwi_efe2f20e6da87ec8.png");}
+.sprite-kiwi{background-image:url("../assets/sprites/kiwi.png");}
 
 
 
-.sprite-robin{background-image:url("../assets/sprites/robin_d6c24949c45c683d.png");}
+.sprite-robin{background-image:url("../assets/sprites/robin.png");}
 
-.sprite-flamingo{background-image:url("../assets/sprites/flamingo_a4647eac4ef47d8d.png");}
+.sprite-flamingo{background-image:url("../assets/sprites/flamingo.png");}
 
-.sprite-seagull{background-image:url("../assets/sprites/seagull_99616ee5e3ab3e2d.png");}
+.sprite-seagull{background-image:url("../assets/sprites/seagull.png");}
 
 /* ===== Portrait sizing / pixel art standardization ===== */
 .sprite4.medium{width:92px;height:92px;border-radius:16px;}
@@ -774,12 +774,12 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 .sprite4.tiny{width:64px;height:64px;border-radius:12px;}
 .bird-portrait .sprite4.medium{width:86px;height:105px;}
 .ascent-face .sprite4.medium, .ascent-panel-portrait .sprite4.medium{width:96px;height:96px;}
-.sprite-emu{background-image:url("../assets/sprites/emu_755f0a94e63c5cf4.png");}
+.sprite-emu{background-image:url("../assets/sprites/emu.png");}
 
 
 
 /* MAGPIE SPRITE CLEAN */
-.sprite-magpie{background-image:url("../assets/sprites/magpie_c01347413f20d463.png");background-size:200% 200%;}
+.sprite-magpie{background-image:url("../assets/sprites/magpie.png");background-size:200% 200%;}
 
 /* Magpie uses a 2x2 sheet */
 .sprite-magpie.frame-0{background-position:0% 0%;}
@@ -960,7 +960,7 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 
 /* ===== FINAL SMALL PENGUIN SPRITE ===== */
 .sprite-penguin{
-  background-image:url("../assets/sprites/penguin_057d605aff5ae58f.png") !important;
+  background-image:url("../assets/sprites/penguin.png") !important;
   background-repeat:no-repeat !important;
   background-size:200% 200% !important;
   image-rendering:pixelated !important;

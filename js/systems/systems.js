@@ -746,8 +746,8 @@ cooldown('chargeUp',3);
 (function(){
   function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
 
-  // 1) Make DoTs actually tick for both sides.
-  globalThis.tickDoTs = async function(who){
+  // 1) Make DoTs actually tick for both sides (legacy fallback only).
+  if(typeof globalThis.tickDoTs !== 'function') globalThis.tickDoTs = async function(who){
     const status = who === 'player' ? G.playerStatus : G.enemyStatus;
     const stats  = who === 'player' ? G.player.stats : G.enemy.stats;
     const name   = who === 'player' ? G.player.name : G.enemy.name;
