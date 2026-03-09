@@ -1,0 +1,10 @@
+{
+  "name": "avian-ascent-blakistons-court",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static browser game server scripts for local preview/mobile testing",
+  "scripts": {
+    "dev": "python3 -m http.server ${PORT:-8000} --bind 0.0.0.0",
+    "preview": "python3 -m http.server ${PORT:-8000} --bind 0.0.0.0"
+  }
+}
