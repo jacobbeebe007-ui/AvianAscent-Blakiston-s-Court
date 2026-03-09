@@ -176,7 +176,18 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .hp-bar-fill.low{background:linear-gradient(90deg,var(--red),var(--red-light));}
 .hp-bar-fill.mid{background:linear-gradient(90deg,#c97a2a,#e8a040);}
 .status-effects{display:flex;flex-wrap:wrap;gap:3px;min-height:24px;margin-top:6px;}
-.status-badge{padding:1px 7px;border-radius:20px;font-size:.72rem;border:1px solid;}
+.status-badge{padding:1px 7px;border-radius:20px;font-size:.72rem;border:1px solid;display:inline-flex;align-items:center;gap:4px;}
+.status-badge::before{font-size:.64rem;opacity:.9;letter-spacing:.03em;color:currentColor;}
+.status-badge.poison::before{content:'PSN';}
+.status-badge.burning::before{content:'BRN';}
+.status-badge.weaken::before{content:'WKN';}
+.status-badge.paralyzed::before{content:'PAR';}
+.status-badge.slow::before{content:'SLW';}
+.status-badge.delayed::before{content:'RZN';}
+.status-badge.confused::before{content:'CNF';}
+.status-badge.feared::before{content:'FER';}
+.status-badge.defending::before{content:'BLK';}
+.status-badge.evading::before{content:'EVD';}
 .status-badge.stunned{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
 .status-badge.confused{background:rgba(122,76,201,.15);border-color:var(--purple);color:var(--purple-light);}
 .status-badge.feared{background:rgba(201,76,76,.15);border-color:var(--red);color:var(--red-light);}
@@ -1215,6 +1226,5 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 /* Energy colors */
 .energy-orb{background:#3aa0ff;} /* normal EN blue */
 .energy-orb.bonus{background:#36c36c;} /* bonus EN green */
-
 
 
