@@ -2788,6 +2788,7 @@ const CLASS_ORDER = ['assassin','knight','mage','bard','tank','ranger','summoner
 const CLASS_LABELS = {assassin:'⚔️ Assassin',knight:'🛡️ Knight',mage:'✨ Mage',bard:'🎵 Bard',tank:'🪨 Tank',ranger:'🏹 Ranger',summoner:'🌊 Summoner'};
 const CLASS_FLAVOR = {assassin:'Burst dmg, crit fishing, evasive.',knight:'Balanced physical, DEF/ACC.',mage:'Pure songs/spells, debuff control.',bard:'Song mix + physical hybrid.',tank:'Sustain bricks, high HP.',ranger:'Projectile pressure, pierce and slows.',summoner:'Mob caller, flock tactics.'};
 let G_selView = 'size';
+let G_classFilter = 'all';
 let shopPurchaseMade = false;
 
 function initSelection() {
@@ -2807,6 +2808,23 @@ function initSelection() {
   buildDifficultyPicker();
 
   // Build bird grid
+  buildClassFilterMenu();
+  buildBirdGrid(G_selView);
+}
+
+function buildClassFilterMenu(){
+  const tabs=document.getElementById('class-filter-tabs');
+  if(!tabs) return;
+  const opts=[['all','All'], ...CLASS_ORDER.map(c=>[c, idToClassLabel(c)])];
+  tabs.innerHTML = opts.map(([id,label])=>`<button class="class-filter-tab ${G_classFilter===id?'active':''}" onclick="selectClassFilter('${id}')">${label}</button>`).join('');
+}
+function idToClassLabel(id){
+  if(id==='all') return 'All';
+  return (CLASS_LABELS[id]||id).replace(/^.*\s/,'');
+}
+function selectClassFilter(id){
+  G_classFilter=id||'all';
+  buildClassFilterMenu();
   buildBirdGrid(G_selView);
   renderHighscoreBoard();
 }
@@ -2925,6 +2943,7 @@ function buildBirdGrid(view='size') {
   let safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
     return !!(b && b.stats && Number.isFinite(b.stats.hp) && Number.isFinite(b.stats.atk) && Number.isFinite(b.stats.def));
   });
+  if(G_classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>String(b.class||'').toLowerCase()===G_classFilter);
   const fallbackStarters = ['sparrow','goose','blackbird','crow','macaw','robin'];
 
   // Compute global max stats for bars
@@ -3005,7 +3024,7 @@ function buildBirdGrid(view='size') {
   });
 
   const label = document.getElementById('bird-count-label');
-  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available`;
+  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available${G_classFilter!=='all' ? ` · ${idToClassLabel(G_classFilter)}`:''}`;
 
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
@@ -3024,6 +3043,13 @@ function buildBirdGrid(view='size') {
     if(label) label.textContent='6/6 available (fallback)';
   }
 }
+
+document.addEventListener('click', (e)=>{
+  const menu=document.getElementById('class-filter-menu');
+  const btn=document.getElementById('class-filter-btn');
+  if(!menu||!btn) return;
+  if(menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
+});
 
 function buildBirdCard(key, bird, locked, globalMax) {
   const card = document.createElement('div');

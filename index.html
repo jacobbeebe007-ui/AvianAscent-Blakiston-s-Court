@@ -41,6 +41,12 @@
 <!-- SELECT -->
 <!-- SELECT -->
 <div class="screen active" id="screen-select">
+<div class="sky-parallax" aria-hidden="true">
+<span class="fly fly-1">🕊️</span>
+<span class="fly fly-2">🦜</span>
+<span class="fly fly-3">🦅</span>
+<span class="fly fly-4">🪽</span>
+</div>
 <div class="sel-intro">
 <h2>Choose Your Champion</h2>
 <p style="color:var(--text-dim);font-style:italic">Your fate is written in feathers.</p>
@@ -48,6 +54,9 @@
 <!-- DIFFICULTY PICKER -->
 <div class="diff-picker" id="diff-picker"></div>
 <div class="diff-desc" id="diff-desc">Choose your difficulty to begin.</div>
+<div style="text-align:center;margin:-4px 0 10px;">
+<button class="continue-run-btn" onclick="exportCombatTelemetry()">📊 Export Combat Telemetry</button>
+</div>
 <div style="text-align:center;margin:8px auto 10px;max-width:1100px;">
 <input autocomplete="off" id="dev-code-input" maxlength="32" oninput="checkDevCode(this.value)" placeholder="Enter code..." spellcheck="false" style="background:rgba(10,8,4,.7);border:1px solid rgba(80,70,50,.35);border-radius:6px;color:var(--text-dim);font-size:.78rem;padding:5px 12px;width:160px;outline:none;text-align:center;letter-spacing:.05em;" type="password"/>
 <div id="dev-code-msg" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;min-height:16px;"></div>
@@ -82,6 +91,7 @@
 </div>
 <span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
 </div>
+<div class="class-filter-tabs" id="class-filter-tabs"></div>
 <div id="bird-grid"></div>
 </div>
 <div class="sel-right">
