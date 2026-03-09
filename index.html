@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Avian Ascent — Bird Roguelike</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Crimson+Pro:ital,wght@0,300;0,400;1,300&amp;display=swap" rel="stylesheet"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="css/main.css" rel="stylesheet"/><link href="css/sprites.css" rel="stylesheet"/><link href="css/shop.css" rel="stylesheet"/><link href="css/ui.css" rel="stylesheet"/></head>
+<body>
+<div id="action-tooltip"></div>
+<div id="app">
+<header>
+<h1>⚔ AVIAN ASCENT ⚔</h1>
+<p>A Roguelike of Feathers &amp; Fortune</p>
+</header>
+<!-- SELECT -->
+<!-- SELECT -->
+<div class="screen active" id="screen-select">
+<div class="sel-intro">
+<h2>Choose Your Champion</h2>
+<p style="color:var(--text-dim);font-style:italic">Your fate is written in feathers.</p>
+</div>
+<!-- DIFFICULTY PICKER -->
+<div class="diff-picker" id="diff-picker"></div>
+<div class="diff-desc" id="diff-desc">Choose your difficulty to begin.</div>
+<div style="text-align:center;margin:8px auto 10px;max-width:1100px;">
+<input autocomplete="off" id="dev-code-input" maxlength="32" oninput="checkDevCode(this.value)" placeholder="Enter code..." spellcheck="false" style="background:rgba(10,8,4,.7);border:1px solid rgba(80,70,50,.35);border-radius:6px;color:var(--text-dim);font-size:.78rem;padding:5px 12px;width:160px;outline:none;text-align:center;letter-spacing:.05em;" type="password"/>
+<div id="dev-code-msg" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;min-height:16px;"></div>
+</div>
+<div class="endless-row" style="max-width:1100px;margin:8px auto 14px;text-align:center;">
+<label><input id="endless-check" type="checkbox"/> ♾ Endless Mode — bosses every 10 stages</label>
+</div>
+<!-- REFERENCE GUIDE -->
+<div class="ref-guide" id="ref-guide" style="max-width:1100px;margin:0 auto 14px;">
+<div class="ref-guide-header" onclick="toggleRefGuide()">
+<h3>📖 Game Reference — Abilities, Status Effects, Enemy Birds &amp; Mechanics</h3>
+<span id="ref-chevron">▼</span>
+</div>
+<div class="ref-guide-body" id="ref-guide-body">
+<div class="ref-tabs" id="ref-tabs"></div>
+<div id="ref-panels"></div>
+</div>
+</div>
+<div class="sel-continue-row" id="continue-row" style="display:none;max-width:1100px;margin:0 auto 10px;">
+<button class="continue-run-btn" onclick="continueRun()">🪺 Continue Last Run</button>
+<p id="continue-info" style="color:var(--text-dim);font-size:.78rem;margin-top:6px"></p>
+</div>
+<!-- TWO COLUMN LAYOUT -->
+<div class="sel-layout">
+<div class="sel-left">
+<!-- VIEW TOGGLE -->
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+<div class="view-toggle" id="view-toggle">
+<button class="view-toggle-btn active" onclick="setSelView('size',this)">By Size</button>
+<button class="view-toggle-btn" onclick="setSelView('class',this)">By Class</button>
+</div>
+<span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
+</div>
+<div id="bird-grid"></div>
+</div>
+<div class="sel-right">
+<div class="ascent-panel is-empty" id="ascent-panel">
+<div class="ascent-empty">← Select a bird to begin your ascent</div>
+</div>
+</div>
+</div>
+<div class="run-history" id="run-history" style="display:none">
+<div class="run-history-title">— RECENT RUNS —</div>
+<div class="run-history-grid" id="run-history-grid"></div>
+</div>
+</div>
+<!-- BATTLE -->
+<div class="screen" id="screen-battle">
+<div class="battle-layout">
+<div class="menu-row">
+<button class="menu-btn" onclick="goMainMenu()">🏠 Menu</button>
+<button class="nest-btn" onclick="openNest()">🪺 Nest</button>
+<button class="menu-btn" onclick="openAbandonModal()" style="color:var(--red-light);border-color:rgba(201,76,76,.4)">⛔ Abandon</button>
+</div>
+<div class="battle-top">
+<div class="level-badge" id="level-label">STAGE 1</div>
+<div style="display:flex;align-items:center;gap:14px;">
+<span class="bird-lv" id="bird-lv-label">Lv.1</span>
+<span class="passive-badge" id="passive-badge" title="Passive Trait"></span>
+<button class="sound-btn" id="sound-toggle-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+</div>
+<div class="turn-lbl" id="turn-label">Your Turn</div>
+</div>
+<!-- Stage progress bar -->
+<div class="stage-progress-wrap" id="stage-progress-wrap" style="display:none">
+<span style="font-size:.72rem;color:var(--text-dim);white-space:nowrap">Stage</span>
+<div class="stage-progress-bg">
+<div class="stage-progress-fill" id="stage-progress-fill" style="width:0%"></div>
+<div class="stage-progress-bosses" id="stage-progress-bosses"></div>
+</div>
+<span id="stage-progress-txt" style="font-size:.72rem;color:var(--text-dim);white-space:nowrap">1/20</span>
+</div>
+<div id="combo-meter" style="display:none;">
+<span class="combo-label">🔥 COMBO</span>
+<div class="combo-pips" id="combo-pips"></div>
+<span class="combo-txt" id="combo-txt"></span>
+</div>
+<div class="exp-row">
+<span class="exp-label">EXP</span>
+<div class="exp-bg"><div class="exp-fill" id="exp-bar" style="width:0%"></div></div>
+<span class="exp-txt" id="exp-txt">0 / 100</span>
+</div>
+<div class="combatants">
+<div class="combatant-panel player" id="player-panel">
+<div class="shield-overlay" id="player-shield-overlay"></div>
+<div class="combatant-name" id="player-name">—</div>
+<div class="avatar-wrap" id="player-avatar-wrap">
+<div class="avatar-inner" id="player-avatar"></div>
+</div>
+<div class="hp-bar-wrap">
+<div class="hp-label"><span>HP</span><span id="player-hp-text">—</span></div>
+<div class="hp-bar-bg"><div class="hp-bar-fill" id="player-hp-bar"></div></div>
+</div>
+<div class="status-effects" id="player-status"></div>
+<div class="stats-mini" id="player-stats-mini"></div>
+</div>
+<div class="vs-separator">VS</div>
+<div class="combatant-panel enemy" id="enemy-panel">
+<div class="shield-overlay" id="enemy-shield-overlay"></div>
+<div class="combatant-name" id="enemy-name">—</div>
+<div class="avatar-wrap" id="enemy-avatar-wrap">
+<div class="avatar-inner" id="enemy-avatar"></div>
+</div>
+<div class="hp-bar-wrap">
+<div class="hp-label"><span>HP</span><span id="enemy-hp-text">—</span></div>
+<div class="hp-bar-bg"><div class="hp-bar-fill" id="enemy-hp-bar"></div></div>
+</div>
+<div class="phase-banner" id="boss-phase-banner"></div>
+<div class="status-effects" id="enemy-status"></div>
+<div class="enemy-stats-mini" id="enemy-stats-mini"></div>
+<div class="enemy-abilities-list" id="enemy-abilities-list"></div>
+<div class="enemy-intent enemy-plan" id="enemy-intent-panel">🤔 Thinking...</div>
+</div>
+</div>
+<div class="battle-caption" id="battle-caption"></div>
+<div class="battle-log" id="battle-log"></div>
+<div class="action-panel">
+<h3>⚔ CHOOSE YOUR ACTION</h3>
+<div class="energy-orbs" id="energy-orbs"></div><div class="energy-text" id="energy-text"></div>
+<div class="actions-grid" id="actions-grid"></div>
+</div>
+</div>
+</div>
+<!-- LEVEL-UP -->
+<div class="screen" id="screen-levelup">
+<div class="levelup-screen-inner">
+<h2>✦ Level Up! ✦</h2>
+<p class="levelup-sub" id="lu-sub">Your bird grows stronger. Choose your path:</p>
+<div class="levelup-choice-row">
+<button class="levelup-choice-btn upgrade-skill" onclick="showLUPanel('skills')">🦅 Upgrade a Skill</button>
+</div>
+<div class="levelup-panel" id="lu-skills-panel">
+<div class="skill-grid" id="lu-skill-grid"></div>
+</div>
+<!-- Confirm buttons always outside panels, shown/hidden via JS -->
+<div id="lu-confirm-area" style="text-align:center;margin-top:18px;">
+<button class="confirm-btn" id="lu-skill-confirm" onclick="confirmSkillUpgrade()">✓ Confirm Upgrade</button>
+<button class="confirm-btn visible" id="lu-skip-btn" onclick="afterLevelUp()" style="background:linear-gradient(135deg,#2a3040,#3a4050,#2a3040);color:var(--text-dim);font-size:.85rem;padding:8px 28px;">⟩ Continue Without Upgrading</button>
+</div>
+</div>
+</div>
+<!-- REWARD -->
+<div class="screen" id="screen-reward">
+<div class="reward-screen-inner">
+<h2 id="reward-title">✦ Victory! ✦</h2>
+<p id="reward-sub" style="color:var(--text-dim);margin-bottom:8px">Choose your reward:</p>
+<div id="battle-summary-bar"></div>
+<div style="text-align:right;margin-bottom:8px"><button class="nest-btn" onclick="openNest()">🪺 View Nest</button></div>
+<div class="next-stage-preview" id="next-stage-preview" style="display:none;"></div>
+<div class="reward-grid" id="reward-grid"></div>
+<div style="text-align:center"><button class="confirm-btn" id="reward-confirm-btn" onclick="confirmReward()">✓ Take This Reward</button></div>
+</div>
+</div>
+<!-- GAME OVER -->
+<div class="screen" id="screen-gameover">
+<div class="gameover-inner" id="gameover-inner">
+<h2 id="gameover-title">Defeated</h2>
+<p id="gameover-msg" style="color:var(--text-dim);font-size:1.1rem;margin-bottom:16px"></p>
+<div class="victory-stats" id="run-stats" style="display:none"></div>
+<div id="run-unlocks"></div>
+<button class="start-btn" onclick="location.reload()">Fly Again</button>
+<button class="start-btn" onclick="goMainMenu()" style="margin-top:12px;background:linear-gradient(135deg,#2a3040,#3a4050,#2a3040);color:var(--text-dim);font-size:.9rem;">🏠 Main Menu</button>
+</div>
+</div>
+</div>
+<!-- NEST MODAL -->
+<div id="nest-modal" onclick="if(event.target===this)closeNest()">
+<div class="nest-inner">
+<button class="nest-close" onclick="closeNest()">✕</button>
+<h2>🪺 Your Nest</h2>
+<p class="nest-subtitle" id="nest-subtitle">Everything you carry into battle.</p>
+<div id="nest-content"></div>
+</div>
+</div>
+<!-- STORK SHOP SCREEN -->
+<div class="screen" id="screen-stork-shop">
+<div class="stork-shop-inner">
+<h2>🪃 Stork's Emporium</h2>
+<p style="text-align:center;color:var(--text-dim);font-style:italic;font-size:.85rem;margin-bottom:12px">The ancient stork trades in shiny things.</p>
+<div class="shiny-bar">🌟 <span class="shiny-val" id="shop-shiny-count">0</span> Shiny Objects</div>
+<div class="shop-purchase-log" id="shop-purchase-log"></div>
+<div class="shop-items-grid" id="shop-items-grid"></div>
+<div class="shop-btn-row">
+<button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
+<button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (5🌟)</button>
+<button class="shop-exit-btn" data-shop-action="exit">Continue ›</button>
+</div>
+<p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 5🌟</p>
+</div>
+</div>
+<!-- WHISPERING GROVE -->
+<div class="screen" id="screen-grove">
+<div class="grove-inner">
+<h2 style="font-family:'Cinzel',serif;color:var(--gold-light);margin-bottom:8px;font-size:1.35rem;letter-spacing:.1em;">🌳 Whispering Grove</h2>
+<p class="grove-intro" id="grove-intro-text">Ancient trees hide secrets. The wind carries the scent of reward — and danger.<br/><em>Only one can be chosen. Risk the grove?</em></p>
+<div class="grove-opt-row" id="grove-opt-row">
+<button class="grove-btn-opt" id="grove-optout-btn">← Ignore &amp; Move On</button>
+<button class="grove-btn-enter" id="grove-enter-btn">Enter the Grove →</button>
+</div>
+<!-- 3 mystery trees — shown after entering -->
+<div id="grove-trees">
+<div class="grove-tree" data-idx="0">🌳<span class="grove-rustle">Rustle…</span></div>
+<div class="grove-tree" data-idx="1">🌳<span class="grove-rustle">Rustle…</span></div>
+<div class="grove-tree" data-idx="2">🌳<span class="grove-rustle">Rustle…</span></div>
+</div>
+<div id="grove-result-msg"></div>
+<!-- Nest reward section — shown on nest pick -->
+<div id="grove-reward-section">
+<h3>🪹 Choose your reward from the nest:</h3>
+<div class="grove-reward-grid reward-grid" id="grove-reward-grid"></div>
+</div>
+<button class="grove-btn-enter" id="grove-continue-btn" onclick="groveFinish()" style="display:none;">Continue →</button>
+</div>
+</div>
+<!-- ABANDON MODAL -->
+<div class="abandon-modal" id="abandon-modal">
+<div class="abandon-inner">
+<h3>⛔ Abandon Run?</h3>
+<p>This will end your current run. Any unlocks you've earned <strong style="color:var(--text)">will be saved</strong>, but your progress will be lost.</p>
+<button class="abandon-confirm-btn" onclick="confirmAbandon()">Yes, Abandon</button>
+<button class="abandon-cancel-btn" onclick="closeAbandonModal()">Cancel</button>
+</div>
+</div>
+<!-- UNLOCK TOAST -->
+<div class="unlock-toast" id="unlock-toast"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- GAME SYSTEM FIX PATCH -->
+
+
+
+
+<script src="js/core/game.js"></script><script src="js/data/content.js"></script><script src="js/systems/systems.js"></script><script src="js/systems/shop.js"></script><script src="js/systems/fixes.js"></script><script src="js/ui/ui.js"></script><script src="js/ui/sprites.js"></script></body>
+
+
+</html>

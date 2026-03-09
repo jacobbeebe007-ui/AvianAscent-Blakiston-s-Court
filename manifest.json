@@ -1,0 +1,25 @@
+{
+  "source_zip": "avian_ascent_split_project.zip",
+  "source_project": "avian_ascent_split_project",
+  "refactor_type": "consolidated modular project",
+  "css_bundles": [
+    "css/main.css",
+    "css/sprites.css",
+    "css/shop.css",
+    "css/ui.css"
+  ],
+  "js_bundles": [
+    "js/core/game.js",
+    "js/data/content.js",
+    "js/systems/systems.js",
+    "js/systems/shop.js",
+    "js/systems/fixes.js",
+    "js/ui/ui.js",
+    "js/ui/sprites.js"
+  ],
+  "notes": [
+    "This refactor preserves script/style execution order by concatenating extracted files into grouped bundles.",
+    "Sprite data remains embedded in CSS.",
+    "Further manual refactoring into feature modules can be done from this cleaner structure."
+  ]
+}
