@@ -36,10 +36,17 @@
 <header>
 <h1>⚔ AVIAN ASCENT ⚔</h1>
 <p>A Roguelike of Feathers &amp; Fortune</p>
+<div style="text-align:center;margin-top:8px;"><button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button></div>
 </header>
 <!-- SELECT -->
 <!-- SELECT -->
 <div class="screen active" id="screen-select">
+<div class="sky-parallax" aria-hidden="true">
+<span class="fly fly-1">🕊️</span>
+<span class="fly fly-2">🦜</span>
+<span class="fly fly-3">🦅</span>
+<span class="fly fly-4">🪽</span>
+</div>
 <div class="sel-intro">
 <h2>Choose Your Champion</h2>
 <p style="color:var(--text-dim);font-style:italic">Your fate is written in feathers.</p>
@@ -47,6 +54,9 @@
 <!-- DIFFICULTY PICKER -->
 <div class="diff-picker" id="diff-picker"></div>
 <div class="diff-desc" id="diff-desc">Choose your difficulty to begin.</div>
+<div style="text-align:center;margin:-4px 0 10px;">
+<button class="continue-run-btn" onclick="exportCombatTelemetry()">📊 Export Combat Telemetry</button>
+</div>
 <div style="text-align:center;margin:8px auto 10px;max-width:1100px;">
 <input autocomplete="off" id="dev-code-input" maxlength="32" oninput="checkDevCode(this.value)" placeholder="Enter code..." spellcheck="false" style="background:rgba(10,8,4,.7);border:1px solid rgba(80,70,50,.35);border-radius:6px;color:var(--text-dim);font-size:.78rem;padding:5px 12px;width:160px;outline:none;text-align:center;letter-spacing:.05em;" type="password"/>
 <div id="dev-code-msg" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;min-height:16px;"></div>
@@ -75,11 +85,13 @@
 <!-- VIEW TOGGLE -->
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
 <div class="view-toggle" id="view-toggle">
+<button class="view-toggle-btn" onclick="setSelView('all',this)">All</button>
 <button class="view-toggle-btn active" onclick="setSelView('size',this)">By Size</button>
 <button class="view-toggle-btn" onclick="setSelView('class',this)">By Class</button>
 </div>
 <span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
 </div>
+<div class="class-filter-tabs" id="class-filter-tabs"></div>
 <div id="bird-grid"></div>
 </div>
 <div class="sel-right">
@@ -98,6 +110,7 @@
 <div class="battle-layout">
 <div class="menu-row">
 <button class="menu-btn" onclick="goMainMenu()">🏠 Menu</button>
+<button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button>
 <button class="nest-btn" onclick="openNest()">🪺 Nest</button>
 <button class="menu-btn" onclick="openAbandonModal()" style="color:var(--red-light);border-color:rgba(201,76,76,.4)">⛔ Abandon</button>
 </div>
@@ -232,7 +245,7 @@
 <div class="shop-btn-row">
 <button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
 <button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (5🌟)</button>
-<button class="shop-exit-btn" data-shop-action="exit">Continue ›</button>
+<button class="shop-exit-btn" data-shop-action="exit" id="shop-exit-btn">Continue ›</button>
 </div>
 <p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 5🌟</p>
 </div>
@@ -268,6 +281,39 @@
 <p>This will end your current run. Any unlocks you've earned <strong style="color:var(--text)">will be saved</strong>, but your progress will be lost.</p>
 <button class="abandon-confirm-btn" onclick="confirmAbandon()">Yes, Abandon</button>
 <button class="abandon-cancel-btn" onclick="closeAbandonModal()">Cancel</button>
+</div>
+</div>
+<!-- SETTINGS MODAL -->
+<div class="abandon-modal" id="settings-modal" onclick="if(event.target===this)closeSettingsModal()">
+<div class="abandon-inner" style="max-width:560px;text-align:left;">
+<h3>⚙ Accessibility &amp; Settings</h3>
+<div style="display:grid;gap:12px;margin-top:10px;">
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Font Size
+<select id="setting-font-size" onchange="updateAccessibilitySettings()">
+<option value="90">Small (90%)</option>
+<option value="100">Default (100%)</option>
+<option value="115">Large (115%)</option>
+<option value="130">Extra Large (130%)</option>
+</select>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Color Blind Mode
+<select id="setting-color-blind" onchange="updateAccessibilitySettings()">
+<option value="off">Off</option>
+<option value="protanopia">Protanopia-friendly</option>
+<option value="deuteranopia">Deuteranopia-friendly</option>
+<option value="tritanopia">Tritanopia-friendly</option>
+</select>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Reduce Motion
+<input id="setting-reduce-motion" onchange="updateAccessibilitySettings()" type="checkbox"/>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">High Contrast UI
+<input id="setting-high-contrast" onchange="updateAccessibilitySettings()" type="checkbox"/>
+</label>
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+<button class="abandon-cancel-btn" onclick="closeSettingsModal()">Close</button>
+</div>
 </div>
 </div>
 <!-- UNLOCK TOAST -->
