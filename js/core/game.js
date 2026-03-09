@@ -3017,6 +3017,13 @@ function buildBirdGrid(view='size') {
   }
 }
 
+document.addEventListener('click', (e)=>{
+  const menu=document.getElementById('class-filter-menu');
+  const btn=document.getElementById('class-filter-btn');
+  if(!menu||!btn) return;
+  if(menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
+});
+
 function buildBirdCard(key, bird, locked, globalMax) {
   const card = document.createElement('div');
   card.className = 'bird-card' + (locked ? ' bird-locked' : '') + (G.selected===key?' selected':'');
