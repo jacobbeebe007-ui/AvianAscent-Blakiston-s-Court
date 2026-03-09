@@ -1,0 +1,44 @@
+/* ===== 18_oai-shop-glow-colors.css ===== */
+
+/* Shop card readability glows */
+#shop-items-grid .shop-item,
+#shop-items-grid .reward-card{
+  position: relative;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, filter .2s ease;
+}
+#shop-items-grid .shop-item.tier-grey,
+#shop-items-grid .reward-card.tier-grey{
+  box-shadow: 0 0 10px rgba(160,170,185,.10), inset 0 0 8px rgba(160,170,185,.04);
+}
+#shop-items-grid .shop-item.tier-green,
+#shop-items-grid .reward-card.tier-green{
+  box-shadow: 0 0 14px rgba(76,138,106,.22), inset 0 0 10px rgba(76,138,106,.08);
+}
+#shop-items-grid .shop-item.tier-blue,
+#shop-items-grid .reward-card.tier-blue{
+  box-shadow: 0 0 16px rgba(74,106,201,.24), inset 0 0 10px rgba(74,106,201,.08);
+}
+#shop-items-grid .shop-item.tier-purple,
+#shop-items-grid .reward-card.tier-purple{
+  box-shadow: 0 0 18px rgba(122,76,201,.28), inset 0 0 10px rgba(122,76,201,.10);
+}
+#shop-items-grid .shop-item.tier-gold,
+#shop-items-grid .reward-card.tier-gold{
+  box-shadow: 0 0 20px rgba(201,168,76,.32), 0 0 34px rgba(232,201,106,.14), inset 0 0 12px rgba(201,168,76,.10);
+}
+#shop-items-grid .shop-item:hover,
+#shop-items-grid .reward-card:hover{
+  transform: translateY(-2px);
+  filter: saturate(1.04);
+}
+@keyframes oaiGoldShimmer{
+  0%{ box-shadow: 0 0 18px rgba(201,168,76,.24), 0 0 30px rgba(232,201,106,.10), inset 0 0 10px rgba(201,168,76,.08); }
+  50%{ box-shadow: 0 0 24px rgba(201,168,76,.40), 0 0 42px rgba(232,201,106,.18), inset 0 0 14px rgba(201,168,76,.14); }
+  100%{ box-shadow: 0 0 18px rgba(201,168,76,.24), 0 0 30px rgba(232,201,106,.10), inset 0 0 10px rgba(201,168,76,.08); }
+}
+#shop-items-grid .shop-item.tier-gold,
+#shop-items-grid .reward-card.tier-gold{
+  animation: oaiGoldShimmer 2.2s ease-in-out infinite;
+}
+
+

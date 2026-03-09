@@ -1,0 +1,52 @@
+/* ===== 03_aviant-polish-patch.css ===== */
+
+/* Polish patch UI */
+#murmuration-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9998;align-items:center;justify-content:center}
+#murmuration-modal.open{display:flex}
+.murmuration-inner{width:min(720px,94vw);background:rgba(17,14,9,.98);border:1px solid rgba(201,168,76,.45);border-radius:16px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
+.murmuration-title{font-family:'Cinzel',serif;color:var(--gold-light);font-size:1.35rem;text-align:center;margin-bottom:8px}
+.murmuration-sub{color:var(--text-dim);text-align:center;margin-bottom:14px}
+.murmuration-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.murmuration-opt{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s}
+.murmuration-opt:hover{transform:translateY(-2px);border-color:var(--gold)}
+.murmuration-opt .m-icon{font-size:1.5rem;display:block;margin-bottom:6px}
+.murmuration-opt .m-name{font-weight:700;color:var(--text);margin-bottom:4px}
+.murmuration-opt .m-desc{font-size:.78rem;color:var(--text-dim);line-height:1.35}
+.enemy-trait-badge{display:inline-block;margin-top:6px;padding:2px 8px;border:1px solid rgba(201,168,76,.25);border-radius:999px;font-size:.72rem;color:var(--gold-light);background:rgba(201,168,76,.08)}
+.shop-row-label{grid-column:1/-1;font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.12em;color:var(--gold-light);padding:2px 4px 0}
+.artifact-card{box-shadow:0 0 0 1px rgba(201,168,76,.18), 0 0 18px rgba(201,168,76,.12) inset}
+.damage-tag-float{font-size:.72rem;opacity:.95}
+
+
+/* ===== 07_all-birds-menu-animation-patch.css ===== */
+
+/* ===== All birds menu/select animation polish ===== */
+.sprite4.menu-idle-anim{
+  animation: birdMenuIdleBob 1.9s ease-in-out infinite;
+  transform-origin:center bottom;
+}
+.sprite4.menu-hover-anim{
+  animation: birdMenuHoverBounce .55s ease-in-out 2;
+  transform-origin:center bottom;
+}
+.sprite4.menu-dash-anim{
+  animation: birdMenuDashBurst .38s ease-out 1;
+  transform-origin:center center;
+}
+@keyframes birdMenuIdleBob{
+  0%{ transform:translateY(0); }
+  50%{ transform:translateY(-4px); }
+  100%{ transform:translateY(0); }
+}
+@keyframes birdMenuHoverBounce{
+  0%{ transform:translateY(0) scale(1); }
+  50%{ transform:translateY(-3px) scale(1.04); }
+  100%{ transform:translateY(0) scale(1); }
+}
+@keyframes birdMenuDashBurst{
+  0%{ transform:translateX(0); }
+  45%{ transform:translateX(8px); }
+  100%{ transform:translateX(0); }
+}
+
+

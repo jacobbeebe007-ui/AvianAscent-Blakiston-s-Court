@@ -1,0 +1,240 @@
+/* ===== 02_blakiston-sprite-patch.css ===== */
+
+/* ===== Duke Blakiston sprite ===== */
+.sprite-dukeblakiston{
+  background-image:url("../assets/sprites/dukeblakiston_fd6f9d1386d74c2a.png");
+}
+/* Boss-scale render */
+.sprite4.boss.sprite-dukeblakiston,
+#enemy-avatar .sprite4.sprite-dukeblakiston{
+  width:128px;
+  height:128px;
+  background-size:200% 200%;
+  background-repeat:no-repeat;
+  image-rendering:pixelated;
+}
+/* idle hover */
+.boss-hover{
+  animation: bossHover 2.2s ease-in-out infinite;
+}
+@keyframes bossHover {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+.boss-power{
+  animation: bossPowerPulse 1s ease-in-out infinite alternate;
+}
+@keyframes bossPowerPulse{
+  from{ filter: drop-shadow(0 0 8px rgba(128,0,255,.55)); }
+  to{ filter: drop-shadow(0 0 22px rgba(180,80,255,.9)); }
+}
+
+/* Energy colors */
+.energy-orb{background:#3aa0ff;} /* normal EN blue */
+.energy-orb.bonus{background:#36c36c;} /* bonus EN green */
+
+
+
+/* ===== 04_dove-enemy-sprite-patch.css ===== */
+
+/* ===== Dove enemy sprite ===== */
+.sprite-dove {
+  background-image: url("../assets/sprites/dove_c21e39caa89afe03.png");
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+  image-rendering: auto;
+}
+.sprite-dove.frame-0 { background-position: 0% 0%; }
+.sprite-dove.frame-1 { background-position: 100% 0%; }
+.sprite-dove.frame-2 { background-position: 0% 100%; }
+.sprite-dove.frame-3 { background-position: 100% 100%; }
+
+
+/* ===== 05_seagull-sprite-replacement.css ===== */
+
+/* ===== Seagull sprite replacement ===== */
+.sprite-seagull {
+  background-image: url("../assets/sprites/seagull_09bed982d764a49c.png");
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+}
+.sprite-seagull.frame-0 { background-position: 0% 0%; }     /* idle */
+.sprite-seagull.frame-1 { background-position: 100% 0%; }   /* call */
+.sprite-seagull.frame-2 { background-position: 0% 100%; }   /* dash */
+.sprite-seagull.frame-3 { background-position: 100% 100%; } /* power */
+
+
+/* ===== 06_seagull-animation-patch.css ===== */
+
+/* ===== Seagull animation polish ===== */
+.sprite-seagull.seagull-idle-anim{
+  animation: seagullIdleBob 1.8s ease-in-out infinite;
+}
+.sprite-seagull.seagull-call-anim{
+  animation: seagullCallBounce .55s ease-in-out 2;
+}
+.sprite-seagull.seagull-dash-anim{
+  animation: seagullDashBurst .4s ease-out 1;
+}
+@keyframes seagullIdleBob{
+  0%{ transform:translateY(0); }
+  50%{ transform:translateY(-4px); }
+  100%{ transform:translateY(0); }
+}
+@keyframes seagullCallBounce{
+  0%{ transform:translateY(0) scale(1); }
+  50%{ transform:translateY(-3px) scale(1.04); }
+  100%{ transform:translateY(0) scale(1); }
+}
+@keyframes seagullDashBurst{
+  0%{ transform:translateX(0); }
+  45%{ transform:translateX(10px); }
+  100%{ transform:translateX(0); }
+}
+
+
+/* ===== 08_albatross-sprite-replacement.css ===== */
+
+.sprite-albatross{background-image:url("../assets/sprites/albatross_e5851021f36713d0.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-albatross.frame-0{background-position:0% 0%;}
+.sprite-albatross.frame-1{background-position:100% 0%;}
+.sprite-albatross.frame-2{background-position:0% 100%;}
+.sprite-albatross.frame-3{background-position:100% 100%;}
+
+
+/* ===== 09_raven-sprite-replacement.css ===== */
+
+.sprite-raven{background-image:url("../assets/sprites/raven_2166535c9108f81f.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-raven.frame-0{background-position:0% 0%;}
+.sprite-raven.frame-1{background-position:100% 0%;}
+.sprite-raven.frame-2{background-position:0% 100%;}
+.sprite-raven.frame-3{background-position:100% 100%;}
+
+
+/* ===== 10_peregrine-sprite-replacement.css ===== */
+
+.sprite-peregrine{background-image:url("../assets/sprites/peregrine_098518ffc756ac5b.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-peregrine.frame-0{background-position:0% 0%;}
+.sprite-peregrine.frame-1{background-position:100% 0%;}
+.sprite-peregrine.frame-2{background-position:0% 100%;}
+.sprite-peregrine.frame-3{background-position:100% 100%;}
+
+
+/* ===== 11_peregrine-global-alias-patch.css ===== */
+
+/* Peregrine aliases so every UI path uses the same sheet */
+.sprite-peregrinefalcon{
+  background-image: inherit;
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+}
+.sprite-peregrinefalcon.frame-0{ background-position:0% 0%; }
+.sprite-peregrinefalcon.frame-1{ background-position:100% 0%; }
+.sprite-peregrinefalcon.frame-2{ background-position:0% 100%; }
+.sprite-peregrinefalcon.frame-3{ background-position:100% 100%; }
+
+
+/* ===== 12_snowyowl-sprite-replacement.css ===== */
+
+.sprite-snowyowl{background-image:url("../assets/sprites/snowyowl_b5662e5e1a106124.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-snowyowl.frame-0{background-position:0% 0%;}
+.sprite-snowyowl.frame-1{background-position:100% 0%;}
+.sprite-snowyowl.frame-2{background-position:0% 100%;}
+.sprite-snowyowl.frame-3{background-position:100% 100%;}
+
+
+/* ===== 13_lyrebird-sprite-replacement.css ===== */
+
+.sprite-lyrebird{background-image:url("../assets/sprites/lyrebird_3e80e83c379bba57.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-lyrebird.frame-0{background-position:0% 0%;}
+.sprite-lyrebird.frame-1{background-position:100% 0%;}
+.sprite-lyrebird.frame-2{background-position:0% 100%;}
+.sprite-lyrebird.frame-3{background-position:100% 100%;}
+
+
+/* ===== 14_bowerbird-sprite-replacement.css ===== */
+
+.sprite-bowerbird{background-image:url("../assets/sprites/bowerbird_d1e9d315a64fe4ea.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-bowerbird.frame-0{background-position:0% 0%;}
+.sprite-bowerbird.frame-1{background-position:100% 0%;}
+.sprite-bowerbird.frame-2{background-position:0% 100%;}
+.sprite-bowerbird.frame-3{background-position:100% 100%;}
+
+
+/* ===== 15_toucan-sprite-replacement.css ===== */
+
+.sprite-toucan{background-image:url("../assets/sprites/toucan_638fd6cf85306d4c.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-toucan.frame-0{background-position:0% 0%;}
+.sprite-toucan.frame-1{background-position:100% 0%;}
+.sprite-toucan.frame-2{background-position:0% 100%;}
+.sprite-toucan.frame-3{background-position:100% 100%;}
+
+
+/* ===== 16_swan-sprite-replacement.css ===== */
+
+.sprite-swan{background-image:url("../assets/sprites/swan_c6663fb1ed6ac9a3.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-swan.frame-0{background-position:0% 0%;}
+.sprite-swan.frame-1{background-position:100% 0%;}
+.sprite-swan.frame-2{background-position:0% 100%;}
+.sprite-swan.frame-3{background-position:100% 100%;}
+
+
+/* ===== 17_toucan-final-authority.css ===== */
+
+.sprite-toucan{background-image:url("../assets/sprites/toucan_638fd6cf85306d4c.png") !important;background-size:200% 200% !important;background-repeat:no-repeat !important;}
+.sprite-toucan.frame-0{background-position:0% 0% !important;}
+.sprite-toucan.frame-1{background-position:100% 0% !important;}
+.sprite-toucan.frame-2{background-position:0% 100% !important;}
+.sprite-toucan.frame-3{background-position:100% 100% !important;}
+
+
+/* ===== 20_all-sprites-living-motion-patch.css ===== */
+
+/* Generic living motion for all sprite birds */
+.sprite4{
+  transform-origin:center bottom;
+  animation:oaiSpriteIdleBob 2.8s ease-in-out infinite;
+  will-change:transform, filter;
+}
+.bird-card:hover .sprite4,
+.ascent-panel-portrait .sprite4:hover,
+#player-avatar .sprite4:hover,
+#enemy-avatar .sprite4:hover{
+  animation:oaiSpriteHoverFloat 1.2s ease-in-out infinite;
+}
+@keyframes oaiSpriteIdleBob{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
+  100%{transform:translateY(0)}
+}
+@keyframes oaiSpriteHoverFloat{
+  0%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-4px) scale(1.03)}
+  100%{transform:translateY(0) scale(1)}
+}
+
+
+/* ===== 22_penguin-realistic-sheet-patch.css ===== */
+
+/* ===== REALISTIC EMPEROR PENGUIN SHEET PATCH ===== */
+
+.sprite-penguin.idle{background-position:0% 0% !important;}
+.sprite-penguin.run{background-position:100% 0% !important;}
+.sprite-penguin.slide{background-position:0% 100% !important;}
+.sprite-penguin.attack{background-position:100% 100% !important;}
+
+/* Keep penguin proportionally wider than tall across the UI */
+.ascent-panel-portrait .sprite4.sprite-penguin.small,.ascent-face .sprite4.sprite-penguin.small{width:106px !important;height:80px !important;}
+.ascent-panel-portrait .sprite4.sprite-penguin.medium,.ascent-face .sprite4.sprite-penguin.medium{width:124px !important;height:92px !important;}
+.ascent-panel-portrait .sprite4.sprite-penguin.large,.ascent-face .sprite4.sprite-penguin.large{width:138px !important;height:102px !important;}
+.ascent-panel-portrait .sprite4.sprite-penguin.xl,.ascent-face .sprite4.sprite-penguin.xl,
+.ascent-panel-portrait .sprite4.sprite-penguin.xlarge,.ascent-face .sprite4.sprite-penguin.xlarge{width:158px !important;height:118px !important;}
+
+
+/* Energy colors */
+.energy-orb{background:#3aa0ff;} /* normal EN blue */
+.energy-orb.bonus{background:#36c36c;} /* bonus EN green */
+
+
+
