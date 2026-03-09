@@ -36,6 +36,7 @@
 <header>
 <h1>⚔ AVIAN ASCENT ⚔</h1>
 <p>A Roguelike of Feathers &amp; Fortune</p>
+<div style="text-align:center;margin-top:8px;"><button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button></div>
 </header>
 <!-- SELECT -->
 <!-- SELECT -->
@@ -75,6 +76,7 @@
 <!-- VIEW TOGGLE -->
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
 <div class="view-toggle" id="view-toggle">
+<button class="view-toggle-btn" onclick="setSelView('all',this)">All</button>
 <button class="view-toggle-btn active" onclick="setSelView('size',this)">By Size</button>
 <button class="view-toggle-btn" onclick="setSelView('class',this)">By Class</button>
 </div>
@@ -92,12 +94,17 @@
 <div class="run-history-title">— RECENT RUNS —</div>
 <div class="run-history-grid" id="run-history-grid"></div>
 </div>
+<div class="run-history" id="highscore-board" style="display:block;max-width:1100px;margin:8px auto 12px;">
+<div class="run-history-title">— HIGHSCORES —</div>
+<div class="run-history-grid" id="highscore-grid"></div>
+</div>
 </div>
 <!-- BATTLE -->
 <div class="screen" id="screen-battle">
 <div class="battle-layout">
 <div class="menu-row">
 <button class="menu-btn" onclick="goMainMenu()">🏠 Menu</button>
+<button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button>
 <button class="nest-btn" onclick="openNest()">🪺 Nest</button>
 <button class="menu-btn" onclick="openAbandonModal()" style="color:var(--red-light);border-color:rgba(201,76,76,.4)">⛔ Abandon</button>
 </div>
@@ -232,7 +239,7 @@
 <div class="shop-btn-row">
 <button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
 <button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (5🌟)</button>
-<button class="shop-exit-btn" data-shop-action="exit">Continue ›</button>
+<button class="shop-exit-btn" data-shop-action="exit" id="shop-exit-btn">Continue ›</button>
 </div>
 <p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 5🌟</p>
 </div>
@@ -268,6 +275,50 @@
 <p>This will end your current run. Any unlocks you've earned <strong style="color:var(--text)">will be saved</strong>, but your progress will be lost.</p>
 <button class="abandon-confirm-btn" onclick="confirmAbandon()">Yes, Abandon</button>
 <button class="abandon-cancel-btn" onclick="closeAbandonModal()">Cancel</button>
+</div>
+</div>
+<!-- SETTINGS MODAL -->
+<div class="abandon-modal" id="settings-modal" onclick="if(event.target===this)closeSettingsModal()">
+<div class="abandon-inner" style="max-width:560px;text-align:left;">
+<h3>⚙ Accessibility &amp; Settings</h3>
+<div style="display:grid;gap:12px;margin-top:10px;">
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Font Size
+<select id="setting-font-size" onchange="updateAccessibilitySettings()">
+<option value="90">Small (90%)</option>
+<option value="100">Default (100%)</option>
+<option value="115">Large (115%)</option>
+<option value="130">Extra Large (130%)</option>
+</select>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Color Blind Mode
+<select id="setting-color-blind" onchange="updateAccessibilitySettings()">
+<option value="off">Off</option>
+<option value="protanopia">Protanopia-friendly</option>
+<option value="deuteranopia">Deuteranopia-friendly</option>
+<option value="tritanopia">Tritanopia-friendly</option>
+</select>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Reduce Motion
+<input id="setting-reduce-motion" onchange="updateAccessibilitySettings()" type="checkbox"/>
+</label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">High Contrast UI
+<input id="setting-high-contrast" onchange="updateAccessibilitySettings()" type="checkbox"/>
+</label>
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+<button class="abandon-cancel-btn" onclick="closeSettingsModal()">Close</button>
+</div>
+</div>
+</div>
+<!-- ABILITY MODIFICATION MODAL -->
+<div class="abandon-modal" id="ability-mod-modal" onclick="if(event.target===this)closeAbilityModModal()">
+<div class="abandon-inner" style="max-width:560px;text-align:left;">
+<h3>✨ Ability Modification</h3>
+<p id="ability-mod-sub" style="color:var(--text-dim);margin-bottom:10px;font-size:.9rem;">Choose one ailment to add at Lv.4.</p>
+<div id="ability-mod-options" style="display:grid;grid-template-columns:1fr;gap:8px;"></div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+<button class="abandon-cancel-btn" onclick="closeAbilityModModal()">Cancel</button>
+</div>
 </div>
 </div>
 <!-- UNLOCK TOAST -->
