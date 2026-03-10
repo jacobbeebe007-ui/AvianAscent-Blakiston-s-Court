@@ -796,9 +796,30 @@ const BIRDS = {
     stats:{hp:38,maxHp:38,atk:6,def:4,spd:6,dodge:20,acc:82,critChance:6,mdef:10,matk:14},
     statBars:{HP:38/50,ATK:6/15,SPD:6/10,Dodge:.4,ACC:.82}, color:'#c8902a',
     startAbilities:['dart','lullaby','shriekwave'],
-    passive:{id:'perfectMimic',name:'Perfect Mimic',desc:'Once per battle, can copy the last ability the enemy used as a bonus attack.',
-      onBattleStart(p){p._mimicAbility=null;p._mimicUsed=false;},
-      onEnemyAbility(p,abilityId){if(!p._mimicUsed)p._mimicAbility=abilityId;}},
+    passive:{id:'lyreLyre',name:'Lyre Lyre',desc:'Reduces a randomly selected enemy stat at battle start and grants that amount to Lyrebird as a buff.',
+      onBattleStart(p){
+        const enemy=G?.enemy?.stats;
+        if(!enemy) return;
+        const picks=[
+          {key:'atk',label:'ATK',min:1,delta:2},
+          {key:'def',label:'DEF',min:0,delta:2},
+          {key:'spd',label:'SPD',min:1,delta:2},
+          {key:'acc',label:'ACC',min:40,delta:6},
+          {key:'dodge',label:'Dodge',min:0,delta:6},
+          {key:'matk',label:'MATK',min:0,delta:2},
+          {key:'mdef',label:'MDEF',min:0,delta:2},
+        ].filter(x=>Number.isFinite(enemy[x.key]));
+        if(!picks.length) return;
+        const pick=picks[Math.floor(Math.random()*picks.length)];
+        const cur=Number(enemy[pick.key]||0);
+        const reduction=Math.max(0,Math.min(pick.delta, cur-pick.min));
+        if(reduction<=0) return;
+        enemy[pick.key]=cur-reduction;
+        p.stats[pick.key]=Number(p.stats[pick.key]||0)+reduction;
+        spawnFloat('enemy',`🎼 ${pick.label}-${reduction}`,'fn-status');
+        spawnFloat('player',`🎵 ${pick.label}+${reduction}`,'fn-status');
+        logMsg(`🎵 Lyre Lyre steals ${pick.label} ${reduction} at battle start!`,'system');
+      }},
   },
   raven:{
     name:'Raven', portraitKey:'raven', tagline:'Chaos given feathers. Roll the bones.',
@@ -1068,6 +1089,31 @@ const BIRDS = {
 };
 
 BIRDS.blackbird.extraAbilities = (BIRDS.blackbird.extraAbilities||[]).filter(x=>x!=='mimic');
+
+
+function runPassiveIntegrityAudit(){
+  const IMM_MAP=[
+    {needle:/immune\s+to\s+poison|poison\s+immune/i, key:'immunePoison'},
+    {needle:/immune\s+to\s+fear|fear\s+immune/i, key:'immuneFear'},
+    {needle:/immune\s+to\s+stun|stun\s+immune/i, key:'immuneStun'},
+    {needle:/immune\s+to\s+paraly/i, key:'immuneParalyze'},
+    {needle:/immune\s+to\s+weaken|weaken\s+immune/i, key:'immuneWeaken'},
+    {needle:/immune\s+to\s+confus/i, key:'immuneConfused'},
+    {needle:/immune\s+to\s+slow|slow\s+immune/i, key:'immuneSlow'},
+  ];
+  Object.entries(BIRDS||{}).forEach(([id,b])=>{
+    const p=b?.passive;
+    if(!p||!p.desc) return;
+    IMM_MAP.forEach(m=>{
+      if(m.needle.test(p.desc) && !p[m.key]){
+        p[m.key]=true;
+        try{ console.warn(`[passive-audit] ${id}.${p.id||'passive'} missing ${m.key}; auto-enabled to match description.`); }catch(_){ }
+      }
+    });
+  });
+}
+
+runPassiveIntegrityAudit();
 if(!BIRDS.blackbird.extraAbilities.includes('bleakBeak')) BIRDS.blackbird.extraAbilities.push('bleakBeak');
 
 // ============================================================
@@ -3059,8 +3105,6 @@ function buildBirdExpandedContent(key, bird){
   const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
   return `
     <div class="bird-card-expanded">
-      <div class="ascent-panel-portrait">${renderBirdIconHTML(key, sizeClass, false)}</div>
-      <div class="ascent-panel-name">${bird.name}</div>
       <div class="ascent-panel-tagline">${bird.tagline||''}</div>
       <div class="ascent-panel-class"><span class="class-badge class-${cls}">${cls.toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
       ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
@@ -3442,8 +3486,13 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   if(id==='screen-stork-shop' || id==='screen-grove'){
     const el=document.getElementById(id);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); }
+    if(el){
+      el.scrollTop=0;
+      el.scrollIntoView({behavior:'auto', block:'start'});
+    }
+    document.documentElement.scrollTop=0;
+    document.body.scrollTop=0;
+    try{ window.scrollTo({top:0, behavior:'auto'}); }catch(_){ window.scrollTo(0,0); }
   }
   const evt={id};
   AvianEvents.emit('screen:change', evt);

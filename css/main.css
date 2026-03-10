@@ -1356,3 +1356,8 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
   #actions-grid{max-height:38vh;overflow:auto;padding-right:4px;}
   .screen{padding:8px;}
 }
+
+
+/* Shop/Grove top alignment */
+#screen-stork-shop,#screen-grove{padding-top:0 !important;}
+.stork-shop-inner,.grove-inner{margin-top:0 !important;}
