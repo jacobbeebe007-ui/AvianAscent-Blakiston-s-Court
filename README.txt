@@ -37,3 +37,14 @@ Merge/CI quick check
 - Run `npm test` before pushing/PR.
 - This validates JS parse and verifies every sprite path in CSS points to an existing file.
 
+
+If GitHub says the merge is too complex
+- This usually means the PR is very large or has overlapping edits with the base branch.
+- Fix it locally instead of the web editor:
+  1) `git fetch origin`
+  2) `git checkout <your-branch>`
+  3) `git rebase origin/main`  (or `git merge origin/main`)
+  4) Resolve conflicts, then run `npm test`
+  5) `git push --force-with-lease` (for rebase) or `git push` (for merge)
+- If the PR is still too large, split it into smaller PRs (sprites/paths, gameplay, UI) so GitHub can evaluate checks and diffs reliably.
+
