@@ -743,6 +743,7 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .sprite-hummingbird{background-image:url("../assets/sprites/hummingbird.png");}
 .sprite-shoebill{background-image:url("../assets/sprites/Shoebill Stork.png");}
 .sprite-secretarybird{background-image:url("../assets/sprites/Secretary Bird.png");}
+.sprite-secretary{background-image:url("../assets/sprites/Secretary Bird.png");}
 .sprite-robin{background-image:url("../assets/sprites/Robin.png");}
 .sprite-kiwi{background-image:url("../assets/sprites/kiwi.png");}
 .sprite-magpie{background-image:url("../assets/sprites/magpie.png");}

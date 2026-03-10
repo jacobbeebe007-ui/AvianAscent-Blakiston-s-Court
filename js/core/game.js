@@ -3136,6 +3136,8 @@ function normalizeSpriteBirdKey(raw){
   const k = String(raw||'').toLowerCase().replace(/[^a-z]/g,'');
   if(k === 'peregrinefalcon') return 'peregrine';
   if(k === 'snowyowl' || k === 'snowy') return 'snowyowl';
+  if(k === 'secretary') return 'secretarybird';
+  if(k === 'harpyeagle') return 'harpy';
   return k;
 }
 function neutralBirdFallbackHTML(sizeClass){
@@ -3143,7 +3145,7 @@ function neutralBirdFallbackHTML(sizeClass){
 }
 function renderBirdIconHTML(birdKey, sizeClass, locked){
   const k = normalizeSpriteBirdKey(birdKey);
-  const spriteBirds = /^(sparrow|goose|blackbird|crow|macaw|robin|hummingbird|shoebill|secretarybird|magpie|kookaburra|kiwi|penguin|flamingo|seagull|swan|emu|bowerbird|raven|lyrebird|peregrine|snowyowl|toucan|dukeblakiston)$/;
+  const spriteBirds = /^(sparrow|goose|blackbird|crow|macaw|robin|hummingbird|shoebill|secretarybird|secretary|magpie|kookaburra|kiwi|penguin|flamingo|seagull|swan|emu|bowerbird|raven|lyrebird|peregrine|snowyowl|toucan|dukeblakiston|albatross|harpy|harpyeagle|baldeagle|blackcockatoo|ostrich|cassowary)$/;
   if(spriteBirds.test(k)){
     return `<div class="sprite4 ${sizeClass||''} sprite-${k} frame-0 ${locked?'locked':''}"></div>`;
   }
@@ -9287,7 +9289,7 @@ applyAccessibilitySettings();
      3 power/buff
    ============================================================ */
 (function(){
-  const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','hummingbird','shoebill','secretarybird','magpie','kookaburra','kiwi','penguin','robin','flamingo','seagull','emu','dukeblakiston']);
+  const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','hummingbird','shoebill','secretarybird','secretary','magpie','kookaburra','kiwi','penguin','robin','flamingo','seagull','emu','dukeblakiston','albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary']);
   const CASTERS = new Set(['mage','bard','summoner']);
 
   function normKey(k){ return String(k||'').toLowerCase().replace(/[^a-z]/g,''); } // secretaryBird -> secretarybird
@@ -9423,7 +9425,7 @@ applyAccessibilitySettings();
    - Forces all UI locations using PORTRAITS[...] to show sprites
    ============================================================ */
 (function(){
-  const SPRITE_KEYS = ['sparrow','goose','blackbird','crow','macaw','hummingbird','shoebill','secretarybird','magpie','kookaburra','flamingo','seagull','dukeblakiston'];
+  const SPRITE_KEYS = ['sparrow','goose','blackbird','crow','macaw','hummingbird','shoebill','secretarybird','secretary','magpie','kookaburra','flamingo','seagull','dukeblakiston','albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary'];
   function mk(k, small=true){
     const cls = small ? 'sprite4 small' : 'sprite4';
     return `<div class="${cls} sprite-${k} frame-0"></div>`;
@@ -9580,7 +9582,7 @@ SPRITE_KEYS_ALL.add('magpie');
    - Adds small idle flutter + clearer attack/run/crouch cues
    ============================================================ */
 (function(){
-  const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','robin','hummingbird','shoebill','secretarybird','magpie','kookaburra','flamingo','seagull','emu','penguin','dukeblakiston']);
+  const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','robin','hummingbird','shoebill','secretarybird','secretary','magpie','kookaburra','flamingo','seagull','emu','penguin','dukeblakiston','albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary']);
   const CASTERS = new Set(['mage','bard']);
 
   function normKey(k){ return String(k||'').toLowerCase().replace(/[^a-z]/g,''); }
@@ -9940,10 +9942,16 @@ SPRITE_KEYS_ALL.add('magpie');
 (function(){
   const spriteBirds = new Set([
     'sparrow','goose','blackbird','crow','macaw','robin','hummingbird','shoebill',
-    'secretarybird','magpie','kookaburra','kiwi','penguin','flamingo','seagull',
-    'swan','emu','bowerbird','raven','lyrebird','peregrine','snowyowl','toucan','dukeblakiston'
+    'secretarybird','secretary','magpie','kookaburra','kiwi','penguin','flamingo','seagull',
+    'swan','emu','bowerbird','raven','lyrebird','peregrine','snowyowl','toucan','dukeblakiston',
+    'albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary'
   ]);
-  const norm = s => String(s || '').toLowerCase().replace(/[^a-z]/g,'');
+  const norm = s => {
+    const k = String(s || '').toLowerCase().replace(/[^a-z]/g,'');
+    if(k === 'secretary') return 'secretarybird';
+    if(k === 'harpyeagle') return 'harpy';
+    return k;
+  };
 
   globalThis.getUISizeClass = function(entity, context='general'){
     const key = norm(entity?.portraitKey || entity?.birdKey || entity?.id || '');
