@@ -241,10 +241,10 @@ const ABILITY_TEMPLATES = {
     id:'crowDefend', name:'Defend', type:'utility', btnType:'utility',
     desc:'Brace and raise defense this turn. 2-turn cooldown.', ailments:[],
     levels:[
-      {lv:1, desc:'Gain +2 DEF for 1 turn, block stance active. CD 2t'},
-      {lv:2, desc:'Gain +3 DEF for 1 turn, block stance active. CD 2t'},
-      {lv:3, desc:'Gain +4 DEF for 1 turn, block stance active + thorns. CD 2t'},
-      {lv:4, desc:'Gain +5 DEF for 1 turn, block stance active + stronger thorns. CD 2t'},
+      {lv:1, desc:'Gain +2 DEF for 1 turn, guard stance active. CD 2t'},
+      {lv:2, desc:'Gain +3 DEF for 1 turn, guard stance active. CD 2t'},
+      {lv:3, desc:'Gain +4 DEF for 1 turn, guard stance active + thorns. CD 2t'},
+      {lv:4, desc:'Gain +5 DEF for 1 turn, guard stance active + stronger thorns. CD 2t'},
     ]
   },
   // ---- SHOEBILL ----
@@ -455,12 +455,12 @@ const ABILITY_TEMPLATES = {
     id:'shieldWing', name:'Shield-Wing', type:'utility', btnType:'utility',
     isNeutral:false, allowedClasses:['tank','knight'],
     energyByLevel:[1,1,1,1], cooldownByLevel:[2,2,2,2],
-    desc:'Core tank/knight setup skill. Gain Block and stabilize.',
+    desc:'Core tank/knight setup skill. Gain Guard and stabilize.',
     levels:[
-      {lv:1, desc:'Gain block based on DEF'},
-      {lv:2, desc:'Gain more block + cleanse 1 debuff'},
-      {lv:3, desc:'Gain high block + cleanse 1 debuff'},
-      {lv:4, desc:'Gain very high block + cleanse 2 debuffs'},
+      {lv:1, desc:'Gain reduced damage based on DEF'},
+      {lv:2, desc:'Gain more damage reduction + cleanse 1 debuff'},
+      {lv:3, desc:'Gain high damage reduction + cleanse 1 debuff'},
+      {lv:4, desc:'Gain very high damage reduction + cleanse 2 debuffs'},
     ]
   },
 
@@ -1256,7 +1256,7 @@ const UPGRADE_CARDS_REWORK = [
   {id:'b_hex',tier:'blue',icon:'🕯️',name:'Dread Choir',desc:'+2 MATK. First spell each battle inflicts Fear(1).',tags:['offense'],apply:p=>{p.stats.matk=(p.stats.matk||0)+2;p.openingFearOnSpell=1;}},
   {id:'p_echo',tier:'purple',icon:'🎶',name:'Echo Feather',desc:'First skill each battle repeats at 50%.',stackable:false,tags:['utility'],apply:p=>{p.echoFirstSkill=0.5;}},
   {id:'p_blood',tier:'purple',icon:'🩸',name:'Blood Quill',desc:'Below 50% HP: your first attack each turn +25%.',tags:['offense'],apply:p=>{p.lowHpFirstAtkBonus=0.25;}},
-  {id:'p_pierce',tier:'purple',icon:'🦅',name:'Raptor Doctrine',desc:'Attacks pierce +25% DEF.',tags:['offense'],apply:p=>{p.pierceBonus=(p.pierceBonus||0)+0.25;}},
+  {id:'p_pierce',tier:'purple',icon:'🦅',name:'Raptor Doctrine',desc:'Attacks pierce +25% DEF. (One-time)',stackable:false,tags:['offense'],apply:p=>{p.pierceBonus=Math.max(p.pierceBonus||0,0.25);}},
   {id:'z_crown',tier:'gold',icon:'👑',name:'Court-Sunder',desc:'Once per battle: your next attack ignores all DEF.',stackable:false,tags:['offense'],apply:p=>{p.onceIgnoreDef=true;}},
 ];
 
@@ -1296,8 +1296,8 @@ const ALL_REWARDS = [
   {id:'u_hp25', tier:'green', icon:'❤️', name:'Stronger Heart', desc:'Max HP +12 (heal +12)', tags:['sustain','hp'], apply:p=>{ p.stats.maxHp+=12; p.stats.hp=Math.min(p.stats.hp+12,p.stats.maxHp); }},
   {id:'u_def4', tier:'green', icon:'🛡️', name:'Iron Feathers', desc:'DEF +2', tags:['defense','def'], apply:p=>{ p.stats.def+=2; }},
   {id:'u_mdef4', tier:'green', icon:'🔷', name:'Runic Plumage', desc:'MDEF +2', tags:['defense','mdef'], apply:p=>{ p.stats.mdef=(p.stats.mdef||0)+2; }},
-  {id:'u_atk5', tier:'green', icon:'⚔️', name:'Talons Honed', desc:'ATK +2', tags:['offense','atk'], apply:p=>{ p.stats.atk+=2; }},
-  {id:'u_matk5', tier:'green', icon:'🌙', name:'Moonlit Call', desc:'MATK +2', tags:['offense','matk'], apply:p=>{ p.stats.matk=(p.stats.matk||0)+2; }},
+  {id:'u_atk5', tier:'green', icon:'⚔️', name:'Talons Honed', desc:'ATK +1', tags:['offense','atk'], apply:p=>{ p.stats.atk+=1; }},
+  {id:'u_matk5', tier:'green', icon:'🌙', name:'Moonlit Call', desc:'MATK +3', tags:['offense','matk'], apply:p=>{ p.stats.matk=(p.stats.matk||0)+3; }},
   {id:'u_spd2', tier:'green', icon:'🏁', name:'Tailwind Steps', desc:'SPD +2', tags:['utility','spd'], apply:p=>{ p.stats.spd=(p.stats.spd||0)+2; }},
   {id:'u_dodge10', tier:'green', icon:'🌪️', name:'Wind Step', desc:'Dodge +10%', tags:['defense','dodge'], apply:p=>{ p.stats.dodge=Math.min((p.stats.dodge||0)+10,100); }},
   {id:'u_mdodge10', tier:'green', icon:'🌫️', name:'Mist Step', desc:'MDodge +10%', tags:['defense','mdodge'], apply:p=>{ p.stats.mdodge=Math.min((p.stats.mdodge||0)+10,100); }},
@@ -2337,7 +2337,7 @@ const MAX_ENERGY_GAIN_PER_TURN=2;
 // ============================================================
 //  ENERGY (RECOMMENDED) — StS full refill (size + class)
 // ============================================================
-const ENERGY_BY_SIZE = { tiny:4, small:4, medium:4, large:3, xl:3 };
+const ENERGY_BY_SIZE = { tiny:5, small:4, medium:3, large:2, xl:2 };
 const ENERGY_DELTA_BY_CLASS = {
   assassin:1, bard:1, tank:-1,
   ranger:1, knight:0, mage:0, summoner:0, rogue:1, bruiser:0,
@@ -2671,10 +2671,12 @@ function openNest() {
     const tmpl=ABILITY_TEMPLATES[ab.id];
     const lv=Math.min(ab.level,4);
     const desc=tmpl?tmpl.levels[lv-1].desc:'';
+    const path=tmpl?formatAbilityLevelPathway(tmpl):'';
     html+=`<div class="nest-ab-card">
       <div class="nest-ab-name ${ab.type}">${ab.name}</div>
       <div class="nest-ab-lv">Level ${ab.level} · ${ab.type}</div>
       <div class="nest-ab-desc">${desc}</div>
+      ${path?`<div class="nest-ab-path">${path.replace(/\n/g,'<br>')}</div>`:''}
     </div>`;
   });
   html+=`</div></div>`;
@@ -3291,10 +3293,14 @@ function startGame() {
     passive: bd.passive||null,
     cardDodge: 0,
     cardMdodge: 0,
-    energyMax: 3,
-    energy: 3,
+    energyMax: 0,
+    energy: 0,
     energyRegen: 0,
   };
+  G.player.class = bd.class;
+  G.player.size = bd.size||'medium';
+  G.player.energyMax = computePlayerMaxEnergy();
+  G.player.energy = G.player.energyMax;
   // MDodge base mirrors the bird's physical dodge stat
   G.player.stats.mdodge = G.player.stats.dodge;
   codexMark('birds', G.player.birdKey, 'seen');
@@ -3716,7 +3722,7 @@ function renderStatuses(id, statuses) {
     else if (k==='feared') { b.className='status-badge feared'; b.textContent=`😨 Feared(${v}t)`; }
     else if (k==='lullabied') { b.className='status-badge lullabied'; b.textContent=`💤 Lulled(${v}t)`; tooltipSummary='Debuff: chance to skip actions while lulled.'; }
     else if (k==='evading') { b.className='status-badge evading'; b.textContent=`💨 Evade(${v}t)`; }
-    else if (k==='defending') { b.className='status-badge defending'; b.textContent=`🛡 Block(${v}t)`; }
+    else if (k==='defending') { b.className='status-badge defending'; b.textContent=`🛡 Guard(${v}t)`; tooltipSummary='Damage reduction while guarding.'; }
     else if (k==='dustDevil') { b.className='status-badge feared'; b.textContent=`🌪 Blinded(${v.turns}t,-${v.accDrop||15}%ACC)`; }
     else if (k==='featherRuffle') { b.className='status-badge weaken'; b.textContent=`🪶 Ruffled(${v.turns}t,-${v.atkReduction}%ATK${v.accDrop>0?',-'+v.accDrop+'%ACC':''})`; }
     else if (k==='hum') { b.className='status-badge evading'; b.textContent=`🎵 Hum(${v}t)`; }
@@ -4148,10 +4154,21 @@ function renderActions() {
     btn.disabled=locked||cdisabled;
     btn.title=`${ab.name}\nEnergy: ${energyCost}`;
     const ailDots=(ab.ailmentIds||[]).map(a=>`<div class="ail-dot ${a}"></div>`).join('');
+    const dmgTypes=['physical','ranged','spell'];
+    let modTxt='';
+    if(dmgTypes.includes(ab.btnType||ab.type)){
+      const mods=[];
+      if(G.warcryActive) mods.push('⬆ ATK buff');
+      if(G.playerStatus?.weaken) mods.push('⬇ Weakened');
+      if(G.playerStatus?.feared) mods.push('⬇ Fear hit penalty');
+      if(G.playerStatus?.battleHymn) mods.push('⬆ Hymn buff');
+      if(mods.length) modTxt=`<span class=\"btn-mod\" title=\"${mods.join(' | ')}\">${mods.join(' · ')}</span>`;
+    }
     btn.innerHTML=`
       <span class="btn-name">${ab.name}</span>
       <span class="btn-type">${ab.type}</span>
       <span class="btn-cost">${btnCostText}</span>
+      ${modTxt}
       ${ab.level>1?`<span class="ab-lv-badge">Lv${ab.level}</span>`:''}
       ${ailDots?`<div class="ailment-icons">${ailDots}</div>`:''}
       <span class="kb-hint">[${idx+1}]</span>`;
@@ -9035,21 +9052,24 @@ function resolveShopAbilityTemplate(item){
   if(!learnId) return null;
   return (ABILITY_TEMPLATES && ABILITY_TEMPLATES[learnId]) || null;
 }
+
+function formatAbilityLevelPathway(tmpl){
+  if(!tmpl||!Array.isArray(tmpl.levels)||!tmpl.levels.length) return '';
+  return tmpl.levels.map((lv,i)=>{
+    const en=Array.isArray(tmpl.energyByLevel)?(tmpl.energyByLevel[i] ?? tmpl.energyByLevel[0] ?? tmpl.energyCost ?? 0):(tmpl.energyCost ?? 0);
+    const cd=Array.isArray(tmpl.cooldownByLevel)?(tmpl.cooldownByLevel[i] ?? tmpl.cooldownByLevel[0] ?? 0):0;
+    return `Lv${i+1}: ${lv?.desc||''}${Number.isFinite(en)?` [EN ${en}]`:''}${cd>0?` [CD ${cd}]`:''}`;
+  }).join('\n');
+}
+
 function buildShopItemTooltip(item){
   const tmpl=resolveShopAbilityTemplate(item);
   if(!tmpl) return item?.desc || item?.description || '';
-  const level=1;
   const parts=[];
   if(tmpl.desc) parts.push(tmpl.desc);
-  const row=Array.isArray(tmpl.levels)?tmpl.levels[level-1]:null;
-  if(row&&row.desc) parts.push(row.desc);
-  let en=(typeof tmpl.energyCost==='number')?tmpl.energyCost:1;
-  if(Array.isArray(tmpl.energyByLevel)) en=(tmpl.energyByLevel[level-1] ?? tmpl.energyByLevel[0] ?? en);
-  let cd=0;
-  if(Array.isArray(tmpl.cooldownByLevel)) cd=(tmpl.cooldownByLevel[level-1] ?? tmpl.cooldownByLevel[0] ?? 0);
-  parts.push(`EN ${en}`);
-  if(cd>0) parts.push(`CD ${cd}`);
-  return parts.join(' • ');
+  const path=formatAbilityLevelPathway(tmpl);
+  if(path) parts.push(path);
+  return parts.join('\n');
 }
 
 function renderShopItems() {
@@ -10028,7 +10048,7 @@ SPRITE_KEYS_ALL.add('magpie');
     const isBoss = !!entity?.isBoss;
     if(isBoss && context==='battle') return 'boss';
     if(key === 'penguin') return 'xl';
-    if(key === 'robin') return 'small';
+    if(key === 'robin') return 'tiny';
     if(key === 'seagull') return 'medium';
     if(sz.includes('tiny')) return 'tiny';
     if(sz.includes('small')) return 'small';
@@ -10062,7 +10082,7 @@ SPRITE_KEYS_ALL.add('magpie');
     const sz = String(entity?.size || entity?.birdSize || '').toLowerCase();
     if(entity?.isBoss && context === 'battle') return 'boss';
     if(key === 'penguin') return 'xl';
-    if(key === 'robin') return 'small';
+    if(key === 'robin') return 'tiny';
     if(key === 'seagull') return 'medium';
     if(sz.includes('tiny')) return 'tiny';
     if(sz.includes('small')) return 'small';
@@ -10077,7 +10097,7 @@ SPRITE_KEYS_ALL.add('magpie');
     const entity = (sizeOrEntity && typeof sizeOrEntity === 'object') ? sizeOrEntity : { size: String(sizeOrEntity || 'medium') };
     let sizeClass = (typeof sizeOrEntity === 'string') ? sizeOrEntity : globalThis.getUISizeClass(entity, 'general');
     if(key === 'penguin') sizeClass = 'small';
-    if(key === 'robin') sizeClass = 'small';
+    if(key === 'robin') sizeClass = 'tiny';
     if(key === 'seagull') sizeClass = 'medium';
     if(spriteBirds.has(key)){
       return '<div class="sprite4 ' + sizeClass + ' sprite-' + key + ' frame-0 ' + (locked ? 'locked' : '') + '"></div>';

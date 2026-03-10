@@ -1363,3 +1363,7 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 .stork-shop-inner,.grove-inner{margin-top:0 !important;}
 
 .levelup-choice-title{padding:8px 0;font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;color:var(--gold-light);text-transform:uppercase;}
+
+.nest-ab-path{margin-top:6px;font-size:.7rem;line-height:1.35;color:var(--text-dim);background:rgba(0,0,0,.2);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:6px;}
+.btn-mod{display:block;font-size:.62rem;color:var(--gold-light);opacity:.9;line-height:1.2;}
+.sprite4.sprite-robin{width:56px !important;height:56px !important;}
