@@ -1144,87 +1144,172 @@ function makeDukeBlakiston(){
 
 const COURT_LIEUTENANTS=[
   {
-    id:'lt_khar', name:'Khar the Bonebreaker', title:'Executioner', species:'Shoebill', emoji:'🪶', portraitKey:'shoebill', aiType:'boss_lt_khar',
-    passiveName:"Executioner's Bill", passiveDesc:'Second consecutive hit deals +40% damage.',
-    mechanic:'Repeated hits become extremely dangerous.',
-    abilities:[
-      {id:'lt_bonecrusher',name:'Bonecrusher Strike',tag:'HEAVY',desc:'High-damage execution strike.'},
-      {id:'lt_shatter_grip',name:'Shatter Grip',tag:'CONTROL',desc:'Roots the player for 1 turn.'},
-      {id:'lt_execution_clamp',name:'Execution Clamp',tag:'FINISH',desc:'Massive damage vs targets below 40% HP.'},
-      {id:'lt_dread_stare',name:'Dread Stare',tag:'CONTROL',desc:'Applies Fear.'},
-    ],
-    stats:{maxHp:360,hp:360,atk:17,matk:10,def:9,mdef:8,spd:7,acc:84,dodge:6}
+    id:'lt_khar', displayName:'Khar the Bonebreaker', title:'Executioner', species:'Shoebill', portraitKey:'shoebill', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'executioner', aiType:'boss_lt_khar',
+    intro:'Khar the Bonebreaker descends, bill heavy with judgment.',
+    passive:{name:"Executioner's Bill",desc:'If Khar hits the same target twice consecutively, the second hit deals +40% damage.'},
+    abilities:['lt_bonecrusher','lt_shatter_grip','lt_execution_clamp','lt_dread_stare'],
+    baseStats:{hp:150,atk:12,def:6,matk:3,mdef:4,spd:4,en:3,acc:84,dodge:6}
   },
   {
-    id:'lt_seraph', name:'Seraph Talonstrike', title:'Duelist', species:'Peregrine Falcon', emoji:'🪶', portraitKey:'peregrine', aiType:'boss_lt_seraph',
-    passiveName:'Terminal Velocity', passiveDesc:'Gains +10% damage each turn until hit.',
-    mechanic:'Damage ramps quickly if not interrupted.',
-    abilities:[
-      {id:'lt_skyfall_strike',name:'Skyfall Strike',tag:'HEAVY',desc:'High crit pressure strike.'},
-      {id:'lt_razor_dive',name:'Razor Dive',tag:'MULTI',desc:'Two quick attacks.'},
-      {id:'lt_wind_feint',name:'Wind Feint',tag:'UTILITY',desc:'Gain +15% dodge for 1 turn.'},
-      {id:'lt_predator_mark',name:'Predator Mark',tag:'CONTROL',desc:'Target takes +20% damage next turn.'},
-    ],
-    stats:{maxHp:330,hp:330,atk:15,matk:10,def:8,mdef:8,spd:10,acc:88,dodge:14}
+    id:'lt_seraph', displayName:'Seraph Talonstrike', title:'Duelist', species:'Peregrine Falcon', portraitKey:'peregrine', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'duelist', aiType:'boss_lt_seraph',
+    intro:'A silver blur splits the sky — Seraph Talonstrike has arrived.',
+    passive:{name:'Terminal Velocity',desc:'Every turn Seraph gains +10% damage until she is hit.'},
+    abilities:['lt_skyfall_strike','lt_razor_dive','lt_wind_feint','lt_predator_mark'],
+    baseStats:{hp:110,atk:10,def:4,matk:4,mdef:4,spd:10,en:3,acc:88,dodge:14}
   },
   {
-    id:'lt_marshal', name:'Marshal Stride', title:'Warden', species:'Secretary Bird', emoji:'🪶', portraitKey:'secretarybird', aiType:'boss_lt_marshal',
-    passiveName:'Iron Patrol', passiveDesc:'Gains +1 DEF every 2 turns.',
-    mechanic:'Battle gets harder the longer it lasts.',
-    abilities:[
-      {id:'lt_iron_kick',name:'Iron Kick',tag:'HEAVY',desc:'Strong physical kick.'},
-      {id:'lt_crush_serpent',name:'Crush Serpent',tag:'CONTROL',desc:'Stuns or slows the player.'},
-      {id:'lt_patrol_command',name:'Patrol Command',tag:'BUFF',desc:'Gain DEF and SPD.'},
-      {id:'lt_ground_sweep',name:'Ground Sweep',tag:'MULTI',desc:'Sweeping multi-kick attack.'},
-    ],
-    stats:{maxHp:380,hp:380,atk:15,matk:8,def:11,mdef:10,spd:7,acc:82,dodge:6}
+    id:'lt_marshal', displayName:'Marshal Stride', title:'Warden', species:'Secretary Bird', portraitKey:'secretarybird', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'warden', aiType:'boss_lt_marshal',
+    intro:'The grass parts. Marshal Stride advances without haste.',
+    passive:{name:'Iron Patrol',desc:'Every 2 turns gain +1 DEF (max +6).'},
+    abilities:['lt_iron_kick','lt_crush_serpent','lt_patrol_command','lt_ground_sweep'],
+    baseStats:{hp:180,atk:9,def:10,matk:3,mdef:7,spd:4,en:3,acc:82,dodge:6}
   },
   {
-    id:'lt_koro', name:'Mistmother Koro', title:'Seer', species:'Great Egret', emoji:'🪶', portraitKey:'seagull', aiType:'boss_lt_koro',
-    passiveName:'Veil of Fog', passiveDesc:'First attack against Koro each turn has -20% accuracy.',
-    mechanic:'Hard to hit and manipulates accuracy.',
-    abilities:[
-      {id:'lt_mist_curse',name:'Mist Curse',tag:'CONTROL',desc:'Blinds the player.'},
-      {id:'lt_future_sight',name:'Future Sight',tag:'BUFF',desc:'Next attack deals +25% damage.'},
-      {id:'lt_ghost_step',name:'Ghost Step',tag:'UTILITY',desc:'Increases dodge.'},
-      {id:'lt_tidal_strike',name:'Tidal Strike',tag:'SPELL',desc:'Magic damage attack.'},
-    ],
-    stats:{maxHp:350,hp:350,atk:12,matk:17,def:8,mdef:11,spd:9,acc:85,dodge:12}
+    id:'lt_koro', displayName:'Mistmother Koro', title:'Seer', species:'Great Egret', portraitKey:'seagull', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'seer', aiType:'boss_lt_koro',
+    intro:'The mist thickens. Mistmother Koro is already watching.',
+    passive:{name:'Veil of Fog',desc:'First attack against Koro each turn has -20% accuracy.'},
+    abilities:['lt_mist_curse','lt_future_sight','lt_ghost_step','lt_tidal_strike'],
+    baseStats:{hp:120,atk:5,def:4,matk:11,mdef:8,spd:7,en:3,acc:85,dodge:12}
   },
   {
-    id:'lt_skarn', name:'Gravecaller Skarn', title:'Reaper', species:'Marabou Stork', emoji:'🪶', portraitKey:'shoebill', aiType:'boss_lt_skarn',
-    passiveName:'Feast on the Fallen', passiveDesc:'Heals 10% max HP every 3 turns.',
-    mechanic:'Sustained survival and attrition pressure.',
-    abilities:[
-      {id:'lt_carrion_peck',name:'Carrion Peck',tag:'BASIC',desc:'Standard attack.'},
-      {id:'lt_rotting_curse',name:'Rotting Curse',tag:'CONTROL',desc:'Applies Poison.'},
-      {id:'lt_death_circle',name:'Death Circle',tag:'BUFF',desc:'Gains damage each turn.'},
-      {id:'lt_bone_harvest',name:'Bone Harvest',tag:'HEAL',desc:'Heals based on damage dealt.'},
-    ],
-    stats:{maxHp:390,hp:390,atk:14,matk:13,def:10,mdef:10,spd:6,acc:82,dodge:5}
+    id:'lt_skarn', displayName:'Gravecaller Skarn', title:'Reaper', species:'Marabou Stork', portraitKey:'shoebill', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'reaper', aiType:'boss_lt_skarn',
+    intro:'Carrion shadows gather. Gravecaller Skarn comes to claim the fallen.',
+    passive:{name:'Feast on the Fallen',desc:'Every 3 turns heal 12% HP.'},
+    abilities:['lt_carrion_peck','lt_rotting_curse','lt_death_circle','lt_bone_harvest'],
+    baseStats:{hp:160,atk:7,def:6,matk:9,mdef:7,spd:5,en:3,acc:82,dodge:5}
   },
   {
-    id:'lt_ashwing', name:'Ashwing Pyre', title:'Scavenger', species:'Black Kite', emoji:'🪶', portraitKey:'raven', aiType:'boss_lt_ashwing',
-    passiveName:'Smoke Hunter', passiveDesc:'Deals +25% damage to targets below 50% HP.',
-    mechanic:'Extremely dangerous when the player is low.',
-    abilities:[
-      {id:'lt_burning_dive',name:'Burning Dive',tag:'HEAVY',desc:'High damage strike.'},
-      {id:'lt_ash_cloud',name:'Ash Cloud',tag:'CONTROL',desc:'Reduces player accuracy.'},
-      {id:'lt_carrion_rush',name:'Carrion Rush',tag:'MULTI',desc:'Two fast attacks.'},
-      {id:'lt_smoke_spiral',name:'Smoke Spiral',tag:'UTILITY',desc:'Gain dodge.'},
-    ],
-    stats:{maxHp:345,hp:345,atk:16,matk:10,def:8,mdef:8,spd:9,acc:86,dodge:10}
+    id:'lt_ashwing', displayName:'Ashwing Pyre', title:'Scavenger', species:'Black Kite', portraitKey:'raven', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'scavenger', aiType:'boss_lt_ashwing',
+    intro:'Smoke circles overhead. Ashwing Pyre dives from the ash-dark sky.',
+    passive:{name:'Smoke Hunter',desc:'Deals +25% damage to enemies below 50% HP.'},
+    abilities:['lt_burning_dive','lt_ash_cloud','lt_carrion_rush','lt_smoke_spiral'],
+    baseStats:{hp:130,atk:11,def:5,matk:5,mdef:4,spd:8,en:3,acc:86,dodge:10}
   },
 ];
-function makeCourtLieutenantByIndex(idx=0){
-  const src=COURT_LIEUTENANTS[((idx%COURT_LIEUTENANTS.length)+COURT_LIEUTENANTS.length)%COURT_LIEUTENANTS.length];
-  const e=JSON.parse(JSON.stringify(src));
-  e.isBoss=true; e.size='xl'; e.bossTitle=`👑 ${src.title}`;
-  e.aiStyle='boss';
-  e.stats=e.stats||{};
+
+const LIEUTENANT_ABILITY_DEFS={
+  lt_bonecrusher:{name:'Bonecrusher Strike',type:'heavy',enCost:1,baseDamage:18,atkScale:1.2,accuracy:0.85},
+  lt_shatter_grip:{name:'Shatter Grip',type:'control',enCost:1,baseDamage:6,atkScale:0.45,accuracy:0.90,status:'rooted',statusTurns:1},
+  lt_execution_clamp:{name:'Execution Clamp',type:'finisher',enCost:2,baseDamage:22,atkScale:1.35,accuracy:0.88,bonusLowHp:0.50,lowHpThreshold:0.40},
+  lt_dread_stare:{name:'Dread Stare',type:'control',enCost:1,baseDamage:0,accuracy:0.95,status:'feared',statusTurns:1},
+  lt_skyfall_strike:{name:'Skyfall Strike',type:'heavy',enCost:1,baseDamage:16,atkScale:1.1,accuracy:0.90,critBonus:0.20},
+  lt_razor_dive:{name:'Razor Dive',type:'multi',enCost:1,hits:2,baseDamage:8,atkScale:0.55,accuracy:0.90},
+  lt_wind_feint:{name:'Wind Feint',type:'utility',enCost:1,dodgeBuff:20,dodgeTurns:1},
+  lt_predator_mark:{name:'Predator Mark',type:'control',enCost:1,markMult:1.20,markTurns:1},
+  lt_iron_kick:{name:'Iron Kick',type:'heavy',enCost:1,baseDamage:14,atkScale:1.0,accuracy:0.90},
+  lt_crush_serpent:{name:'Crush Serpent',type:'control',enCost:1,baseDamage:10,atkScale:0.75,accuracy:0.88,stunChance:0.40,slowTurns:2,slowAmt:6},
+  lt_patrol_command:{name:'Patrol Command',type:'buff',enCost:1,defBuff:2,spdBuff:1,buffTurns:2},
+  lt_ground_sweep:{name:'Ground Sweep',type:'multi_heavy',enCost:2,baseDamage:16,atkScale:1.1,accuracy:0.85,stunChance:0.20},
+  lt_mist_curse:{name:'Mist Curse',type:'control',enCost:1,baseDamage:0,accuracy:0.95,status:'blind',statusTurns:1},
+  lt_future_sight:{name:'Future Sight',type:'buff',enCost:1,nextSpellMult:1.30},
+  lt_ghost_step:{name:'Ghost Step',type:'utility',enCost:1,dodgeBuff:25,dodgeTurns:1},
+  lt_tidal_strike:{name:'Tidal Strike',type:'spell',enCost:1,baseDamage:16,matkScale:1.15,accuracy:0.90},
+  lt_carrion_peck:{name:'Carrion Peck',type:'basic',enCost:1,baseDamage:12,atkScale:0.9,accuracy:0.92},
+  lt_rotting_curse:{name:'Rotting Curse',type:'control',enCost:1,baseDamage:0,accuracy:0.92,status:'poison',statusTurns:2,statusStacks:2},
+  lt_death_circle:{name:'Death Circle',type:'buff',enCost:1,matkBuff:3,buffTurns:3},
+  lt_bone_harvest:{name:'Bone Harvest',type:'heal_drain',enCost:2,baseDamage:12,matkScale:0.9,accuracy:0.90,healFromDamage:0.50},
+  lt_burning_dive:{name:'Burning Dive',type:'heavy',enCost:1,baseDamage:18,atkScale:1.2,accuracy:0.88},
+  lt_ash_cloud:{name:'Ash Cloud',type:'control',enCost:1,baseDamage:0,accuracy:0.95,accDebuff:15,debuffTurns:1},
+  lt_carrion_rush:{name:'Carrion Rush',type:'multi',enCost:1,hits:2,baseDamage:8,atkScale:0.55,accuracy:0.90},
+  lt_smoke_spiral:{name:'Smoke Spiral',type:'utility',enCost:1,dodgeBuff:20,dodgeTurns:1},
+};
+
+function getLieutenantPlayerSnapshot(){
+  const p=G.player||{};
+  return {
+    level:p.birdLevel||1,
+    upgradeCount:(G.collectedRewards||[]).length,
+    perkCount:(G.runPerks||[]).length,
+    masteryCount:(G.runMasteries||[]).length,
+    atk:p.stats?.atk||0, matk:p.stats?.matk||0, def:p.stats?.def||0, mdef:p.stats?.mdef||0, spd:p.stats?.spd||0,
+  };
+}
+function buildScaledLieutenantBoss(baseDef,endlessStage,playerSnapshot={}){
+  const st=Math.max(30,Number(endlessStage)||30);
+  const milestoneIndex=Math.max(1,Math.floor((st-20)/10));
+  const b=baseDef.baseStats||{};
+  let hp=(b.hp||1)*(1+milestoneIndex*0.18);
+  let atk=(b.atk||1)*(1+milestoneIndex*0.10);
+  let matk=(b.matk||1)*(1+milestoneIndex*0.10);
+  let def=(b.def||0)+Math.floor(milestoneIndex/2);
+  let mdef=(b.mdef||0)+Math.floor(milestoneIndex/2);
+  let spd=(b.spd||1)+Math.max(0,Math.floor((milestoneIndex-1)/3));
+
+  const powerScore=(playerSnapshot.level||1)
+    +((playerSnapshot.upgradeCount||0)*0.35)
+    +((playerSnapshot.perkCount||0)*1.5)
+    +((playerSnapshot.masteryCount||0)*1.2);
+  const expectedScoreForStage=8+(milestoneIndex*4);
+  const delta=Math.max(0,powerScore-expectedScoreForStage);
+  const hpCorrectionMult=1+clamp(delta*0.01,0,0.15);
+  const atkCorrectionMult=1+clamp(delta*0.005,0,0.10);
+  const defCorrectionBonus=clamp(Math.floor(delta/10),0,2);
+
+  hp*=hpCorrectionMult;
+  atk*=atkCorrectionMult;
+  matk*=atkCorrectionMult;
+  def+=defCorrectionBonus;
+  mdef+=defCorrectionBonus;
+
+  const threatHpMult=1.90+(milestoneIndex*0.12);
+  const threatDmgMult=1.45+(milestoneIndex*0.08);
+  hp*=threatHpMult;
+  atk*=threatDmgMult;
+  matk*=threatDmgMult;
+  def+=2+Math.floor(milestoneIndex/2);
+  mdef+=2+Math.floor(milestoneIndex/2);
+  spd+=Math.floor(milestoneIndex/4);
+
+  const e={
+    id:baseDef.id,name:baseDef.displayName,title:baseDef.title,species:baseDef.species,portraitKey:baseDef.portraitKey,
+    lieutenant:true,isBoss:true,size:baseDef.size||'xl',emoji:'🪶',aiType:baseDef.aiType,aiProfile:baseDef.aiProfile,
+    bossTitle:`👑 ${baseDef.title}`,
+    passiveName:baseDef.passive?.name||'', passiveDesc:baseDef.passive?.desc||'',
+    abilities:(baseDef.abilities||[]).map(id=>({id,name:LIEUTENANT_ABILITY_DEFS[id]?.name||id,tag:String(LIEUTENANT_ABILITY_DEFS[id]?.type||'').toUpperCase()})),
+    introLine:baseDef.intro||'',
+    stats:{
+      hp:Math.max(1,Math.floor(hp)),maxHp:Math.max(1,Math.floor(hp)),
+      atk:Math.max(1,Math.floor(atk)),def:Math.max(0,Math.floor(def)),
+      matk:Math.max(1,Math.floor(matk)),mdef:Math.max(0,Math.floor(mdef)),
+      spd:Math.max(1,Math.floor(spd)),acc:b.acc||84,dodge:b.dodge||6,mdodge:Math.max(0,Math.floor((b.dodge||6)*0.6))
+    },
+    energyMax:Math.max(1,b.en||3),energy:Math.max(1,b.en||3),
+    _ltMilestone:milestoneIndex,_ltPowerDelta:delta,
+  };
   e.hp=e.stats.hp; e.maxHp=e.stats.maxHp; e.atk=e.stats.atk; e.def=e.stats.def; e.spd=e.stats.spd; e.acc=e.stats.acc; e.dodge=e.stats.dodge; e.matk=e.stats.matk; e.mdef=e.stats.mdef;
-  e.lieutenant={turn:0,lastHitConnected:false,velocityStacks:0,markTurns:0,futureSight:0,dodgeBuffTurns:0,dodgeBuffAmt:0,deathCircle:false,deathCircleStacks:0};
+  e.lieutenant={turn:0,lastHitConnected:false,velocityStacks:0,markTurns:0,futureSight:0,dodgeBuffTurns:0,dodgeBuffAmt:0,deathCircle:false,deathCircleStacks:0,lastMoveType:'',lastMoveDidDamage:true,patrolBuffTurns:0,futureSpellMult:1};
   return e;
+}
+function ensureLieutenantRotation(){
+  if(!Array.isArray(G.endlessLieutenantRotation)) G.endlessLieutenantRotation=[];
+  if(!Array.isArray(G.endlessLieutenantHistory)) G.endlessLieutenantHistory=[];
+  if(!G.endlessLieutenantRotation.length){
+    G.endlessLieutenantRotation=COURT_LIEUTENANTS.map((_,i)=>i).sort(()=>Math.random()-.5);
+    if(G.endlessLieutenantHistory[0]===COURT_LIEUTENANTS[G.endlessLieutenantRotation[0]]?.id){
+      G.endlessLieutenantRotation.push(G.endlessLieutenantRotation.shift());
+    }
+  }
+}
+function makeCourtLieutenantByStage(stage=30){
+  ensureLieutenantRotation();
+  let idx=G.endlessLieutenantRotation.shift();
+  const lastId=G.lastLieutenantId||G._lastLieutenantId||'';
+  if(COURT_LIEUTENANTS[idx]?.id===lastId && G.endlessLieutenantRotation.length){
+    G.endlessLieutenantRotation.push(idx);
+    idx=G.endlessLieutenantRotation.shift();
+  }
+  const base=COURT_LIEUTENANTS[idx]||COURT_LIEUTENANTS[0];
+  G.endlessLieutenantHistory.unshift(base.id);
+  G.endlessLieutenantHistory=G.endlessLieutenantHistory.slice(0,24);
+  G.lastLieutenantId=base.id;
+  G._lastLieutenantId=base.id;
+  return buildScaledLieutenantBoss(base, stage, getLieutenantPlayerSnapshot());
 }
 const ENEMY_ABILITY_POOL = {
   // Enemy abilities are simplified versions
@@ -1280,6 +1365,7 @@ const ENEMIES = [
   // Final Boss
   makeEnemy('Sky Sovereign','👑',200,35,18,6,'berserker',true,'👑 Final Boss',{acc:90,dodge:12,size:'xl',abilities:['eRage','eStun','ePoison','eFear','eShield','eBurn'],portraitKey:'baldEagle'}),
 ];
+const STORY_STAGE_CAP = 20;
 
 // Birds that can appear as enemy combatants (adds variety)
 const BIRD_ENEMIES = [
@@ -3116,7 +3202,9 @@ const DEFAULT_UI_STATE = Object.freeze({
 
 function ensureUIState(){
   if(!G.ui || typeof G.ui!=='object') G.ui={};
+  const endlessUnlocked=isEndlessModeUnlocked();
   G.ui.gameMode = (G.ui.gameMode==='endless') ? 'endless' : 'story';
+  if(!endlessUnlocked && G.ui.gameMode==='endless') G.ui.gameMode='story';
   G.ui.battleLayout = (G.ui.battleLayout==='mobile') ? 'mobile' : 'desktop';
   G.ui.selectionView = String(G.ui.selectionView || DEFAULT_UI_STATE.selectionView);
   G.ui.expandedBird = G.ui.expandedBird ? String(G.ui.expandedBird) : null;
@@ -3124,6 +3212,9 @@ function ensureUIState(){
   G.ui.combatDropdownOpen.player = !!G.ui.combatDropdownOpen.player;
   G.ui.combatDropdownOpen.enemy = !!G.ui.combatDropdownOpen.enemy;
   return G.ui;
+}
+function isEndlessModeUnlocked(){
+  return isUnlocked('stage20') || isUnlocked('storyCompleted');
 }
 
 const TELEMETRY_KEY='avianAscent_telemetry_v1';
@@ -3314,6 +3405,7 @@ function openNest() {
   const sub=document.getElementById('nest-subtitle');
   const p=G.player;
   if(!p){content.innerHTML='<p style="color:var(--text-dim);text-align:center">No active run.</p>';modal.classList.add('open');return;}
+  const ps=G.playerStatus||{};
   sub.textContent=`${p.name} · Stage ${G.stage} · Lv.${p.birdLevel}`;
   let html='';
   // Passive trait
@@ -3326,10 +3418,10 @@ function openNest() {
   // Compute effective in-battle stats
   const _nestWarcry=G.warcryActive?Math.floor(s.atk*(1+G.warcryATK/100)):s.atk;
   const _nestDef=s.def+(G.battleHymnActive?G.battleHymnDEF:0);
-  const _nestAcc=Math.min(100,s.acc+(G.battleHymnActive?G.battleHymnACC:0)-(G.playerStatus.accDebuff||0));
+  const _nestAcc=Math.min(100,s.acc+(G.battleHymnActive?G.battleHymnACC:0)-(ps.accDebuff||0));
   const _nestDodge=getEffectiveDodge(p);
   const _nestMDodge=getEffectiveMdodge(p);
-  const _nestCrit=Math.min(100,(s.critChance||5)+(G.playerStatus.burning>0?20:0)+(p._velocityStacks||0));
+  const _nestCrit=Math.min(100,(s.critChance||5)+((ps.burning||0)>0?20:0)+(p._velocityStacks||0));
   const _nestCritMult=p.goldCritMult||1.8;
   function _nestStat(val,base,suffix=''){const d=val-base;const col=d>0?'#6ab89a':d<0?'#e87070':'var(--gold)';const arr=d>0?' ↑':d<0?' ↓':'';return `<span style="color:${col}">${val}${suffix}${arr}</span>`;}
   html+=`<div class="nest-section"><div class="nest-section-title">📊 Stats ${G.turn?'(In Battle)':''}</div>
@@ -3453,6 +3545,10 @@ function saveRun() {
       birdPerks: JSON.parse(JSON.stringify(G.birdPerks||{})),
       runMasteries: JSON.parse(JSON.stringify(G.runMasteries||[])),
       skillMasteries: JSON.parse(JSON.stringify(G.skillMasteries||{})),
+      endlessLieutenantHistory: JSON.parse(JSON.stringify(G.endlessLieutenantHistory||[])),
+      endlessLieutenantRotation: JSON.parse(JSON.stringify(G.endlessLieutenantRotation||[])),
+      lieutenantKills: JSON.parse(JSON.stringify(G.lieutenantKills||{})),
+      lastLieutenantId: G.lastLieutenantId||G._lastLieutenantId||'',
       inBattle: onBattleScreen && !!G.enemy && !G.battleOver,
       battle: (onBattleScreen && G.enemy && !G.battleOver) ? {
         enemy: JSON.parse(JSON.stringify(G.enemy)),
@@ -3490,6 +3586,10 @@ function continueRun() {
   G.endlessBattle=save.endlessBattle||0;
   G.bossKills=save.bossKills||0;
   G.stage=save.stage||1;
+  const ui=ensureUIState();
+  const uiWantsEndless=(ui.gameMode==='endless') && isEndlessModeUnlocked();
+  if(!uiWantsEndless) G.endlessMode=false;
+  if(!G.endlessMode && G.stage>STORY_STAGE_CAP) G.stage=STORY_STAGE_CAP;
   G.collectedRewards=save.collectedRewards||[];
   G.player=save.player;
   if(!Array.isArray(G.player.endlessRewards)) G.player.endlessRewards=[];
@@ -3499,6 +3599,10 @@ function continueRun() {
   G.birdPerks=save.birdPerks&&typeof save.birdPerks==='object'?save.birdPerks:{};
   G.runMasteries=Array.isArray(save.runMasteries)?save.runMasteries:[];
   G.skillMasteries=save.skillMasteries&&typeof save.skillMasteries==='object'?save.skillMasteries:{};
+  G.endlessLieutenantHistory=Array.isArray(save.endlessLieutenantHistory)?save.endlessLieutenantHistory:[];
+  G.endlessLieutenantRotation=Array.isArray(save.endlessLieutenantRotation)?save.endlessLieutenantRotation:[];
+  G.lieutenantKills=save.lieutenantKills&&typeof save.lieutenantKills==='object'?save.lieutenantKills:{};
+  G.lastLieutenantId=save.lastLieutenantId||G._lastLieutenantId||'';
   // Re-attach passive reference (fns can't be serialized)
   const bd=BIRDS[G.player.birdKey];
   if(bd) G.player.passive=bd.passive||null;
@@ -3542,6 +3646,12 @@ function goMainMenu() {
 
 function returnToMenuFromVictory(){
   clearTimeout(G._victoryReturnTimer);
+  if(G._pendingEndlessContinuation){
+    G._pendingEndlessContinuation=false;
+    G.endlessBattle=0;
+    advanceStage();
+    return;
+  }
   if(G._pendingStage20Narrative){
     G._pendingStage20Narrative=false;
     startStage20NarrativeSequence();
@@ -3740,9 +3850,9 @@ function showNextStagePreview() {
   const el=document.getElementById('next-stage-preview');
   if(!el) return;
   const nextStage=G.stage+1;
-  if(nextStage>ENEMIES.length&&!G.endlessMode){el.style.display='none';return;}
+  if(nextStage>STORY_STAGE_CAP&&!G.endlessMode){el.style.display='none';return;}
   let enemy;
-  if(G.endlessMode&&nextStage>ENEMIES.length){
+  if(G.endlessMode&&nextStage>STORY_STAGE_CAP){
     el.innerHTML=`<div class="nsp-title">Next Up</div><div class="nsp-enemy">⚔</div><div class="nsp-name" style="color:var(--gold)">Endless Battle ${G.endlessBattle+1}</div><div class="nsp-stats">Scaled enemies await...</div>`;
   } else {
     enemy=ENEMIES[Math.min(nextStage-1,ENEMIES.length-1)];
@@ -3813,12 +3923,19 @@ function buildGameModeToggle(){
   const host=document.getElementById('game-mode-toggle');
   if(!host) return;
   const ui=ensureUIState();
+  const endlessUnlocked=isEndlessModeUnlocked();
   const isEndless=(ui.gameMode==='endless');
-  host.innerHTML=`<div class="mode-toggle"><button class="mode-toggle-btn ${!isEndless?'active':''}" onclick="setGameMode('story',this)">📖 Story Mode</button><button class="mode-toggle-btn ${isEndless?'active':''}" onclick="setGameMode('endless',this)">♾ Endless Mode</button></div>`;
+  host.innerHTML=`<div class="mode-toggle"><button class="mode-toggle-btn ${!isEndless?'active':''}" onclick="setGameMode('story',this)">📖 Story Mode</button><button class="mode-toggle-btn ${isEndless?'active':''} ${!endlessUnlocked?'locked':''}" onclick="setGameMode('endless',this)" ${endlessUnlocked?'':'disabled title="Defeat Duke Blakiston (Stage 20) to unlock Endless Mode."'}>♾ Endless Mode${endlessUnlocked?'':' 🔒'}</button></div>${endlessUnlocked?'':'<div style="margin-top:6px;font-size:.72rem;color:var(--text-dim)">Defeat Duke Blakiston in Story Mode to unlock Endless.</div>'}`;
 }
 
 function setGameMode(mode,btn){
   const ui=ensureUIState();
+  if(mode==='endless' && !isEndlessModeUnlocked()){
+    ui.gameMode='story';
+    buildGameModeToggle();
+    logMsg('🔒 Endless Mode unlocks after defeating Duke Blakiston (Stage 20).','system');
+    return;
+  }
   ui.gameMode=(mode==='endless')?'endless':'story';
   applyUIStateToDOM();
   buildGameModeToggle();
@@ -4223,6 +4340,11 @@ function beginRun(){ return startGame(); }
 function startGame() {
   if(!G.selected) return;
   G.endlessMode = (ensureUIState().gameMode==='endless');
+  if(G.endlessMode && !isEndlessModeUnlocked()){
+    G.endlessMode=false;
+    ensureUIState().gameMode='story';
+    applyUIStateToDOM();
+  }
   G.difficulty = G._selectedDifficulty || 'juvenile';
   const bd = BIRDS[G.selected];
   G.collectedRewards=[];
@@ -4266,7 +4388,11 @@ function startGame() {
   G.autoQueuedAbilityId=null;
   G._breakClampStreak=0;
   G._lastLieutenantId='';
+  G.lastLieutenantId='';
   G._lieutenantRotationIndex=0;
+  G.endlessLieutenantHistory=[];
+  G.endlessLieutenantRotation=[];
+  G.lieutenantKills={};
   G.bossKills = 0;
   G.abilityCooldowns={};
   G.runCrits = 0; G.runBuffs = 0; G.runDebuffs = 0;
@@ -4291,15 +4417,9 @@ function startGame() {
 // Build endless-mode enemy from base pool (scaling happens in loadStage via stage-depth curve)
 function makeEndlessEnemy(stage) {
   const isBoss = (stage % 10 === 0);
-  const endlessStage=Math.max(1,stage-20);
-  if(isBoss && endlessStage>=10 && endlessStage%10===0){
-    const len=COURT_LIEUTENANTS.length;
-    let idx=(G._lieutenantRotationIndex||0)%Math.max(1,len);
-    let candidate=makeCourtLieutenantByIndex(idx);
-    if(candidate?.id===G._lastLieutenantId) candidate=makeCourtLieutenantByIndex((idx+1)%Math.max(1,len));
-    G._lieutenantRotationIndex=(idx+1)%Math.max(1,len);
-    G._lastLieutenantId=candidate?.id||'';
-    return candidate;
+  const lieutenantStage = isBoss && stage>=30 && (stage%10===0);
+  if(lieutenantStage){
+    return makeCourtLieutenantByStage(stage);
   }
   const pool = ENEMIES.filter(e=>!!e.isBoss===isBoss);
   const src = (pool.length?pool:ENEMIES)[Math.floor(Math.random()*(pool.length?pool.length:ENEMIES.length))];
@@ -4408,13 +4528,21 @@ function loadStage() {
     }
 
   }
-  const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
-  ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
-  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
-  ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
-  ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
-  ed.mdef=scaled.mdef; ed.matk=scaled.matk;
-  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
+  if(ed?.lieutenant){
+    ed.stats = ed.stats || {};
+    ed.hp=ed.stats.hp; ed.maxHp=ed.stats.maxHp;
+    ed.atk=ed.stats.atk; ed.def=ed.stats.def; ed.spd=ed.stats.spd;
+    ed.acc=ed.stats.acc; ed.dodge=ed.stats.dodge; ed.mdodge=ed.stats.mdodge||Math.floor((ed.stats.dodge||0)*0.6);
+    ed.mdef=ed.stats.mdef; ed.matk=ed.stats.matk;
+  }else{
+    const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
+    ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
+    if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
+    ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
+    ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
+    ed.mdef=scaled.mdef; ed.matk=scaled.matk;
+    ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
+  }
   const baseEnemyEnergy = ed.isBoss ? 6 : (ed.size==='xl'?5:ed.size==='large'?4:ed.size==='medium'?4:3);
   ed.energyMax=baseEnemyEnergy;
   ed.energy=baseEnemyEnergy;
@@ -4460,9 +4588,10 @@ function loadStage() {
   updateStageProgress();
   refreshBattleUI();
   if (G.enemy.isBoss) {
-    const stageLabel = G.endlessMode && G.stage > ENEMIES.length
+    const stageLabel = G.endlessMode && G.stage > STORY_STAGE_CAP
       ? `Endless Battle ${G.endlessBattle}` : `Stage ${G.stage}`;
     logMsg(`👑 ${G.enemy.bossTitle}: ${G.enemy.name} descends! [${stageLabel}]`,'boss');
+    if(G.enemy?.introLine) logMsg(`🪶 ${G.enemy.introLine}`,'boss');
     logMsg(`Defeat them for a guaranteed Epic reward!`,'system');
     SFX.boss(); doScreenShake(true);
   } else {
@@ -8542,6 +8671,7 @@ function lieutenantBaseMult(e){
   if(e?.id==='lt_seraph') mult += (lt.velocityStacks||0)*0.10;
   if(e?.id==='lt_ashwing' && (G.player?.stats?.hp||0)<=Math.floor((G.player?.stats?.maxHp||1)*0.5)) mult*=1.25;
   if(e?.id==='lt_skarn' && lt.deathCircle) mult*=(1 + (lt.deathCircleStacks||0)*0.08);
+  if(e?.id==='lt_khar' && lt.lastHitConnected) mult*=1.40;
   return mult;
 }
 function lieutenantStrike(mult=1,label='hits!'){
@@ -8555,67 +8685,193 @@ function lieutenantApplyKharChain(r){
   lt.lastHitConnected=!!(r && !r.wasDodged && (r.dmgDealt||0)>0);
   G.enemy.lieutenant=lt;
 }
+function lieutenantApplyDodgeBuff(e,lt,amt,turns,label){
+  if((lt.dodgeBuffTurns||0)>0 && lt.dodgeBuffAmt){
+    e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt);
+  }
+  lt.dodgeBuffTurns=turns;
+  lt.dodgeBuffAmt=amt;
+  e.stats.dodge=Math.min(95,(e.stats.dodge||0)+amt);
+  logMsg(label,'boss');
+}
+function lieutenantActionDamageMult(def,e,baseMult){
+  const atk=e.stats.atk||1;
+  const matk=e.stats.matk||atk;
+  const stat=((def.matkScale||0)>0)?matk:atk;
+  const base=(def.baseDamage||0) + stat*((def.atkScale||0)+(def.matkScale||0));
+  const denom=Math.max(1,atk+8);
+  return clamp((base/denom)*baseMult,0.45,2.6);
+}
+function performLieutenantAbility(abilityId,opts={}){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  const def=LIEUTENANT_ABILITY_DEFS[abilityId];
+  if(!def) return {didDamage:false,type:'utility'};
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  if(Number.isFinite(def.accuracy) && Math.random()>def.accuracy){
+    logMsg(`👑 ${e.name}'s ${def.name} missed!`,'miss');
+    lt.lastMoveType=def.type||'utility';
+    lt.lastMoveDidDamage=false;
+    return {didDamage:false,type:def.type||'utility'};
+  }
+
+  const baseMult=lieutenantBaseMult(e) * (opts.damageMult||1);
+  let didDamage=false;
+  const doHit=(mult,label)=>{
+    const r=lieutenantStrike(mult,label||`uses ${def.name}!`);
+    if(e.id==='lt_khar') lieutenantApplyKharChain(r);
+    if((r?.dmgDealt||0)>0 && !r?.wasDodged) didDamage=true;
+    return r;
+  };
+
+  if(def.type==='utility' && def.dodgeBuff){
+    lieutenantApplyDodgeBuff(e,lt,def.dodgeBuff,def.dodgeTurns||1,`💨 ${def.name}: ${e.name} gains +${def.dodgeBuff}% dodge.`);
+  }else if(def.type==='buff' && abilityId==='lt_patrol_command'){
+    lt.patrolBuffTurns=Math.max(lt.patrolBuffTurns||0,def.buffTurns||2);
+    e.stats.def=(e.stats.def||0)+(def.defBuff||0);
+    e.stats.spd=(e.stats.spd||0)+(def.spdBuff||0);
+    logMsg(`📯 Patrol Command hardens the line (+${def.defBuff||0} DEF, +${def.spdBuff||0} SPD).`,'boss');
+  }else if(def.type==='buff' && abilityId==='lt_future_sight'){
+    lt.futureSight=1;
+    lt.futureSpellMult=def.nextSpellMult||1.3;
+    logMsg('🔮 Future Sight: the next spell is empowered.','boss');
+  }else if(def.type==='buff' && abilityId==='lt_death_circle'){
+    lt.deathCircle=true;
+    lt.deathCircleStacks=0;
+    logMsg('☠ Death Circle begins to spiral.','boss');
+  }else if(abilityId==='lt_predator_mark'){
+    lt.markTurns=def.markTurns||1;
+    lt.markMult=def.markMult||1.2;
+    logMsg('🎯 Predator Mark! Seraph lines up a kill angle.','boss');
+  }else if(abilityId==='lt_shatter_grip'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'slams with Shatter Grip!');
+    setStatusMax(G.playerStatus,'rooted',def.statusTurns||1);
+    logMsg('⛓ You are rooted in place!','boss');
+  }else if(abilityId==='lt_dread_stare'){
+    setStatusMax(G.playerStatus,'feared',def.statusTurns||1);
+    logMsg('😨 Dread Stare inflicts fear.','boss');
+  }else if(abilityId==='lt_execution_clamp'){
+    let ex=1;
+    if(pHpPct<=(def.lowHpThreshold||0.4)) ex*=(1+(def.bonusLowHp||0));
+    doHit(lieutenantActionDamageMult(def,e,baseMult*ex),'uses Execution Clamp!');
+  }else if(abilityId==='lt_crush_serpent'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'lashes out with Crush Serpent!');
+    if(chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); }
+    else{ applyPlayerSlow(def.slowTurns||2,def.slowAmt||6,def.slowTurns||2); logMsg('🦵 Crush Serpent slows your movement.','boss'); }
+  }else if(abilityId==='lt_ground_sweep'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'sweeps the ground with crushing force!');
+    if((r?.dmgDealt||0)>0 && chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🌀 Ground Sweep staggers you!','boss'); }
+  }else if(abilityId==='lt_mist_curse'){
+    G.playerStatus.blind=Math.max(G.playerStatus.blind||0,def.statusTurns||1);
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15;
+    logMsg('🌫 Mist Curse blinds your aim.','boss');
+  }else if(abilityId==='lt_tidal_strike'){
+    const fs=(lt.futureSight>0)?(lt.futureSpellMult||1.3):1;
+    lt.futureSight=0;
+    doHit(lieutenantActionDamageMult(def,e,baseMult*fs),'casts Tidal Strike!');
+  }else if(abilityId==='lt_rotting_curse'){
+    applyAilment('player','poison',def.statusStacks||2);
+    logMsg('☣ Rotting Curse infects you with poison.','boss');
+  }else if(abilityId==='lt_bone_harvest'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'reaps with Bone Harvest!');
+    const heal=Math.max(1,Math.floor((r?.dmgDealt||0)*(def.healFromDamage||0.5)));
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal');
+  }else if(abilityId==='lt_ash_cloud'){
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+(def.accDebuff||15);
+    logMsg('🌫 Ash Cloud shrouds the battlefield.','boss');
+  }else {
+    const hits=Math.max(1,def.hits||1);
+    const critMult=1+(def.critBonus||0);
+    for(let i=0;i<hits;i++) doHit(lieutenantActionDamageMult(def,e,baseMult*critMult),`uses ${def.name}!`);
+  }
+
+  lt.lastMoveType=def.type||'utility';
+  lt.lastMoveDidDamage=didDamage;
+  return {didDamage,type:def.type||'utility'};
+}
 function lieutenantTurnAI(){
   const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
   lt.turn=(lt.turn||0)+1;
-  if(lt.dodgeBuffTurns>0){ lt.dodgeBuffTurns--; if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; } }
+
+  if(lt.dodgeBuffTurns>0){
+    lt.dodgeBuffTurns--;
+    if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; }
+  }
+  if((lt.patrolBuffTurns||0)>0){
+    lt.patrolBuffTurns--;
+    if(lt.patrolBuffTurns<=0){ e.stats.def=Math.max(0,(e.stats.def||0)-2); e.stats.spd=Math.max(1,(e.stats.spd||0)-1); }
+  }
+
   if(e.id==='lt_seraph') lt.velocityStacks=Math.min(8,(lt.velocityStacks||0)+1);
-  if(e.id==='lt_marshal' && lt.turn%2===0){ e.stats.def=(e.stats.def||0)+1; logMsg('🛡 Iron Patrol: +1 DEF.','boss'); }
-  if(e.id==='lt_skarn' && lt.turn%3===0){ const h=Math.floor((e.stats.maxHp||1)*0.10); e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${h}`,'fn-heal'); logMsg('☠ Feast on the Fallen restores Skarn.','boss'); }
+  if(e.id==='lt_marshal' && lt.turn%2===0){
+    lt.ironPatrolStacks=Math.min(6,(lt.ironPatrolStacks||0)+1);
+    e.stats.def=(e.stats.def||0)+1;
+    logMsg('🛡 Iron Patrol reinforces Marshal Stride (+1 DEF).','boss');
+  }
+  if(e.id==='lt_skarn' && lt.turn%3===0){
+    const h=Math.floor((e.stats.maxHp||1)*0.12);
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h);
+    setHpBar('enemy',e.stats.hp,e.stats.maxHp);
+    spawnFloat('enemy',`+${h}`,'fn-heal');
+    logMsg('☠ Feast on the Fallen restores Skarn.','boss');
+  }
   if(e.id==='lt_skarn' && lt.deathCircle) lt.deathCircleStacks=Math.min(8,(lt.deathCircleStacks||0)+1);
 
-  const base=lieutenantBaseMult(e);
   const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  const eHpPct=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+  const forceDamage = (lt.lastMoveDidDamage===false);
+  const avoidSecondUtility = (lt.lastMoveType==='utility' || lt.lastMoveType==='buff' || lt.lastMoveType==='control');
 
-  if(e.id==='lt_khar'){
-    let mult=base;
-    if(lt.lastHitConnected) mult*=1.40;
-    if(pHpPct<0.40){ const r=lieutenantStrike(2.10*mult,'uses Execution Clamp!'); lieutenantApplyKharChain(r); return; }
-    if(Math.random()<0.28){ setStatusMax(G.playerStatus,'rooted',1); logMsg('⛓ Shatter Grip roots you!','boss'); return; }
-    if(Math.random()<0.22){ setStatusMax(G.playerStatus,'feared',2); logMsg('😨 Dread Stare applies Fear!','boss'); return; }
-    const r=lieutenantStrike(1.60*mult,'lands Bonecrusher Strike!'); lieutenantApplyKharChain(r); return;
+  let chosen='';
+
+  if(e.aiProfile==='executioner'){
+    if(pHpPct<=0.40) chosen='lt_execution_clamp';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_shatter_grip';
+    else if(!forceDamage && Math.random()<0.22) chosen='lt_dread_stare';
+    else chosen='lt_bonecrusher';
+  }else if(e.aiProfile==='duelist'){
+    if(lt.markTurns>0) chosen='lt_skyfall_strike';
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.28) chosen='lt_wind_feint';
+    else if(!forceDamage && Math.random()<0.34) chosen='lt_predator_mark';
+    else chosen=(Math.random()<0.55)?'lt_razor_dive':'lt_skyfall_strike';
+  }else if(e.aiProfile==='warden'){
+    if((lt.turn<=2 || (lt.patrolBuffTurns||0)<=0) && !forceDamage && Math.random()<0.45) chosen='lt_patrol_command';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_crush_serpent';
+    else chosen=(Math.random()<0.45)?'lt_ground_sweep':'lt_iron_kick';
+  }else if(e.aiProfile==='seer'){
+    if(lt.futureSight>0) chosen='lt_tidal_strike';
+    else if(!forceDamage && Math.random()<0.32) chosen='lt_mist_curse';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_future_sight';
+    else if(!forceDamage && eHpPct<0.5 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_ghost_step';
+    else chosen='lt_tidal_strike';
+  }else if(e.aiProfile==='reaper'){
+    if(!(lt.openedWithCurse)) { lt.openedWithCurse=true; chosen='lt_rotting_curse'; }
+    else if(!lt.deathCircle && !forceDamage && Math.random()<0.28) chosen='lt_death_circle';
+    else if(!forceDamage && eHpPct<0.75 && Math.random()<0.34) chosen='lt_bone_harvest';
+    else chosen=(Math.random()<0.4)?'lt_rotting_curse':'lt_carrion_peck';
+  }else if(e.aiProfile==='scavenger'){
+    if(!(lt.openedWithAsh)) { lt.openedWithAsh=true; chosen='lt_ash_cloud'; }
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_smoke_spiral';
+    else if(pHpPct<=0.50) chosen=(Math.random()<0.65)?'lt_burning_dive':'lt_carrion_rush';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_ash_cloud';
+    else chosen=(Math.random()<0.5)?'lt_carrion_rush':'lt_burning_dive';
   }
-  if(e.id==='lt_seraph'){
-    if((e.stats.hp/e.stats.maxHp)<0.55 && Math.random()<0.28 && lt.dodgeBuffTurns<=0){
-      lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('💨 Wind Feint: Seraph gains +15 dodge.','boss'); return;
-    }
-    if(Math.random()<0.26){ lt.markTurns=1; logMsg('🎯 Predator Mark! Next hit deals +20%.','boss'); return; }
-    const marked=lt.markTurns>0?1.20:1;
-    if(lt.markTurns>0) lt.markTurns=0;
-    if(Math.random()<0.5){ lieutenantStrike(0.88*base*marked,'slashes with Razor Dive!'); lieutenantStrike(0.88*base*marked,'follows through with Razor Dive!'); }
-    else{ lieutenantStrike(1.55*base*marked,'drops in with Skyfall Strike!'); }
-    return;
+
+  if(avoidSecondUtility && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const fallback={
+      lt_khar:'lt_bonecrusher', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_iron_kick',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_carrion_peck', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=fallback[e.id]||chosen;
   }
-  if(e.id==='lt_marshal'){
-    if(Math.random()<0.25){ e.stats.def+=1; e.stats.spd+=1; logMsg('📯 Patrol Command boosts DEF and SPD!','boss'); return; }
-    if(Math.random()<0.25){ if(chance(40)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); } else { applyPlayerSlow(2,6,2); logMsg('🦵 Crush Serpent slows you!','boss'); } return; }
-    if(Math.random()<0.45){ lieutenantStrike(0.90*base,'sweeps with Ground Sweep!'); lieutenantStrike(0.90*base,'completes the Ground Sweep!'); }
-    else lieutenantStrike(1.45*base,'drives an Iron Kick!');
-    return;
+  if(forceDamage && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const damageFallback={
+      lt_khar:'lt_execution_clamp', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_ground_sweep',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_bone_harvest', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=damageFallback[e.id]||chosen;
   }
-  if(e.id==='lt_koro'){
-    if(lt.futureSight>0){ lt.futureSight=0; lieutenantStrike(1.55*base,'unleashes a foreseen Tidal Strike!'); return; }
-    if(Math.random()<0.26){ G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15; logMsg('🌫 Mist Curse lowers your ACC!','boss'); return; }
-    if(Math.random()<0.26){ lt.futureSight=1; logMsg('🔮 Future Sight: next strike empowered.','boss'); return; }
-    if(Math.random()<0.22 && lt.dodgeBuffTurns<=0){ lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('👻 Ghost Step raises Koro\'s dodge.','boss'); return; }
-    lieutenantStrike(1.25*base,'casts Tidal Strike!');
-    return;
-  }
-  if(e.id==='lt_skarn'){
-    if(!lt.deathCircle && Math.random()<0.28){ lt.deathCircle=true; lt.deathCircleStacks=0; logMsg('☠ Death Circle begins to spiral.','boss'); return; }
-    if(Math.random()<0.30){ applyAilment('player','poison',2); logMsg('☣ Rotting Curse applies Poison.','boss'); return; }
-    if(Math.random()<0.26){ const r=lieutenantStrike(1.10*base,'uses Bone Harvest!'); const heal=Math.max(1,Math.floor((r.dmgDealt||0)*0.5)); e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal'); return; }
-    lieutenantStrike(1.05*base,'pecks with Carrion Peck.');
-    return;
-  }
-  if(e.id==='lt_ashwing'){
-    if(Math.random()<0.25 && lt.dodgeBuffTurns<=0){ lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('🌪 Smoke Spiral increases Ashwing\'s dodge.','boss'); return; }
-    if(Math.random()<0.24){ G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+12; logMsg('🌫 Ash Cloud reduces your accuracy!','boss'); return; }
-    if(Math.random()<0.5){ lieutenantStrike(0.92*base,'lunges with Carrion Rush!'); lieutenantStrike(0.92*base,'strikes again with Carrion Rush!'); }
-    else lieutenantStrike(1.65*base,'dives with Burning Dive!');
-    return;
-  }
-  lieutenantStrike(1.2*base,'attacks!');
+  if(!chosen) chosen='lt_bonecrusher';
+  performLieutenantAbility(chosen);
 }
 
 
@@ -8823,6 +9079,11 @@ function checkDeath() {
     if(G.enemy.isBoss){
       G.bossKills++;
       logMsg(`💀 Boss kill #${G.bossKills}! Future enemies grow stronger.`,'boss');
+      if(G.enemy?.lieutenant){
+        if(!G.lieutenantKills||typeof G.lieutenantKills!=='object') G.lieutenantKills={};
+        G.lieutenantKills[G.enemy.id]=(G.lieutenantKills[G.enemy.id]||0)+1;
+        G.lastLieutenantId=G.enemy.id;
+      }
       const _harpyBd=BIRDS[G.player.birdKey];
       if(_harpyBd&&_harpyBd.passive&&_harpyBd.passive.onBossKill) _harpyBd.passive.onBossKill(G.player);
       // Kookaburra Ambush Master: reset on boss kill
@@ -9113,7 +9374,7 @@ function showRewardScreen(hasLevelUp) {
 function confirmReward() {
   if(!G._pendingReward) return;
   if(document.getElementById('gold-replace-ui')) return;
-  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=3){
+  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=getGoldUpgradeLimit()){
     showGoldReplaceUI(G._pendingReward);
     return;
   }
@@ -9174,8 +9435,9 @@ function showGoldReplaceUI(newReward){
   const ui=document.createElement('div');
   ui.id='gold-replace-ui';
   ui.style.cssText='background:rgba(20,15,5,.97);border:1px solid var(--gold);border-radius:12px;padding:16px;margin-top:12px;text-align:center;';
+  const goldLimit=getGoldUpgradeLimit();
   ui.innerHTML=`<div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:8px;font-size:.85rem;letter-spacing:.08em">⚠ LEGENDARY LIMIT — Replace a Gold Card</div>
-    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold 3 Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
+    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold ${goldLimit} Legendary card${goldLimit===1?'':'s'}. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
     <div id="gold-replace-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     <button onclick="document.getElementById('gold-replace-ui').remove();G._goldReplaceMode=false;" style="margin-top:10px;background:rgba(40,35,25,.8);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;">✕ Cancel</button>`;
   const list=ui.querySelector('#gold-replace-list');
@@ -9273,7 +9535,12 @@ function rollWeighted(tiers,weights){
   return tiers[tiers.length-1];
 }
 
-// Gold card limit: max 3, prompt replacement if at limit
+// Gold card limit: Story=1. Endless increases +1 each endless boss milestone (10,20,...) up to 3.
+function getGoldUpgradeLimit(){
+  if(!isEndlessRunActive()) return 1;
+  const eb=Math.max(0,G.endlessBattle||0);
+  return Math.min(3,1+Math.floor(eb/10));
+}
 function getGoldCardCount(){return(G.collectedRewards||[]).filter(r=>r.tier==='gold').length;}
 
 // ============================================================
@@ -9609,8 +9876,9 @@ async function advanceStage(opts={}) {
   const ui=ensureUIState();
   const runIsEndless = (ui.gameMode==='endless') && !!G.endlessMode;
   if(isEndlessRunActive()) applyEndlessProgressionMilestones();
-  if(G.stage>ENEMIES.length && !runIsEndless){
+  if(!runIsEndless && G.stage>STORY_STAGE_CAP){
     G.endlessMode=false;
+    G.stage=STORY_STAGE_CAP;
     deleteSave();
     showVictory();
     return;
@@ -9934,14 +10202,27 @@ function showVictory(){
   showRunStats();
   const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
   const mainMenuBtn=document.getElementById('gameover-main-menu-btn');
+  G._pendingEndlessContinuation=false;
   if(victoryMenuBtn) victoryMenuBtn.style.display='inline-block';
   const ui=ensureUIState();
   const isEndlessRun = (ui.gameMode==='endless') && !!G.endlessMode;
   if(isEndlessRun){
-    G.endlessBattle=0;
+    G._pendingStage20Narrative=false;
+    G._pendingEndlessContinuation=true;
+    if(victoryMenuBtn) victoryMenuBtn.innerHTML='Continue to Endless';
+    if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
     logMsg('🌟 Stage 20 complete! Endless mode continues — bosses await!','boss');
-    advanceStage();
-    return;
+  }else{
+    const dukeVictory = (G.stage>=STORY_STAGE_CAP) || !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
+    if(dukeVictory && victoryMenuBtn){
+      G._pendingStage20Narrative=true;
+      victoryMenuBtn.innerHTML='Continue';
+      if(mainMenuBtn) mainMenuBtn.style.display='none';
+    }else{
+      G._pendingStage20Narrative=false;
+      if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
+      if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
+    }
   }
   const dukeVictory = !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
   if(dukeVictory && victoryMenuBtn){
@@ -9959,11 +10240,6 @@ function showVictory(){
   runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
   clearTimeout(G._victoryReturnTimer);
-  if(!dukeVictory){
-    G._victoryReturnTimer=setTimeout(()=>{
-      try{ showScreen('screen-select'); initSelectionSafe(); }catch(_){ }
-    }, 5200);
-  }
 }
 function showDefeat(){
   G.phase='REWARD';
@@ -9979,7 +10255,7 @@ function showDefeat(){
   saveHighscoreEntry(false);
   document.getElementById('gameover-inner').className='gameover-inner lose';
   document.getElementById('gameover-title').textContent='💀 Fallen';
-  const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
+  const stageLabel=G.endlessMode&&G.stage>STORY_STAGE_CAP?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
   const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
   const mainMenuBtn=document.getElementById('gameover-main-menu-btn');

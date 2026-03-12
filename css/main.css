@@ -559,6 +559,7 @@ body.ui-mobile-mode #screen-battle .level-badge{font-size:.7rem;}
 .mode-toggle{display:inline-flex;border:1px solid rgba(201,168,76,.35);border-radius:10px;overflow:hidden;background:rgba(12,10,5,.65);}
 .mode-toggle-btn{padding:7px 16px;border:none;background:transparent;color:var(--text-dim);font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.06em;cursor:pointer;transition:all .2s;}
 .mode-toggle-btn.active{background:linear-gradient(135deg,rgba(201,168,76,.25),rgba(201,168,76,.12));color:var(--gold-light);}
+.mode-toggle-btn.locked,.mode-toggle-btn:disabled{opacity:.65;cursor:not-allowed;}
 #lu-stat-preview{margin:8px auto 0;max-width:760px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
 .lu-stat-row{display:flex;justify-content:space-between;align-items:center;background:rgba(10,12,18,.5);border:1px solid rgba(201,168,76,.2);border-radius:7px;padding:5px 8px;font-size:.78rem;color:var(--text-dim);}
 .lu-stat-row .v-new{color:var(--green-light);font-weight:700;}
