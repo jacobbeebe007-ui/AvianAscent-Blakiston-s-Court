@@ -597,6 +597,13 @@ body.ui-mobile-mode #screen-battle .level-badge{font-size:.7rem;}
 .nest-ab-lv{font-size:.72rem;color:var(--gold);margin-bottom:5px;}
 .nest-ab-desc{font-size:.78rem;color:var(--text-dim);line-height:1.4;}
 .nest-rewards-list{display:flex;flex-direction:column;gap:6px;}
+.nest-dropdown{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;}
+.nest-dropdown-title{cursor:pointer;color:var(--gold);font-family:"Cinzel",serif;list-style:none;}
+.nest-dropdown-title::-webkit-details-marker{display:none;}
+.nest-dropdown-title::after{content:'▾';float:right;color:var(--text-dim);}
+.nest-dropdown[open] .nest-dropdown-title::after{content:'▴';}
+.nest-bonus-line{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:.8rem;color:var(--text);}
+.nest-bonus-label{color:var(--gold);font-family:"Cinzel",serif;margin-right:8px;}
 .nest-reward-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:.83rem;}
 .nest-reward-icon{font-size:1.2rem;}
 .nest-reward-name{flex:1;font-weight:bold;}
