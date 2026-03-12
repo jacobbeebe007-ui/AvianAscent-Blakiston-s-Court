@@ -1464,6 +1464,74 @@ const UPGRADE_CARDS_REWORK = [
 
 function getUpgradePool(){ return UPGRADE_CARDS_REWORK.slice(); }
 
+function createReward(def={}){
+  const uiText = def.uiText || {};
+  const source = Array.isArray(def.source)
+    ? def.source
+    : (def.source ? [def.source] : ['battle']);
+  const reward = {
+    ...def,
+    id: String(def.id||''),
+    kind: def.kind || def.type || 'upgrade',
+    tier: def.tier || 'grey',
+    source,
+    uiText: {
+      icon: uiText.icon ?? def.icon ?? '🎁',
+      name: uiText.name ?? def.name ?? def.id ?? 'Reward',
+      desc: uiText.desc ?? def.desc ?? ''
+    },
+    apply: typeof def.apply==='function' ? def.apply : ()=>{}
+  };
+  reward.icon = reward.uiText.icon;
+  reward.name = reward.uiText.name;
+  reward.desc = reward.uiText.desc;
+  return reward;
+}
+
+const REWARD_FILTERS = {
+  story: rw => !rw.source.includes('endless'),
+  endless: rw => rw.source.includes('endless'),
+  shop: rw => rw.source.includes('shop'),
+  battle: rw => rw.source.includes('battle'),
+  tier: tier => rw => rw.tier===tier,
+  notUsed: used => rw => !used.has(rw.id),
+  notRunLocked: () => rw => !(rw.oncePerRun && G.runUpgradesPurchased?.has(rw.id))
+};
+
+function rollRewardPool(pool,{count=1,predicates=[],usedIds=null}={}){
+  const used = usedIds || new Set();
+  const filt = pool.filter(rw=>predicates.every(fn=>fn(rw)));
+  const bag = filt.slice();
+  const picks=[];
+  while(picks.length<count && bag.length){
+    const idx=Math.floor(Math.random()*bag.length);
+    const rw=bag.splice(idx,1)[0];
+    if(used.has(rw.id)) continue;
+    used.add(rw.id);
+    picks.push(rw);
+  }
+  return picks;
+}
+
+function applyRewardEffect(reward, player, context={}){
+  if(!reward || !player) return false;
+  if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased = new Set();
+  const alreadyApplied = G.runUpgradesPurchased.has(reward.id);
+  const preventDuplicates = context.preventDuplicates ?? true;
+  if(preventDuplicates && alreadyApplied && (reward.oncePerRun || reward.stackable===false)) return false;
+
+  reward.apply(player, context);
+
+  if(reward.kind==='relic' || reward.kind==='augment' || reward.kind==='mutation'){
+    if(!player.endlessRewards) player.endlessRewards=[];
+    if(!player.endlessRewards.some(x=>x.id===reward.id)){
+      player.endlessRewards.push({id:reward.id,type:reward.kind,name:reward.name});
+    }
+  }
+  if(reward.oncePerRun || reward.stackable===false) G.runUpgradesPurchased.add(reward.id);
+  return true;
+}
+
 
 const ENDLESS_SKILL_AUGMENTS = [
   {id:'aug_razor_edge',name:'Razor Edge',tier:'blue',type:'augment',desc:'Endless only — Attack skills deal +20% damage to Bleeding enemies.',apply:p=>{p.augAttackVsBleedPct=(p.augAttackVsBleedPct||0)+0.20;}},
@@ -1535,38 +1603,29 @@ const ENDLESS_MUTATIONS = [
 ];
 
 function isEndlessRunActive(){ return !!(G.endlessMode && (G.stage||0)>20); }
-function getEndlessRewardPool(type){
-  if(type==='augment') return ENDLESS_SKILL_AUGMENTS;
-  if(type==='mutation') return ENDLESS_MUTATIONS;
-  return ENDLESS_RELICS;
+function getEndlessRewardPool(kind){
+  const base = kind==='augment' ? ENDLESS_SKILL_AUGMENTS : (kind==='mutation' ? ENDLESS_MUTATIONS : ENDLESS_RELICS);
+  return base.map(entry=>createReward({
+    ...entry,
+    kind: entry.type || kind || 'relic',
+    source:['battle','endless'],
+    endlessOnly:true,
+    oncePerRun:true,
+    uiText:{
+      icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
+      name:entry.name,
+      desc:entry.desc,
+    }
+  }));
 }
 function hasEndlessReward(id){
-  const seen=(G.player?.endlessRewards||[]).map(x=>x.id);
-  return seen.includes(id);
-}
-function buildEndlessRewardCard(entry){
-  return {
-    id:entry.id,
-    tier:entry.tier||'blue',
-    icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
-    name:entry.name,
-    desc:entry.desc,
-    endlessOnly:true,
-    apply:p=>{
-      if(!isEndlessRunActive()) return;
-      if(!p.endlessRewards) p.endlessRewards=[];
-      if(p.endlessRewards.some(x=>x.id===entry.id)) return;
-      p.endlessRewards.push({id:entry.id,type:entry.type,name:entry.name});
-      entry.apply?.(p);
-    }
-  };
+  return !!G.runUpgradesPurchased?.has(id);
 }
 function rollEndlessReward(kind='relic'){
   if(!isEndlessRunActive()) return null;
-  const pool=getEndlessRewardPool(kind).filter(x=>!hasEndlessReward(x.id));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  return buildEndlessRewardCard(pick);
+  const pool=getEndlessRewardPool(kind);
+  const [pick]=rollRewardPool(pool,{count:1,predicates:[REWARD_FILTERS.endless,REWARD_FILTERS.notRunLocked()]});
+  return pick||null;
 }
 function applyEndlessProgressionMilestones(){
   if(!isEndlessRunActive()) return;
@@ -1656,6 +1715,7 @@ const ALL_REWARDS = [
   {id:'l_trueSight', tier:'gold', icon:'👁️', name:'True Sight', desc:'All skills: -12% miss chance (min 0%)', tags:['utility','accuracy'], apply:p=>{ p.missReduce=(p.missReduce||0)+0.12; }},
   {id:'l_roostFeast', tier:'gold', icon:'🔥', name:'Eternal Roost', desc:'Full heal + +12% Max HP extra heal after every battle', tags:['sustain','scaling'], apply:p=>{ p.stats.hp=p.stats.maxHp; p.postBattleHealBonusPct=(p.postBattleHealBonusPct||0)+0.12; }},
 ];
+const CORE_UPGRADE_REWARDS = ALL_REWARDS.map(rw=>createReward({...rw,kind:'upgrade',source:['battle','shop'],oncePerRun:rw.stackable===false}));
 
 // ============================================================
 //  LEARNABLE ABILITIES — universal abilities gained at level-up
@@ -3045,6 +3105,25 @@ function runModuleHook(hook, payload){
   }
 }
 globalThis.registerGameModule = registerGameModule;
+
+let _warnedMissingAbilityPassiveUpgradePack = false;
+function initDataPacks(){
+  const pack = globalThis.ABILITY_PASSIVE_UPGRADE_PACK;
+  if(pack && typeof pack === 'object'){
+    G.dataPacks = G.dataPacks || {};
+    G.dataPacks.abilityPassiveUpgrade = Object.freeze({
+      STATUS_GLOSSARY: pack.STATUS_GLOSSARY || Object.freeze({}),
+      ABILITY_DEFS: pack.ABILITY_DEFS || Object.freeze({}),
+    });
+    return;
+  }
+  G.dataPacks = G.dataPacks || {};
+  G.dataPacks.abilityPassiveUpgrade = null;
+  if(!_warnedMissingAbilityPassiveUpgradePack){
+    _warnedMissingAbilityPassiveUpgradePack = true;
+    console.warn('[DataPack] ABILITY_PASSIVE_UPGRADE_PACK missing; metadata overlays disabled.');
+  }
+}
 
 let G = {
   player: null, enemy: null, stage: 1, turn: 'player', turnPhase:TURN.PLAYER,
@@ -8848,6 +8927,215 @@ function lieutenantTurnAI(){
   return res;
 }
 
+function lieutenantBaseMult(e){
+  const lt=e?.lieutenant||{};
+  let mult=1;
+  if(e?.id==='lt_seraph') mult += (lt.velocityStacks||0)*0.10;
+  if(e?.id==='lt_ashwing' && (G.player?.stats?.hp||0)<=Math.floor((G.player?.stats?.maxHp||1)*0.5)) mult*=1.25;
+  if(e?.id==='lt_skarn' && lt.deathCircle) mult*=(1 + (lt.deathCircleStacks||0)*0.08);
+  if(e?.id==='lt_khar' && lt.lastHitConnected) mult*=1.40;
+  return mult;
+}
+function lieutenantStrike(mult=1,label='hits!'){
+  const r=dealDamage('player',edmg(mult));
+  spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
+  logMsg(`👑 ${G.enemy.name} ${label}`,'boss');
+  return r;
+}
+function lieutenantApplyKharChain(r){
+  const lt=G.enemy.lieutenant||{};
+  lt.lastHitConnected=!!(r && !r.wasDodged && (r.dmgDealt||0)>0);
+  G.enemy.lieutenant=lt;
+}
+function lieutenantApplyDodgeBuff(e,lt,amt,turns,label){
+  if((lt.dodgeBuffTurns||0)>0 && lt.dodgeBuffAmt){
+    e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt);
+  }
+  lt.dodgeBuffTurns=turns;
+  lt.dodgeBuffAmt=amt;
+  e.stats.dodge=Math.min(95,(e.stats.dodge||0)+amt);
+  logMsg(label,'boss');
+}
+function lieutenantActionDamageMult(def,e,baseMult){
+  const atk=e.stats.atk||1;
+  const matk=e.stats.matk||atk;
+  const stat=((def.matkScale||0)>0)?matk:atk;
+  const base=(def.baseDamage||0) + stat*((def.atkScale||0)+(def.matkScale||0));
+  const denom=Math.max(1,atk+8);
+  return clamp((base/denom)*baseMult,0.45,2.6);
+}
+function performLieutenantAbility(abilityId,opts={}){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  const def=LIEUTENANT_ABILITY_DEFS[abilityId];
+  if(!def) return {didDamage:false,type:'utility'};
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  if(Number.isFinite(def.accuracy) && Math.random()>def.accuracy){
+    logMsg(`👑 ${e.name}'s ${def.name} missed!`,'miss');
+    lt.lastMoveType=def.type||'utility';
+    lt.lastMoveDidDamage=false;
+    return {didDamage:false,type:def.type||'utility'};
+  }
+
+  const baseMult=lieutenantBaseMult(e) * (opts.damageMult||1);
+  let didDamage=false;
+  const doHit=(mult,label)=>{
+    const r=lieutenantStrike(mult,label||`uses ${def.name}!`);
+    if(e.id==='lt_khar') lieutenantApplyKharChain(r);
+    if((r?.dmgDealt||0)>0 && !r?.wasDodged) didDamage=true;
+    return r;
+  };
+
+  if(def.type==='utility' && def.dodgeBuff){
+    lieutenantApplyDodgeBuff(e,lt,def.dodgeBuff,def.dodgeTurns||1,`💨 ${def.name}: ${e.name} gains +${def.dodgeBuff}% dodge.`);
+  }else if(def.type==='buff' && abilityId==='lt_patrol_command'){
+    lt.patrolBuffTurns=Math.max(lt.patrolBuffTurns||0,def.buffTurns||2);
+    e.stats.def=(e.stats.def||0)+(def.defBuff||0);
+    e.stats.spd=(e.stats.spd||0)+(def.spdBuff||0);
+    logMsg(`📯 Patrol Command hardens the line (+${def.defBuff||0} DEF, +${def.spdBuff||0} SPD).`,'boss');
+  }else if(def.type==='buff' && abilityId==='lt_future_sight'){
+    lt.futureSight=1;
+    lt.futureSpellMult=def.nextSpellMult||1.3;
+    logMsg('🔮 Future Sight: the next spell is empowered.','boss');
+  }else if(def.type==='buff' && abilityId==='lt_death_circle'){
+    lt.deathCircle=true;
+    lt.deathCircleStacks=0;
+    logMsg('☠ Death Circle begins to spiral.','boss');
+  }else if(abilityId==='lt_predator_mark'){
+    lt.markTurns=def.markTurns||1;
+    lt.markMult=def.markMult||1.2;
+    logMsg('🎯 Predator Mark! Seraph lines up a kill angle.','boss');
+  }else if(abilityId==='lt_shatter_grip'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'slams with Shatter Grip!');
+    setStatusMax(G.playerStatus,'rooted',def.statusTurns||1);
+    logMsg('⛓ You are rooted in place!','boss');
+  }else if(abilityId==='lt_dread_stare'){
+    setStatusMax(G.playerStatus,'feared',def.statusTurns||1);
+    logMsg('😨 Dread Stare inflicts fear.','boss');
+  }else if(abilityId==='lt_execution_clamp'){
+    let ex=1;
+    if(pHpPct<=(def.lowHpThreshold||0.4)) ex*=(1+(def.bonusLowHp||0));
+    doHit(lieutenantActionDamageMult(def,e,baseMult*ex),'uses Execution Clamp!');
+  }else if(abilityId==='lt_crush_serpent'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'lashes out with Crush Serpent!');
+    if(chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); }
+    else{ applyPlayerSlow(def.slowTurns||2,def.slowAmt||6,def.slowTurns||2); logMsg('🦵 Crush Serpent slows your movement.','boss'); }
+  }else if(abilityId==='lt_ground_sweep'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'sweeps the ground with crushing force!');
+    if((r?.dmgDealt||0)>0 && chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🌀 Ground Sweep staggers you!','boss'); }
+  }else if(abilityId==='lt_mist_curse'){
+    G.playerStatus.blind=Math.max(G.playerStatus.blind||0,def.statusTurns||1);
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15;
+    logMsg('🌫 Mist Curse blinds your aim.','boss');
+  }else if(abilityId==='lt_tidal_strike'){
+    const fs=(lt.futureSight>0)?(lt.futureSpellMult||1.3):1;
+    lt.futureSight=0;
+    doHit(lieutenantActionDamageMult(def,e,baseMult*fs),'casts Tidal Strike!');
+  }else if(abilityId==='lt_rotting_curse'){
+    applyAilment('player','poison',def.statusStacks||2);
+    logMsg('☣ Rotting Curse infects you with poison.','boss');
+  }else if(abilityId==='lt_bone_harvest'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'reaps with Bone Harvest!');
+    const heal=Math.max(1,Math.floor((r?.dmgDealt||0)*(def.healFromDamage||0.5)));
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal');
+  }else if(abilityId==='lt_ash_cloud'){
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+(def.accDebuff||15);
+    logMsg('🌫 Ash Cloud shrouds the battlefield.','boss');
+  }else {
+    const hits=Math.max(1,def.hits||1);
+    const critMult=1+(def.critBonus||0);
+    for(let i=0;i<hits;i++) doHit(lieutenantActionDamageMult(def,e,baseMult*critMult),`uses ${def.name}!`);
+  }
+
+  lt.lastMoveType=def.type||'utility';
+  lt.lastMoveDidDamage=didDamage;
+  return {didDamage,type:def.type||'utility'};
+}
+function lieutenantTurnAI(){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  lt.turn=(lt.turn||0)+1;
+
+  if(lt.dodgeBuffTurns>0){
+    lt.dodgeBuffTurns--;
+    if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; }
+  }
+  if((lt.patrolBuffTurns||0)>0){
+    lt.patrolBuffTurns--;
+    if(lt.patrolBuffTurns<=0){ e.stats.def=Math.max(0,(e.stats.def||0)-2); e.stats.spd=Math.max(1,(e.stats.spd||0)-1); }
+  }
+
+  if(e.id==='lt_seraph') lt.velocityStacks=Math.min(8,(lt.velocityStacks||0)+1);
+  if(e.id==='lt_marshal' && lt.turn%2===0){
+    lt.ironPatrolStacks=Math.min(6,(lt.ironPatrolStacks||0)+1);
+    e.stats.def=(e.stats.def||0)+1;
+    logMsg('🛡 Iron Patrol reinforces Marshal Stride (+1 DEF).','boss');
+  }
+  if(e.id==='lt_skarn' && lt.turn%3===0){
+    const h=Math.floor((e.stats.maxHp||1)*0.12);
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h);
+    setHpBar('enemy',e.stats.hp,e.stats.maxHp);
+    spawnFloat('enemy',`+${h}`,'fn-heal');
+    logMsg('☠ Feast on the Fallen restores Skarn.','boss');
+  }
+  if(e.id==='lt_skarn' && lt.deathCircle) lt.deathCircleStacks=Math.min(8,(lt.deathCircleStacks||0)+1);
+
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  const eHpPct=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+  const forceDamage = (lt.lastMoveDidDamage===false);
+  const avoidSecondUtility = (lt.lastMoveType==='utility' || lt.lastMoveType==='buff' || lt.lastMoveType==='control');
+
+  let chosen='';
+
+  if(e.aiProfile==='executioner'){
+    if(pHpPct<=0.40) chosen='lt_execution_clamp';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_shatter_grip';
+    else if(!forceDamage && Math.random()<0.22) chosen='lt_dread_stare';
+    else chosen='lt_bonecrusher';
+  }else if(e.aiProfile==='duelist'){
+    if(lt.markTurns>0) chosen='lt_skyfall_strike';
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.28) chosen='lt_wind_feint';
+    else if(!forceDamage && Math.random()<0.34) chosen='lt_predator_mark';
+    else chosen=(Math.random()<0.55)?'lt_razor_dive':'lt_skyfall_strike';
+  }else if(e.aiProfile==='warden'){
+    if((lt.turn<=2 || (lt.patrolBuffTurns||0)<=0) && !forceDamage && Math.random()<0.45) chosen='lt_patrol_command';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_crush_serpent';
+    else chosen=(Math.random()<0.45)?'lt_ground_sweep':'lt_iron_kick';
+  }else if(e.aiProfile==='seer'){
+    if(lt.futureSight>0) chosen='lt_tidal_strike';
+    else if(!forceDamage && Math.random()<0.32) chosen='lt_mist_curse';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_future_sight';
+    else if(!forceDamage && eHpPct<0.5 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_ghost_step';
+    else chosen='lt_tidal_strike';
+  }else if(e.aiProfile==='reaper'){
+    if(!(lt.openedWithCurse)) { lt.openedWithCurse=true; chosen='lt_rotting_curse'; }
+    else if(!lt.deathCircle && !forceDamage && Math.random()<0.28) chosen='lt_death_circle';
+    else if(!forceDamage && eHpPct<0.75 && Math.random()<0.34) chosen='lt_bone_harvest';
+    else chosen=(Math.random()<0.4)?'lt_rotting_curse':'lt_carrion_peck';
+  }else if(e.aiProfile==='scavenger'){
+    if(!(lt.openedWithAsh)) { lt.openedWithAsh=true; chosen='lt_ash_cloud'; }
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_smoke_spiral';
+    else if(pHpPct<=0.50) chosen=(Math.random()<0.65)?'lt_burning_dive':'lt_carrion_rush';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_ash_cloud';
+    else chosen=(Math.random()<0.5)?'lt_carrion_rush':'lt_burning_dive';
+  }
+
+  if(avoidSecondUtility && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const fallback={
+      lt_khar:'lt_bonecrusher', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_iron_kick',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_carrion_peck', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=fallback[e.id]||chosen;
+  }
+  if(forceDamage && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const damageFallback={
+      lt_khar:'lt_execution_clamp', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_ground_sweep',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_bone_harvest', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=damageFallback[e.id]||chosen;
+  }
+  if(!chosen) chosen='lt_bonecrusher';
+  performLieutenantAbility(chosen);
+}
+
 
 async function enemyTurn() {
   const e=G.enemy; G.animLock=true; G.turn='enemy'; G.turnPhase=TURN.ENEMY; G.phase='ENEMY';
@@ -8871,6 +9159,13 @@ async function enemyTurn() {
         // pressure follow-up: if prior move dealt no damage, attempt another pass quickly
       }
     }
+    G.animLock=false;
+    if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+    afterEnemyTurn();
+    return;
+  }
+  if(/^boss_lt_/.test(String(G.enemy?.aiType||''))){
+    lieutenantTurnAI();
     G.animLock=false;
     if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
     afterEnemyTurn();
@@ -9439,16 +9734,9 @@ function showGoldReplaceUI(newReward){
 }
 
 function generateNormalRewards() {
-  const out=[];
   const used=new Set();
-  let guard=0;
-  while(out.length<3 && guard<30){
-    guard++;
-    const rw=rollUpgradeCard();
-    if(!rw || used.has(rw.id)) continue;
-    used.add(rw.id);
-    out.push(rw);
-  }
+  const storyOrEndless = isEndlessRunActive() ? REWARD_FILTERS.battle : rw => (REWARD_FILTERS.battle(rw) && REWARD_FILTERS.story(rw));
+  const out=rollRewardPool(CORE_UPGRADE_REWARDS,{count:3,usedIds:used,predicates:[storyOrEndless,REWARD_FILTERS.notRunLocked()]});
   if(isEndlessRunActive()){
     const eb=G.endlessBattle||0;
     const milestone=eb>0 && (eb%5===0);
@@ -9472,10 +9760,9 @@ function generateBossRewards() {
   const endlessBattle=G.endlessBattle||0;
   
   function pickTier(tier){
-    const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-    if(!pool.length) return null;
-    const rw=pool[Math.floor(Math.random()*pool.length)];
-    used.add(rw.id); return rw;
+    const [rw]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle,REWARD_FILTERS.notRunLocked()]});
+    if(!rw) return null;
+    return rw;
   }
   function pick(forced,optional){
     const r=pickTier(forced)||pickTier('purple')||pickTier('blue');
@@ -10055,10 +10342,8 @@ function showGroveNestRewards(){
   const used = new Set();
   const picks=[];
   const pick=(tier)=>{
-    const avail=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id));
-    if(!avail.length) return null;
-    const r=avail[Math.floor(Math.random()*avail.length)];
-    used.add(r.id); return r;
+    const [r]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle]});
+    return r||null;
   };
   const rollNestTier=()=>{
     if(chance(5)) return 'gold';
@@ -10501,15 +10786,24 @@ function buildRefGuide() {
     return card(b.name, `${b.tagline||''} · Class: ${(b.class||'').toUpperCase()}`,u,b.class||'bird');
   }).join('');
 
-  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)).map(([id,t])=>{
+  const packAbilityDefs = G.dataPacks?.abilityPassiveUpgrade?.ABILITY_DEFS || {};
+  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>{
+    const metaDef = packAbilityDefs[id] || {};
+    return isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)||isMatch(metaDef.role)||isMatch(metaDef.notes);
+  }).map(([id,t])=>{
     const c=G.codex?.abilities?.[id]||{seen:false,used:false};
     const u=!!c.seen;
     if(!u&&!showLocked) return '';
+    const packDef = packAbilityDefs[id] || null;
     const meta=`${t.rarity||'common'} · ${t.codexType||'attack'}`;
     const base=(t.shortDesc||t.desc||'No description yet.');
+    const roleLine=packDef?.role?`<br><strong style="color:var(--gold-light)">Role:</strong> ${packDef.role}`:'';
+    const notesLine=packDef?.notes?`<br><strong style="color:var(--gold-light)">Pack Notes:</strong> ${packDef.notes}`:'';
+    const tagsLine=(Array.isArray(packDef?.tags)&&packDef.tags.length)?`<br><strong style="color:var(--gold-light)">Tags:</strong> ${packDef.tags.join(', ')}`:'';
     const path=formatAbilityLevelPathway(t);
-    const desc=path?`${base}<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:base;
-    return card(t.name, desc,u,meta);
+    const levelPathLine=path?`<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:'';
+    const desc=`${base}${roleLine}${notesLine}${tagsLine}${levelPathLine}`;
+    return card(packDef?.name||t.name, desc,u,meta);
   }).join('');
 
   const enemies=(ENEMIES||[]).filter(e=>isMatch(e.name)).map(e=>{
@@ -10642,12 +10936,18 @@ function rollShopTier(weights){
   const vals=tiers.map(t=>weights[t]);
   return rollWeighted(tiers,vals);
 }
-function pickUniqueRewardByTier(tier,used){
-  const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  used.add(pick.id);
-  return pick;
+function pickUniqueRewardByTier(tier,used,extraPredicates=[]){
+  const [pick]=rollRewardPool(CORE_UPGRADE_REWARDS,{
+    count:1,
+    usedIds:used,
+    predicates:[
+      REWARD_FILTERS.tier(tier),
+      REWARD_FILTERS.shop,
+      REWARD_FILTERS.notRunLocked(),
+      ...extraPredicates
+    ]
+  });
+  return pick||null;
 }
 function makeUtilityOffer(kind='regular'){
   const utilsRegular=[
@@ -10666,7 +10966,7 @@ function makeUtilityOffer(kind='regular'){
   ];
   const arr=kind==='boss'?utilsBoss:utilsRegular;
   const pick=arr[Math.floor(Math.random()*arr.length)];
-  return {...pick};
+  return createReward({...pick,kind:'utility',source:['shop'],oncePerRun:pick.stackable===false});
 }
 const ABILITY_RARITY_WEIGHTS = { common:70, rare:22, epic:7, legendary:1 };
 function rollByRarity(list){
@@ -10680,7 +10980,6 @@ function rollByRarity(list){
 
 function makeAbilityOffer(highQuality=false){
   const bd=BIRDS[G.player.birdKey]||{};
-  const birdClass=bd.class||'';
   const existing=new Set((G.player.abilities||[]).map(a=>a.id));
   const classPool=(bd.exclusiveLearnPool&&bd.exclusiveLearnPool.length?bd.exclusiveLearnPool:Object.keys(ABILITY_TEMPLATES_LEARNABLE));
   const candidates=classPool.filter(id=>{
@@ -10693,8 +10992,10 @@ function makeAbilityOffer(highQuality=false){
     const tmpl=rollByRarity(picks)||ABILITY_TEMPLATES[unknown[Math.floor(Math.random()*unknown.length)]];
     const id=tmpl.id;
     const tier=highQuality?'blue':'green';
-    return {
+    return createReward({
       id:`shop_ab_learn_${id}`,
+      kind:'ability',
+      source:['shop'],
       tier,
       icon:highQuality?'📘':'📗',
       name:`Learn: ${tmpl.name}`,
@@ -10703,14 +11004,14 @@ function makeAbilityOffer(highQuality=false){
         // NOTE: shopBuySelected() will handle replacement UI if you're at the non-main cap.
         p.abilities.push({...tmpl,level:1,ailmentIds:[]});
       }
-    };
+    });
   }
   const upgradable=(G.player.abilities||[]).filter(a=>!isMainAttackAbility(a)&&(a.level||1)<4);
   if(upgradable.length){
     const pick=upgradable[Math.floor(Math.random()*upgradable.length)];
-    return {id:`shop_ab_upgrade_${pick.id}`,tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}};
+    return createReward({id:`shop_ab_upgrade_${pick.id}`,kind:'ability',source:['shop'],tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}});
   }
-  return {id:'shop_ab_focus',tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}};
+  return createReward({id:'shop_ab_focus',kind:'ability',source:['shop'],tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}});
 }
 function generateShopItems() {
   _shopItems=[];
@@ -10964,7 +11265,6 @@ async function shopBuySelected() {
           const log=document.getElementById('shop-purchase-log');
           if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-          if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
           _shopItems.splice(selected,1);
           refreshPlayerAbilityAilments();
           enforceAbilityCosts(G.player);
@@ -10998,7 +11298,7 @@ async function shopBuySelected() {
       }
     }
   } else {
-    item.apply(G.player);
+    applyRewardEffect(item,G.player,{preventDuplicates:true,source:'shop'});
   }
   refreshPlayerAbilityAilments();
   enforceAbilityCosts(G.player);
@@ -11010,7 +11310,6 @@ async function shopBuySelected() {
   const log=document.getElementById('shop-purchase-log');
   if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-  if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
   _shopItems.splice(selected,1);
   shopLockVisitState();
   saveRun();
