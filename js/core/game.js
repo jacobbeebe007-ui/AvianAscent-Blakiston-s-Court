@@ -1141,6 +1141,176 @@ function makeDukeBlakiston(){
     duke:{phase:1,nightfallTurns:0,decreeKey:null,decreeStacks:0,riverCd:0,summonCd:0,verdictCd:0}
   };
 }
+
+const COURT_LIEUTENANTS=[
+  {
+    id:'lt_khar', displayName:'Khar the Bonebreaker', title:'Executioner', species:'Shoebill', portraitKey:'shoebill', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'executioner', aiType:'boss_lt_khar',
+    intro:'Khar the Bonebreaker descends, bill heavy with judgment.',
+    passive:{name:"Executioner's Bill",desc:'If Khar hits the same target twice consecutively, the second hit deals +40% damage.'},
+    abilities:['lt_bonecrusher','lt_shatter_grip','lt_execution_clamp','lt_dread_stare'],
+    baseStats:{hp:150,atk:12,def:6,matk:3,mdef:4,spd:4,en:3,acc:84,dodge:6}
+  },
+  {
+    id:'lt_seraph', displayName:'Seraph Talonstrike', title:'Duelist', species:'Peregrine Falcon', portraitKey:'peregrine', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'duelist', aiType:'boss_lt_seraph',
+    intro:'A silver blur splits the sky — Seraph Talonstrike has arrived.',
+    passive:{name:'Terminal Velocity',desc:'Every turn Seraph gains +10% damage until she is hit.'},
+    abilities:['lt_skyfall_strike','lt_razor_dive','lt_wind_feint','lt_predator_mark'],
+    baseStats:{hp:110,atk:10,def:4,matk:4,mdef:4,spd:10,en:3,acc:88,dodge:14}
+  },
+  {
+    id:'lt_marshal', displayName:'Marshal Stride', title:'Warden', species:'Secretary Bird', portraitKey:'secretarybird', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'warden', aiType:'boss_lt_marshal',
+    intro:'The grass parts. Marshal Stride advances without haste.',
+    passive:{name:'Iron Patrol',desc:'Every 2 turns gain +1 DEF (max +6).'},
+    abilities:['lt_iron_kick','lt_crush_serpent','lt_patrol_command','lt_ground_sweep'],
+    baseStats:{hp:180,atk:9,def:10,matk:3,mdef:7,spd:4,en:3,acc:82,dodge:6}
+  },
+  {
+    id:'lt_koro', displayName:'Mistmother Koro', title:'Seer', species:'Great Egret', portraitKey:'seagull', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'seer', aiType:'boss_lt_koro',
+    intro:'The mist thickens. Mistmother Koro is already watching.',
+    passive:{name:'Veil of Fog',desc:'First attack against Koro each turn has -20% accuracy.'},
+    abilities:['lt_mist_curse','lt_future_sight','lt_ghost_step','lt_tidal_strike'],
+    baseStats:{hp:120,atk:5,def:4,matk:11,mdef:8,spd:7,en:3,acc:85,dodge:12}
+  },
+  {
+    id:'lt_skarn', displayName:'Gravecaller Skarn', title:'Reaper', species:'Marabou Stork', portraitKey:'shoebill', size:'xl',
+    lieutenant:true, isBoss:true, aiProfile:'reaper', aiType:'boss_lt_skarn',
+    intro:'Carrion shadows gather. Gravecaller Skarn comes to claim the fallen.',
+    passive:{name:'Feast on the Fallen',desc:'Every 3 turns heal 12% HP.'},
+    abilities:['lt_carrion_peck','lt_rotting_curse','lt_death_circle','lt_bone_harvest'],
+    baseStats:{hp:160,atk:7,def:6,matk:9,mdef:7,spd:5,en:3,acc:82,dodge:5}
+  },
+  {
+    id:'lt_ashwing', displayName:'Ashwing Pyre', title:'Scavenger', species:'Black Kite', portraitKey:'raven', size:'large',
+    lieutenant:true, isBoss:true, aiProfile:'scavenger', aiType:'boss_lt_ashwing',
+    intro:'Smoke circles overhead. Ashwing Pyre dives from the ash-dark sky.',
+    passive:{name:'Smoke Hunter',desc:'Deals +25% damage to enemies below 50% HP.'},
+    abilities:['lt_burning_dive','lt_ash_cloud','lt_carrion_rush','lt_smoke_spiral'],
+    baseStats:{hp:130,atk:11,def:5,matk:5,mdef:4,spd:8,en:3,acc:86,dodge:10}
+  },
+];
+
+const LIEUTENANT_ABILITY_DEFS={
+  lt_bonecrusher:{name:'Bonecrusher Strike',type:'heavy',enCost:1,baseDamage:18,atkScale:1.2,accuracy:0.85},
+  lt_shatter_grip:{name:'Shatter Grip',type:'control',enCost:1,baseDamage:6,atkScale:0.45,accuracy:0.90,status:'rooted',statusTurns:1},
+  lt_execution_clamp:{name:'Execution Clamp',type:'finisher',enCost:2,baseDamage:22,atkScale:1.35,accuracy:0.88,bonusLowHp:0.50,lowHpThreshold:0.40},
+  lt_dread_stare:{name:'Dread Stare',type:'control',enCost:1,baseDamage:0,accuracy:0.95,status:'feared',statusTurns:1},
+  lt_skyfall_strike:{name:'Skyfall Strike',type:'heavy',enCost:1,baseDamage:16,atkScale:1.1,accuracy:0.90,critBonus:0.20},
+  lt_razor_dive:{name:'Razor Dive',type:'multi',enCost:1,hits:2,baseDamage:8,atkScale:0.55,accuracy:0.90},
+  lt_wind_feint:{name:'Wind Feint',type:'utility',enCost:1,dodgeBuff:20,dodgeTurns:1},
+  lt_predator_mark:{name:'Predator Mark',type:'control',enCost:1,markMult:1.20,markTurns:1},
+  lt_iron_kick:{name:'Iron Kick',type:'heavy',enCost:1,baseDamage:14,atkScale:1.0,accuracy:0.90},
+  lt_crush_serpent:{name:'Crush Serpent',type:'control',enCost:1,baseDamage:10,atkScale:0.75,accuracy:0.88,stunChance:0.40,slowTurns:2,slowAmt:6},
+  lt_patrol_command:{name:'Patrol Command',type:'buff',enCost:1,defBuff:2,spdBuff:1,buffTurns:2},
+  lt_ground_sweep:{name:'Ground Sweep',type:'multi_heavy',enCost:2,baseDamage:16,atkScale:1.1,accuracy:0.85,stunChance:0.20},
+  lt_mist_curse:{name:'Mist Curse',type:'control',enCost:1,baseDamage:0,accuracy:0.95,status:'blind',statusTurns:1},
+  lt_future_sight:{name:'Future Sight',type:'buff',enCost:1,nextSpellMult:1.30},
+  lt_ghost_step:{name:'Ghost Step',type:'utility',enCost:1,dodgeBuff:25,dodgeTurns:1},
+  lt_tidal_strike:{name:'Tidal Strike',type:'spell',enCost:1,baseDamage:16,matkScale:1.15,accuracy:0.90},
+  lt_carrion_peck:{name:'Carrion Peck',type:'basic',enCost:1,baseDamage:12,atkScale:0.9,accuracy:0.92},
+  lt_rotting_curse:{name:'Rotting Curse',type:'control',enCost:1,baseDamage:0,accuracy:0.92,status:'poison',statusTurns:2,statusStacks:2},
+  lt_death_circle:{name:'Death Circle',type:'buff',enCost:1,matkBuff:3,buffTurns:3},
+  lt_bone_harvest:{name:'Bone Harvest',type:'heal_drain',enCost:2,baseDamage:12,matkScale:0.9,accuracy:0.90,healFromDamage:0.50},
+  lt_burning_dive:{name:'Burning Dive',type:'heavy',enCost:1,baseDamage:18,atkScale:1.2,accuracy:0.88},
+  lt_ash_cloud:{name:'Ash Cloud',type:'control',enCost:1,baseDamage:0,accuracy:0.95,accDebuff:15,debuffTurns:1},
+  lt_carrion_rush:{name:'Carrion Rush',type:'multi',enCost:1,hits:2,baseDamage:8,atkScale:0.55,accuracy:0.90},
+  lt_smoke_spiral:{name:'Smoke Spiral',type:'utility',enCost:1,dodgeBuff:20,dodgeTurns:1},
+};
+
+function getLieutenantPlayerSnapshot(){
+  const p=G.player||{};
+  return {
+    level:p.birdLevel||1,
+    upgradeCount:(G.collectedRewards||[]).length,
+    perkCount:(G.runPerks||[]).length,
+    masteryCount:(G.runMasteries||[]).length,
+    atk:p.stats?.atk||0, matk:p.stats?.matk||0, def:p.stats?.def||0, mdef:p.stats?.mdef||0, spd:p.stats?.spd||0,
+  };
+}
+function buildScaledLieutenantBoss(baseDef,endlessStage,playerSnapshot={}){
+  const st=Math.max(30,Number(endlessStage)||30);
+  const milestoneIndex=Math.max(1,Math.floor((st-20)/10));
+  const b=baseDef.baseStats||{};
+  let hp=(b.hp||1)*(1+milestoneIndex*0.18);
+  let atk=(b.atk||1)*(1+milestoneIndex*0.10);
+  let matk=(b.matk||1)*(1+milestoneIndex*0.10);
+  let def=(b.def||0)+Math.floor(milestoneIndex/2);
+  let mdef=(b.mdef||0)+Math.floor(milestoneIndex/2);
+  let spd=(b.spd||1)+Math.max(0,Math.floor((milestoneIndex-1)/3));
+
+  const powerScore=(playerSnapshot.level||1)
+    +((playerSnapshot.upgradeCount||0)*0.35)
+    +((playerSnapshot.perkCount||0)*1.5)
+    +((playerSnapshot.masteryCount||0)*1.2);
+  const expectedScoreForStage=8+(milestoneIndex*4);
+  const delta=Math.max(0,powerScore-expectedScoreForStage);
+  const hpCorrectionMult=1+clamp(delta*0.01,0,0.15);
+  const atkCorrectionMult=1+clamp(delta*0.005,0,0.10);
+  const defCorrectionBonus=clamp(Math.floor(delta/10),0,2);
+
+  hp*=hpCorrectionMult;
+  atk*=atkCorrectionMult;
+  matk*=atkCorrectionMult;
+  def+=defCorrectionBonus;
+  mdef+=defCorrectionBonus;
+
+  const threatHpMult=1.90+(milestoneIndex*0.12);
+  const threatDmgMult=1.45+(milestoneIndex*0.08);
+  hp*=threatHpMult;
+  atk*=threatDmgMult;
+  matk*=threatDmgMult;
+  def+=2+Math.floor(milestoneIndex/2);
+  mdef+=2+Math.floor(milestoneIndex/2);
+  spd+=Math.floor(milestoneIndex/4);
+
+  const e={
+    id:baseDef.id,name:baseDef.displayName,title:baseDef.title,species:baseDef.species,portraitKey:baseDef.portraitKey,
+    lieutenant:true,isBoss:true,size:baseDef.size||'xl',emoji:'🪶',aiType:baseDef.aiType,aiProfile:baseDef.aiProfile,
+    bossTitle:`👑 ${baseDef.title}`,
+    passiveName:baseDef.passive?.name||'', passiveDesc:baseDef.passive?.desc||'',
+    abilities:(baseDef.abilities||[]).map(id=>({id,name:LIEUTENANT_ABILITY_DEFS[id]?.name||id,tag:String(LIEUTENANT_ABILITY_DEFS[id]?.type||'').toUpperCase()})),
+    introLine:baseDef.intro||'',
+    stats:{
+      hp:Math.max(1,Math.floor(hp)),maxHp:Math.max(1,Math.floor(hp)),
+      atk:Math.max(1,Math.floor(atk)),def:Math.max(0,Math.floor(def)),
+      matk:Math.max(1,Math.floor(matk)),mdef:Math.max(0,Math.floor(mdef)),
+      spd:Math.max(1,Math.floor(spd)),acc:b.acc||84,dodge:b.dodge||6,mdodge:Math.max(0,Math.floor((b.dodge||6)*0.6))
+    },
+    energyMax:Math.max(1,b.en||3),energy:Math.max(1,b.en||3),
+    _ltMilestone:milestoneIndex,_ltPowerDelta:delta,
+  };
+  e.hp=e.stats.hp; e.maxHp=e.stats.maxHp; e.atk=e.stats.atk; e.def=e.stats.def; e.spd=e.stats.spd; e.acc=e.stats.acc; e.dodge=e.stats.dodge; e.matk=e.stats.matk; e.mdef=e.stats.mdef;
+  e.lieutenant={turn:0,lastHitConnected:false,velocityStacks:0,markTurns:0,futureSight:0,dodgeBuffTurns:0,dodgeBuffAmt:0,deathCircle:false,deathCircleStacks:0,lastMoveType:'',lastMoveDidDamage:true,patrolBuffTurns:0,futureSpellMult:1};
+  return e;
+}
+function ensureLieutenantRotation(){
+  if(!Array.isArray(G.endlessLieutenantRotation)) G.endlessLieutenantRotation=[];
+  if(!Array.isArray(G.endlessLieutenantHistory)) G.endlessLieutenantHistory=[];
+  if(!G.endlessLieutenantRotation.length){
+    G.endlessLieutenantRotation=COURT_LIEUTENANTS.map((_,i)=>i).sort(()=>Math.random()-.5);
+    if(G.endlessLieutenantHistory[0]===COURT_LIEUTENANTS[G.endlessLieutenantRotation[0]]?.id){
+      G.endlessLieutenantRotation.push(G.endlessLieutenantRotation.shift());
+    }
+  }
+}
+function makeCourtLieutenantByStage(stage=30){
+  ensureLieutenantRotation();
+  let idx=G.endlessLieutenantRotation.shift();
+  const lastId=G.lastLieutenantId||G._lastLieutenantId||'';
+  if(COURT_LIEUTENANTS[idx]?.id===lastId && G.endlessLieutenantRotation.length){
+    G.endlessLieutenantRotation.push(idx);
+    idx=G.endlessLieutenantRotation.shift();
+  }
+  const base=COURT_LIEUTENANTS[idx]||COURT_LIEUTENANTS[0];
+  G.endlessLieutenantHistory.unshift(base.id);
+  G.endlessLieutenantHistory=G.endlessLieutenantHistory.slice(0,24);
+  G.lastLieutenantId=base.id;
+  G._lastLieutenantId=base.id;
+  return buildScaledLieutenantBoss(base, stage, getLieutenantPlayerSnapshot());
+}
 const ENEMY_ABILITY_POOL = {
   // Enemy abilities are simplified versions
   eVenom:   {name:'Venom Peck', desc:'Applies 2 Poison stacks (DoT).', dmg:'0 direct', dodgeable:true, fn(e,p,G){applyAilment('player','poison',2);logMsg(`☣ ${e.name} spreads Poison!`,'enemy-action');}},
@@ -1195,6 +1365,7 @@ const ENEMIES = [
   // Final Boss
   makeEnemy('Sky Sovereign','👑',200,35,18,6,'berserker',true,'👑 Final Boss',{acc:90,dodge:12,size:'xl',abilities:['eRage','eStun','ePoison','eFear','eShield','eBurn'],portraitKey:'baldEagle'}),
 ];
+const STORY_STAGE_CAP = 20;
 
 // Birds that can appear as enemy combatants (adds variety)
 const BIRD_ENEMIES = [
@@ -1293,6 +1464,74 @@ const UPGRADE_CARDS_REWORK = [
 
 function getUpgradePool(){ return UPGRADE_CARDS_REWORK.slice(); }
 
+function createReward(def={}){
+  const uiText = def.uiText || {};
+  const source = Array.isArray(def.source)
+    ? def.source
+    : (def.source ? [def.source] : ['battle']);
+  const reward = {
+    ...def,
+    id: String(def.id||''),
+    kind: def.kind || def.type || 'upgrade',
+    tier: def.tier || 'grey',
+    source,
+    uiText: {
+      icon: uiText.icon ?? def.icon ?? '🎁',
+      name: uiText.name ?? def.name ?? def.id ?? 'Reward',
+      desc: uiText.desc ?? def.desc ?? ''
+    },
+    apply: typeof def.apply==='function' ? def.apply : ()=>{}
+  };
+  reward.icon = reward.uiText.icon;
+  reward.name = reward.uiText.name;
+  reward.desc = reward.uiText.desc;
+  return reward;
+}
+
+const REWARD_FILTERS = {
+  story: rw => !rw.source.includes('endless'),
+  endless: rw => rw.source.includes('endless'),
+  shop: rw => rw.source.includes('shop'),
+  battle: rw => rw.source.includes('battle'),
+  tier: tier => rw => rw.tier===tier,
+  notUsed: used => rw => !used.has(rw.id),
+  notRunLocked: () => rw => !(rw.oncePerRun && G.runUpgradesPurchased?.has(rw.id))
+};
+
+function rollRewardPool(pool,{count=1,predicates=[],usedIds=null}={}){
+  const used = usedIds || new Set();
+  const filt = pool.filter(rw=>predicates.every(fn=>fn(rw)));
+  const bag = filt.slice();
+  const picks=[];
+  while(picks.length<count && bag.length){
+    const idx=Math.floor(Math.random()*bag.length);
+    const rw=bag.splice(idx,1)[0];
+    if(used.has(rw.id)) continue;
+    used.add(rw.id);
+    picks.push(rw);
+  }
+  return picks;
+}
+
+function applyRewardEffect(reward, player, context={}){
+  if(!reward || !player) return false;
+  if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased = new Set();
+  const alreadyApplied = G.runUpgradesPurchased.has(reward.id);
+  const preventDuplicates = context.preventDuplicates ?? true;
+  if(preventDuplicates && alreadyApplied && (reward.oncePerRun || reward.stackable===false)) return false;
+
+  reward.apply(player, context);
+
+  if(reward.kind==='relic' || reward.kind==='augment' || reward.kind==='mutation'){
+    if(!player.endlessRewards) player.endlessRewards=[];
+    if(!player.endlessRewards.some(x=>x.id===reward.id)){
+      player.endlessRewards.push({id:reward.id,type:reward.kind,name:reward.name});
+    }
+  }
+  if(reward.oncePerRun || reward.stackable===false) G.runUpgradesPurchased.add(reward.id);
+  return true;
+}
+
 
 const ENDLESS_SKILL_AUGMENTS = [
   {id:'aug_razor_edge',name:'Razor Edge',tier:'blue',type:'augment',desc:'Endless only — Attack skills deal +20% damage to Bleeding enemies.',apply:p=>{p.augAttackVsBleedPct=(p.augAttackVsBleedPct||0)+0.20;}},
@@ -1364,38 +1603,29 @@ const ENDLESS_MUTATIONS = [
 ];
 
 function isEndlessRunActive(){ return !!(G.endlessMode && (G.stage||0)>20); }
-function getEndlessRewardPool(type){
-  if(type==='augment') return ENDLESS_SKILL_AUGMENTS;
-  if(type==='mutation') return ENDLESS_MUTATIONS;
-  return ENDLESS_RELICS;
+function getEndlessRewardPool(kind){
+  const base = kind==='augment' ? ENDLESS_SKILL_AUGMENTS : (kind==='mutation' ? ENDLESS_MUTATIONS : ENDLESS_RELICS);
+  return base.map(entry=>createReward({
+    ...entry,
+    kind: entry.type || kind || 'relic',
+    source:['battle','endless'],
+    endlessOnly:true,
+    oncePerRun:true,
+    uiText:{
+      icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
+      name:entry.name,
+      desc:entry.desc,
+    }
+  }));
 }
 function hasEndlessReward(id){
-  const seen=(G.player?.endlessRewards||[]).map(x=>x.id);
-  return seen.includes(id);
-}
-function buildEndlessRewardCard(entry){
-  return {
-    id:entry.id,
-    tier:entry.tier||'blue',
-    icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
-    name:entry.name,
-    desc:entry.desc,
-    endlessOnly:true,
-    apply:p=>{
-      if(!isEndlessRunActive()) return;
-      if(!p.endlessRewards) p.endlessRewards=[];
-      if(p.endlessRewards.some(x=>x.id===entry.id)) return;
-      p.endlessRewards.push({id:entry.id,type:entry.type,name:entry.name});
-      entry.apply?.(p);
-    }
-  };
+  return !!G.runUpgradesPurchased?.has(id);
 }
 function rollEndlessReward(kind='relic'){
   if(!isEndlessRunActive()) return null;
-  const pool=getEndlessRewardPool(kind).filter(x=>!hasEndlessReward(x.id));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  return buildEndlessRewardCard(pick);
+  const pool=getEndlessRewardPool(kind);
+  const [pick]=rollRewardPool(pool,{count:1,predicates:[REWARD_FILTERS.endless,REWARD_FILTERS.notRunLocked()]});
+  return pick||null;
 }
 function applyEndlessProgressionMilestones(){
   if(!isEndlessRunActive()) return;
@@ -1419,7 +1649,8 @@ function applyEndlessProgressionMilestones(){
 }
 
 function rollUpgradeCard(){
-  const tier=rollRarity();
+  // Stage victory rewards: exclude Legendary (gold) tier.
+  const tier=rollWeighted(['grey','green','blue','purple'],[42,34,16,8]);
   const pool=getUpgradePool().filter(c=>c.tier===tier);
   return pool.length?pool[Math.floor(Math.random()*pool.length)]:null;
 }
@@ -1484,6 +1715,7 @@ const ALL_REWARDS = [
   {id:'l_trueSight', tier:'gold', icon:'👁️', name:'True Sight', desc:'All skills: -12% miss chance (min 0%)', tags:['utility','accuracy'], apply:p=>{ p.missReduce=(p.missReduce||0)+0.12; }},
   {id:'l_roostFeast', tier:'gold', icon:'🔥', name:'Eternal Roost', desc:'Full heal + +12% Max HP extra heal after every battle', tags:['sustain','scaling'], apply:p=>{ p.stats.hp=p.stats.maxHp; p.postBattleHealBonusPct=(p.postBattleHealBonusPct||0)+0.12; }},
 ];
+const CORE_UPGRADE_REWARDS = ALL_REWARDS.map(rw=>createReward({...rw,kind:'upgrade',source:['battle','shop'],oncePerRun:rw.stackable===false}));
 
 // ============================================================
 //  LEARNABLE ABILITIES — universal abilities gained at level-up
@@ -2332,7 +2564,338 @@ function removeMimicEverywhere(){
   if(typeof BIRDS!=='undefined') Object.values(BIRDS).forEach(b=>{ if(Array.isArray(b.extraAbilities)) b.extraAbilities=b.extraAbilities.filter(id=>id!=='mimic'); });
 }
 
-const MAGIC_CLASSES = new Set(['mage','bard','summoner']);
+const CLASS_TAG_ALIASES = {
+  assassin:['assassin','trickster'],
+  trickster:['trickster','assassin'],
+  knight:['knight','tank','bruiser'],
+  tank:['tank','knight','bruiser'],
+  bruiser:['bruiser','tank','knight'],
+  mage:['mage','summoner','caster'],
+  summoner:['summoner','mage','caster'],
+  caster:['caster','mage','summoner'],
+  bard:['bard','support'],
+  support:['support','bard'],
+  ranger:['ranger'],
+};
+
+function normalizeClassTag(raw){
+  const cls=String(raw||'').toLowerCase().trim();
+  if(!cls) return 'assassin';
+  if(cls==='tank' || cls==='knight') return 'bruiser';
+  if(cls==='mage' || cls==='summoner') return 'caster';
+  if(cls==='bard') return 'support';
+  if(cls==='assassin') return 'trickster';
+  return cls;
+}
+function getClassAliases(raw){
+  const cls=String(raw||'').toLowerCase().trim();
+  if(CLASS_TAG_ALIASES[cls]) return CLASS_TAG_ALIASES[cls];
+  const n=normalizeClassTag(cls);
+  return CLASS_TAG_ALIASES[n] || [n];
+}
+function classMatches(raw, expected){
+  const left=new Set(getClassAliases(raw));
+  const right=getClassAliases(expected);
+  return right.some(v=>left.has(v));
+}
+
+const MAGIC_CLASSES = new Set(['mage','bard','summoner','caster','support','trickster']);
+
+const PERK_DEFS={
+  keenSight:{id:'keenSight',name:'Keen Sight',type:'PERK',tier:'grey',pools:['attack'],desc:'Attacks gain +6 ACC.',tags:['ACC','ATTACK'],effect:{statMods:{acc:6}}},
+  earlyStrike:{id:'earlyStrike',name:'Early Strike',type:'PERK',tier:'grey',pools:['attack'],desc:'Gain +2 ATK.',tags:['ATK','OPENING'],effect:{statMods:{atk:2}}},
+  battleInstinct:{id:'battleInstinct',name:'Battle Instinct',type:'PERK',tier:'green',pools:['attack'],desc:'Gain +1 ATK and +1 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:1,spd:1}}},
+  bloodSmell:{id:'bloodSmell',name:'Blood Smell',type:'PERK',tier:'blue',pools:['attack','status'],desc:'Gain +2 ATK against wounded prey.',tags:['ATK','BLEED'],effect:{statMods:{atk:2}}},
+  cleanStrike:{id:'cleanStrike',name:'Clean Strike',type:'PERK',tier:'green',pools:['attack'],desc:'Gain +8 ACC and +1 ATK.',tags:['ACC','ATK'],effect:{statMods:{acc:8,atk:1}}},
+  swiftPredator:{id:'swiftPredator',name:'Swift Predator',type:'PERK',tier:'blue',pools:['attack'],desc:'Gain +3 ATK.',tags:['ATK'],effect:{statMods:{atk:3}}},
+  rhythmStrike:{id:'rhythmStrike',name:'Rhythm Strike',type:'PERK',tier:'blue',pools:['attack'],desc:'Gain +2 ATK and +1 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:2,spd:1}}},
+  huntersPatience:{id:'huntersPatience',name:'Hunter\'s Patience',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +12 ACC and +2 ATK.',tags:['ACC','ATK'],effect:{statMods:{acc:12,atk:2}}},
+  predatorsEdge:{id:'predatorsEdge',name:'Predator\'s Edge',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +4 ATK.',tags:['ATK'],effect:{statMods:{atk:4}}},
+  galeMomentum:{id:'galeMomentum',name:'Gale Momentum',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +2 ATK and +2 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:2,spd:2}}},
+  echoStrike:{id:'echoStrike',name:'Echo Strike',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +3 ATK and +8 ACC.',tags:['ATK','ACC'],effect:{statMods:{atk:3,acc:8}}},
+  apexHunter:{id:'apexHunter',name:'Apex Hunter',type:'PERK',tier:'gold',pools:['attack'],desc:'Gain +6 ATK and +10 ACC.',tags:['ATK','ACC'],effect:{statMods:{atk:6,acc:10}}},
+
+  spellFocus:{id:'spellFocus',name:'Spell Focus',type:'PERK',tier:'grey',pools:['spell'],desc:'Gain +2 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:2}}},
+  venomSense:{id:'venomSense',name:'Venom Sense',type:'PERK',tier:'green',pools:['spell','status'],desc:'Gain +2 M.ATK and +4 ACC.',tags:['MATK','STATUS'],effect:{statMods:{matk:2,acc:4}}},
+  arcPulse:{id:'arcPulse',name:'Arc Pulse',type:'PERK',tier:'blue',pools:['spell'],desc:'Gain +3 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:3}}},
+  toxicFlow:{id:'toxicFlow',name:'Toxic Flow',type:'PERK',tier:'purple',pools:['spell','status'],desc:'Gain +3 M.ATK and +1 SPD.',tags:['MATK','STATUS'],effect:{statMods:{matk:3,spd:1}}},
+  arcOverload:{id:'arcOverload',name:'Arc Overload',type:'PERK',tier:'gold',pools:['spell'],desc:'Gain +6 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:6}}},
+
+  wingGuard:{id:'wingGuard',name:'Wing Guard',type:'PERK',tier:'grey',pools:['survival'],desc:'Gain +2 DEF.',tags:['DEF','SURVIVAL'],effect:{statMods:{def:2}}},
+  windReader:{id:'windReader',name:'Wind Reader',type:'PERK',tier:'green',pools:['survival'],desc:'Gain +3 DODGE.',tags:['DODGE','SURVIVAL'],effect:{statMods:{dodge:3}}},
+  relentlessTalons:{id:'relentlessTalons',name:'Relentless Talons',type:'PERK',tier:'blue',pools:['survival'],desc:'Gain +1 DEF and +8 HP.',tags:['DEF','HP'],effect:{statMods:{def:1,maxHp:8,hp:8}}},
+  skyBattery:{id:'skyBattery',name:'Sky Battery',type:'PERK',tier:'purple',pools:['survival'],desc:'Gain +2 DEF and +12 HP.',tags:['DEF','HP'],effect:{statMods:{def:2,maxHp:12,hp:12}}},
+
+  featherstep:{id:'featherstep',name:'Featherstep',type:'PERK',tier:'grey',pools:['tempo'],desc:'Gain +2 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:2}}},
+  momentumWing:{id:'momentumWing',name:'Momentum Wing',type:'PERK',tier:'green',pools:['tempo'],desc:'Gain +2 SPD and +2 ACC.',tags:['SPD','ACC'],effect:{statMods:{spd:2,acc:2}}},
+  featherReflex:{id:'featherReflex',name:'Feather Reflex',type:'PERK',tier:'blue',pools:['tempo'],desc:'Gain +4 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:4}}},
+  skyDuelist:{id:'skyDuelist',name:'Sky Duelist',type:'PERK',tier:'blue',pools:['tempo'],desc:'Gain +3 SPD and +2 DODGE.',tags:['SPD','DODGE'],effect:{statMods:{spd:3,dodge:2}}},
+  predatorRush:{id:'predatorRush',name:'Predator Rush',type:'PERK',tier:'purple',pools:['tempo'],desc:'Gain +5 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:5}}},
+  energyEcho:{id:'energyEcho',name:'Energy Echo',type:'PERK',tier:'purple',pools:['tempo'],desc:'Gain +3 SPD and +6 ACC.',tags:['SPD','ACC'],effect:{statMods:{spd:3,acc:6}}},
+
+  bloodTracker:{id:'bloodTracker',name:'Blood Tracker',type:'PERK',tier:'green',pools:['status'],desc:'Gain +8 ACC and +1 SPD.',tags:['BLEED','ACC'],effect:{statMods:{acc:8,spd:1}}},
+  bloodEngine:{id:'bloodEngine',name:'Blood Engine',type:'PERK',tier:'blue',pools:['status'],desc:'Gain +2 ATK and +2 M.ATK.',tags:['BLEED','ATK','MATK'],effect:{statMods:{atk:2,matk:2}}},
+  bloodstorm:{id:'bloodstorm',name:'Bloodstorm',type:'PERK',tier:'gold',pools:['status'],desc:'Gain +4 ATK, +4 M.ATK, +2 SPD.',tags:['BLEED','ATK','MATK','SPD'],effect:{statMods:{atk:4,matk:4,spd:2}}},
+};
+
+const ALL_PERK_POOLS=['attack','spell','survival','tempo','status'];
+const PERK_SOURCE_TIER_RULES = {
+  'story-boss-10': {
+    allowedTiers:['grey','green','blue'],
+    weights:{grey:50,green:35,blue:15,purple:0,gold:0}
+  },
+  'story-boss-20': {
+    allowedTiers:['green','blue','purple'],
+    weights:{grey:0,green:45,blue:35,purple:20,gold:0}
+  },
+  'endless-milestone': {
+    allowedTiers:['green','blue','purple','gold'],
+    weights:{grey:0,green:35,blue:35,purple:22,gold:8}
+  },
+  'default': {
+    allowedTiers:['grey','green','blue','purple','gold'],
+    weights:{grey:40,green:30,blue:18,purple:10,gold:2}
+  }
+};
+const PERK_POOL_BIAS = {
+  striker:{primary:['attack','tempo'],secondary:['status']},
+  trickster:{primary:['tempo','status'],secondary:['spell','attack']},
+  mage:{primary:['spell','status'],secondary:['survival','tempo']},
+  tank:{primary:['survival','attack'],secondary:['status']},
+  defender:{primary:['survival','attack'],secondary:['status']},
+  bruiser:{primary:['attack','survival'],secondary:['status']},
+  predator:{primary:['attack','status'],secondary:['tempo']},
+  support:{primary:['survival','spell'],secondary:['tempo','status']},
+  summoner:{primary:['spell','tempo'],secondary:['status','survival']},
+  vanguard:{primary:['attack','survival'],secondary:['status']},
+  skirmisher:{primary:['attack','tempo'],secondary:['status','spell']},
+  tyrant:{primary:['attack','status'],secondary:['survival','spell']}
+};
+const PERK_SOURCE_UI = {
+  'story-boss-10': { title:'Choose a Perk', subtitle:'A new edge for the climb ahead.', flavor:'The forest has not broken you yet.', headerClass:'perk-source-stage10', frameStyle:'standard', accentTierFocus:['grey','green','blue'], bannerText:'Boss Reward' },
+  'story-boss-20': { title:'Final Perk Before Endless', subtitle:'Blakiston falls. The hunt continues.', flavor:'The court has fallen. The climb goes on.', headerClass:'perk-source-stage20', frameStyle:'boss', accentTierFocus:['green','blue','purple'], bannerText:'Duke Defeated' },
+  'endless-milestone': { title:'Endless Perk Choice', subtitle:'The deeper hunt grants stranger gifts.', flavor:'The hunt deepens beyond the old path.', headerClass:'perk-source-endless', frameStyle:'endless', accentTierFocus:['green','blue','purple','gold'], bannerText:'Endless Milestone' },
+  'default': { title:'Choose a Perk', subtitle:'Select one reward.', headerClass:'perk-source-default', frameStyle:'standard', accentTierFocus:['grey','green','blue','purple','gold'], bannerText:'Reward' }
+};
+const DEFAULT_PERK_POOL_BIAS={primary:['attack','survival'],secondary:['tempo','status','spell']};
+const PERK_DRAFT_DEBUG=false;
+
+const MASTERY_DEFS={
+  pinpointBasic:{id:'pinpointBasic',name:'Pinpoint Basic',type:'MASTERY',skillTag:'BASIC',desc:'+10% accuracy',tags:['BASIC','ACC'],effect:{accBonus:10}},
+  openingBasic:{id:'openingBasic',name:'Opening Basic',type:'MASTERY',skillTag:'BASIC',desc:'First use each battle +25% damage',tags:['BASIC','OPENING'],effect:{openingUseDamageMult:0.25}},
+  bloodBasic:{id:'bloodBasic',name:'Blood Basic',type:'MASTERY',skillTag:'BASIC',desc:'Crits apply Bleed(1)',tags:['BASIC','BLEED'],effect:{critAppliesBleed:1}},
+  executionHeavy:{id:'executionHeavy',name:'Execution Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'+25% dmg vs <50% HP',tags:['HEAVY','EXECUTE'],effect:{damageVsLowHpMult:0.25}},
+  piercingHeavy:{id:'piercingHeavy',name:'Piercing Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'Ignore 15% DEF',tags:['HEAVY','PIERCE'],effect:{pierceBonus:0.15}},
+  brutalHeavy:{id:'brutalHeavy',name:'Brutal Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'+10% crit chance',tags:['HEAVY','CRIT'],effect:{critBonus:10}},
+  venomSpell:{id:'venomSpell',name:'Venom Spell',type:'MASTERY',skillTag:'SPELL',desc:'Apply Poison(1) on hit',tags:['SPELL','POISON'],effect:{spellPoisonOnHit:1}},
+  dreadSpell:{id:'dreadSpell',name:'Dread Spell',type:'MASTERY',skillTag:'SPELL',desc:'First cast each battle applies Fear(1)',tags:['SPELL','FEAR'],effect:{firstCastFear:1}},
+  arcSpell:{id:'arcSpell',name:'Arc Spell',type:'MASTERY',skillTag:'SPELL',desc:'+15% magic damage',tags:['SPELL','DAMAGE'],effect:{spellDamageMult:0.15}},
+  reserveGuard:{id:'reserveGuard',name:'Reserve Guard',type:'MASTERY',skillTag:'GUARD',desc:'25% chance refund 1 EN',tags:['GUARD','ENERGY'],effect:{energyRefundChance:25}},
+  reboundGuard:{id:'reboundGuard',name:'Rebound Guard',type:'MASTERY',skillTag:'GUARD',desc:'Next attack +15% damage',tags:['GUARD','BUFF'],effect:{nextAttackDamageMult:0.15}},
+  clarityUtility:{id:'clarityUtility',name:'Clarity Utility',type:'MASTERY',skillTag:'UTILITY',desc:'Remove Fear on use',tags:['UTILITY','CLEANSE'],effect:{cleanseFearOnUse:true}},
+  razorPeck:{id:'razorPeck',name:'Razor Peck',type:'MASTERY',skillId:'peck',desc:'+20% damage vs Bleeding enemies',tags:['BASIC','BLEED'],effect:{damageVsBleedMult:0.20}},
+  galeEdge:{id:'galeEdge',name:'Gale Edge',type:'MASTERY',skillId:'windSlash',desc:'+15% dmg and +10 ACC',tags:['SPELL','ACC'],effect:{spellDamageMult:0.15,accBonus:10}},
+  crushingClamp:{id:'crushingClamp',name:'Crushing Clamp',type:'MASTERY',skillId:'shoebillClamp',desc:'+20% execute damage vs low HP',tags:['HEAVY','EXECUTE'],effect:{damageVsLowHpMult:0.20}},
+};
+function getRunPerks(){ return Array.isArray(G.runPerks)?G.runPerks:[]; }
+function getRunMasteries(){ return Array.isArray(G.runMasteries)?G.runMasteries:[]; }
+function getBirdPerks(birdKey){ const k=birdKey||G.player?.birdKey||''; if(!k) return []; if(!G.birdPerks||typeof G.birdPerks!=='object') G.birdPerks={}; if(!Array.isArray(G.birdPerks[k])) G.birdPerks[k]=[]; return G.birdPerks[k]; }
+function hasPerk(perkId,birdKey){ return getBirdPerks(birdKey).includes(perkId); }
+function grantPerk(perkDef,birdKey,source='generic',meta={}){ const def=(typeof perkDef==='string')?PERK_DEFS[perkDef]:perkDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k) return false; const owned=getBirdPerks(k); const count=owned.filter(x=>x===def.id).length; const cap=Number.isFinite(def?.stackCap)?def.stackCap:(def?.stackable?Infinity:1); if(count>=cap) return false; if(count>0 && !def.stackable) return false; owned.push(def.id); if(!Array.isArray(G.runPerks)) G.runPerks=[]; G.runPerks.push({perkId:def.id,source,birdKey:k,...(meta||{})}); applyBirdPerksToStats(k); recomputePerkAndMasteryEffects(); return true; }
+function getSkillMasteries(birdKey,skillId){ const k=birdKey||G.player?.birdKey||''; if(!k||!skillId) return []; if(!G.skillMasteries||typeof G.skillMasteries!=='object') G.skillMasteries={}; if(!G.skillMasteries[k]||typeof G.skillMasteries[k]!=='object') G.skillMasteries[k]={}; if(!Array.isArray(G.skillMasteries[k][skillId])) G.skillMasteries[k][skillId]=[]; return G.skillMasteries[k][skillId]; }
+function hasMastery(birdKey,skillId,masteryId){ return getSkillMasteries(birdKey,skillId).includes(masteryId); }
+function grantMastery(birdKey,skillId,masteryDef,source='endless-skill-cap'){ const def=(typeof masteryDef==='string')?MASTERY_DEFS[masteryDef]:masteryDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k||!skillId) return false; const owned=getSkillMasteries(k,skillId); if(owned.includes(def.id)&&!def.stackable) return false; owned.push(def.id); if(!Array.isArray(G.runMasteries)) G.runMasteries=[]; G.runMasteries.push({birdKey:k,skillId,masteryId:def.id,source}); recomputePerkAndMasteryEffects(); return true; }
+function getAbilityMasteryTags(ab,tmpl){ const t=tmpl||ABILITY_TEMPLATES?.[ab?.id]||ab||{}; const kind=String(t.btnType||t.type||'').toLowerCase(); const tags=[]; if(t.isBasic||/mainattack|peck/i.test(t.id||ab?.id||'')) tags.push('BASIC'); if(kind==='spell') tags.push('SPELL'); if(kind==='utility') tags.push('UTILITY'); if(kind==='physical'||kind==='ranged') tags.push((Number(ab?.energyCost??t.energyCost??0)>=2)?'HEAVY':'BASIC'); const d=String(t.desc||'').toLowerCase(); if(/stun|fear|confuse|slow|paraly/.test(d)) tags.push('CONTROL'); if(/guard|shield|defend|counter|brace/.test(d)||t.id==='crowDefend') tags.push('GUARD'); return [...new Set(tags)]; }
+function getAvailableMasteriesForSkill(birdKey,skillId){ const ab=(G.player?.abilities||[]).find(x=>x.id===skillId)||{id:skillId}; const tmpl=ABILITY_TEMPLATES?.[skillId]||ab; const tags=getAbilityMasteryTags(ab,tmpl); const owned=new Set(getSkillMasteries(birdKey,skillId)); return Object.values(MASTERY_DEFS).filter(m=>{ if(m.skillId&&m.skillId!==skillId) return false; if(!m.skillId&&m.skillTag&&!tags.includes(String(m.skillTag).toUpperCase())) return false; if(owned.has(m.id)&&!m.stackable) return false; return true; }); }
+
+function getPerkCount(){ return (Array.isArray(G.runPerks)?G.runPerks:[]).length; }
+function hasPerkSource(source, stage){
+  return (G.runPerks||[]).some(p=>p?.source===source && (stage===undefined || p?.stage===stage));
+}
+function getPerkSourceTierRule(source='default'){
+  const key=String(source||'default').toLowerCase();
+  return PERK_SOURCE_TIER_RULES[key]||PERK_SOURCE_TIER_RULES.default;
+}
+function getPerkSourceUIProfile(source='default'){
+  const key=String(source||'default').toLowerCase();
+  return PERK_SOURCE_UI[key]||PERK_SOURCE_UI.default;
+}
+function weightedPick(defs, getWeight){
+  if(!Array.isArray(defs)||!defs.length) return null;
+  const total=defs.reduce((a,d)=>a+Math.max(0,Number(getWeight?getWeight(d):1)||0),0);
+  if(total<=0) return defs[Math.floor(Math.random()*defs.length)];
+  let r=Math.random()*total;
+  for(const d of defs){ r-=Math.max(0,Number(getWeight?getWeight(d):1)||0); if(r<=0) return d; }
+  return defs[defs.length-1];
+}
+function getBirdMechanicalClass(birdKey){
+  const bird=BIRDS?.[birdKey]||{};
+  const raw=String(bird?.newClass||bird?.mechanicalClass||bird?.class||bird?.oldClass||'').toLowerCase().trim();
+  if(!raw) return 'striker';
+  if(raw==='caster') return 'mage';
+  return raw;
+}
+function getBirdPerkBias(birdKey){
+  const cls=getBirdMechanicalClass(birdKey);
+  const bias=PERK_POOL_BIAS[cls]||DEFAULT_PERK_POOL_BIAS;
+  return {classKey:cls,primary:[...(bias.primary||[])],secondary:[...(bias.secondary||[])]};
+}
+function getDynamicPerkPoolBias(birdKey){
+  const p=(G.player&&G.player.birdKey===birdKey)?G.player:null;
+  const s=p?.stats||{};
+  const bonusPools=[];
+  if((s.matk||0)>(s.atk||0)) bonusPools.push('spell');
+  const perkIds=new Set((G.runPerks||[]).filter(x=>!x?.birdKey||x.birdKey===birdKey).map(x=>x.perkId));
+  const bleedPerk=[...perkIds].some(id=>/blood|bleed|venom|toxic/i.test(id||''));
+  const bleedMastery=(G.runMasteries||[]).some(m=>(!m?.birdKey||m.birdKey===birdKey)&&/blood|venom|poison|bleed/i.test(String(m?.masteryId||'')));
+  const bleedReward=(G.collectedRewards||[]).some(r=>/blood|bleed|venom|poison|toxic/i.test(String(r?.name||'')+' '+String(r?.desc||'')));
+  if(bleedPerk||bleedMastery||bleedReward) bonusPools.push('status');
+  if((s.spd||0)>=16 || (s.dodge||0)>=20) bonusPools.push('tempo');
+  const hasGuardHealKit=(p?.abilities||[]).some(ab=>/guard|shield|defend|heal|recover|ward|barrier/i.test(String(ab?.name||'')+' '+String(ab?.desc||'')));
+  if((s.def||0)>=14 || hasGuardHealKit) bonusPools.push('survival');
+  return {bonusPools:[...new Set(bonusPools)]};
+}
+function getValidPerkDefsForBird(birdKey, source='default'){
+  return Object.values(PERK_DEFS||{}).filter(def=>{
+    if(!def?.id) return false;
+    const owned=getBirdPerks(birdKey).filter(x=>x===def.id).length;
+    const cap=Number.isFinite(def?.stackCap)?def.stackCap:(def?.stackable?Infinity:1);
+    if(owned>=cap) return false;
+    if(!Array.isArray(def?.pools)||!def.pools.length) return false;
+    if(source&&def?.sources&&!def.sources.includes(source)) return false;
+    return true;
+  });
+}
+function getValidPerkDefsForSource(activeBirdKey, source='default'){
+  const rule=getPerkSourceTierRule(source);
+  const allowed=new Set(rule.allowedTiers||PERK_SOURCE_TIER_RULES.default.allowedTiers);
+  return getValidPerkDefsForBird(activeBirdKey,source).filter(def=>allowed.has(def?.tier));
+}
+function filterPerksByPool(perks, poolName){
+  if(!poolName) return [];
+  return (perks||[]).filter(def=>Array.isArray(def?.pools)&&def.pools.includes(poolName));
+}
+function rollPerkTierForSource(source, candidatePerks=[]){
+  const rule=getPerkSourceTierRule(source);
+  const byTier={};
+  (candidatePerks||[]).forEach(def=>{ if(def?.tier){ byTier[def.tier]=(byTier[def.tier]||0)+1; } });
+  const tiers=(rule.allowedTiers||[]).filter(t=>(byTier[t]||0)>0);
+  if(!tiers.length) return null;
+  const picked=weightedPick(tiers, t=>Number(rule.weights?.[t]||0));
+  return picked||tiers[Math.floor(Math.random()*tiers.length)];
+}
+function chooseRandomPerkFromPoolAndTier(poolName, tier, perks, excludedIds=new Set()){
+  const poolPerks=filterPerksByPool(perks,poolName).filter(def=>!excludedIds.has(def.id) && (!tier || def.tier===tier));
+  return weightedPick(poolPerks);
+}
+function getPerkRewardOptions(activeBirdKey, count=3, source='default'){
+  const maxChoices=Math.max(1,Math.min(3,Number(count)||3));
+  const valid=getValidPerkDefsForSource(activeBirdKey,source);
+  if(!valid.length) return [];
+  const rule=getPerkSourceTierRule(source);
+  const allowedTiers=rule.allowedTiers||PERK_SOURCE_TIER_RULES.default.allowedTiers;
+  const {classKey,primary,secondary}=getBirdPerkBias(activeBirdKey);
+  const dynamic=getDynamicPerkPoolBias(activeBirdKey);
+  const chosen=[];
+  const excludedIds=new Set();
+  const pickFromPools=(pools=[], slot='')=>{
+    const remaining=valid.filter(def=>!excludedIds.has(def.id));
+    const rolledTier=rollPerkTierForSource(source, remaining);
+    if((PERK_DRAFT_DEBUG||G?.debugPerkDraft) && typeof console!=='undefined'){
+      console.debug('[perk-draft:slot]',{slot,source,pools,rolledTier,allowedTiers});
+    }
+    for(const pool of pools){
+      const pick=chooseRandomPerkFromPoolAndTier(pool, rolledTier, valid, excludedIds);
+      if(pick){ chosen.push(pick); excludedIds.add(pick.id); return pick; }
+    }
+    for(const pool of pools){
+      const poolAnyTier=chooseRandomPerkFromPoolAndTier(pool, null, valid, excludedIds);
+      if(poolAnyTier){ chosen.push(poolAnyTier); excludedIds.add(poolAnyTier.id); return poolAnyTier; }
+    }
+    const sameTierAnyPool=weightedPick(valid.filter(def=>!excludedIds.has(def.id) && (!rolledTier || def.tier===rolledTier)));
+    if(sameTierAnyPool){ chosen.push(sameTierAnyPool); excludedIds.add(sameTierAnyPool.id); return sameTierAnyPool; }
+    const fallback=weightedPick(valid.filter(def=>!excludedIds.has(def.id)));
+    if(fallback){ chosen.push(fallback); excludedIds.add(fallback.id); return fallback; }
+    return null;
+  };
+
+  pickFromPools([primary[0], ...primary.slice(1), ...secondary, ...ALL_PERK_POOLS],'primary-1');
+  if(maxChoices>1) pickFromPools([primary[1], primary[0], ...secondary, ...ALL_PERK_POOLS],'primary-2');
+  if(maxChoices>2){
+    const wildcardPools=[...dynamic.bonusPools, ...secondary, ...primary, ...ALL_PERK_POOLS];
+    pickFromPools(wildcardPools,'wildcard');
+  }
+  while(chosen.length<maxChoices){
+    const rem=weightedPick(valid.filter(def=>!excludedIds.has(def.id)));
+    if(!rem) break;
+    chosen.push(rem); excludedIds.add(rem.id);
+  }
+  if(chosen.length>=3){
+    const tiers=chosen.map(p=>p.tier);
+    const sameTier=tiers.every(t=>t===tiers[0]);
+    const remaining=valid.filter(def=>!excludedIds.has(def.id));
+    const otherTierExists=remaining.some(def=>def.tier!==tiers[0]);
+    if(sameTier && otherTierExists){
+      const idx=Math.floor(Math.random()*chosen.length);
+      const original=chosen[idx];
+      excludedIds.delete(original.id);
+      const rerollPool=(idx===0?primary[0]:idx===1?(primary[1]||primary[0]):(dynamic.bonusPools[0]||secondary[0]||primary[0]));
+      const rerollCandidate=weightedPick(valid.filter(def=>!excludedIds.has(def.id)&&def.tier!==tiers[0]&&(!rerollPool||def.pools?.includes(rerollPool))))
+        || weightedPick(valid.filter(def=>!excludedIds.has(def.id)&&def.tier!==tiers[0]));
+      if(rerollCandidate){ chosen[idx]=rerollCandidate; excludedIds.add(rerollCandidate.id); }
+      else excludedIds.add(original.id);
+    }
+  }
+  if((PERK_DRAFT_DEBUG||G?.debugPerkDraft) && typeof console!=='undefined'){
+    console.debug('[perk-draft]',{birdKey:activeBirdKey,classKey,primary,secondary,dynamic:dynamic.bonusPools,source,allowedTiers,chosen:chosen.map(x=>`${x.id}:${x.tier}`)});
+  }
+  return chosen;
+}
+function getAvailablePerkOptions(maxChoices=3, source='generic'){
+  return getPerkRewardOptions(G.player?.birdKey, maxChoices, source);
+}
+function getPerkRewardSourceForStage(clearedStage, isBoss){
+  if(!isBoss) return null;
+  if(!G.endlessMode){
+    if(clearedStage===10) return 'story-boss-10';
+    if(clearedStage===20) return 'story-boss-20';
+    return null;
+  }
+  const endlessStage=Math.max(0, clearedStage-20);
+  if(endlessStage>0 && endlessStage%10===0) return 'endless-milestone';
+  return null;
+}
+async function triggerPerkReward(source, ctx={}){
+  const storyCap=2, endlessCap=5;
+  const cap=G.endlessMode?endlessCap:storyCap;
+  if(getPerkCount()>=cap) return false;
+  if(source==='story-boss-10' && getPerkCount()>=1 && hasPerkSource('story-boss-10')) return false;
+  if(source==='story-boss-20' && getPerkCount()>=2 && hasPerkSource('story-boss-20')) return false;
+  if(source==='endless-milestone' && hasPerkSource('endless-milestone', ctx?.stage)) return false;
+
+  const opts=getPerkRewardOptions(G.player?.birdKey,3,source);
+  if(!opts.length) return false;
+  const uiProfile=getPerkSourceUIProfile(source);
+  const subtitle = source==='endless-milestone'
+    ? `${uiProfile.subtitle} (Stage ${Math.max(1,(ctx?.stage||G.stage)-20)}).`
+    : uiProfile.subtitle;
+  const choice=await openRewardChoiceModal({
+    kind:'perk', source, title:uiProfile.title, subtitle,
+    flavor:uiProfile.flavor, bannerText:uiProfile.bannerText,
+    headerClass:uiProfile.headerClass, frameStyle:uiProfile.frameStyle,
+    mustChoose:true,
+    options:opts.map(p=>({id:p.id,name:p.name,type:'PERK',desc:p.desc,tags:p.tags||[],payload:p})),
+  });
+  const picked=PERK_DEFS[choice?.id]||choice?.payload;
+  if(!picked) return false;
+  const ok=grantPerk(picked, G.player?.birdKey, source, {stage:ctx?.stage||G.stage});
+  if(ok) logMsg(`✨ Perk chosen: ${picked.name}`,'exp-gain');
+  return ok;
+}
+function applyBirdPerksToStats(birdKey){ if(!G.player||G.player.birdKey!==(birdKey||G.player.birdKey)) return; G.player._appliedPerkIds=G.player._appliedPerkIds||{}; getBirdPerks(G.player.birdKey).forEach(pid=>{ if(G.player._appliedPerkIds[pid]) return; const sm=PERK_DEFS[pid]?.effect?.statMods||{}; Object.entries(sm).forEach(([k,v])=>{ G.player.stats[k]=(G.player.stats[k]||0)+Number(v||0); }); G.player._appliedPerkIds[pid]=true; }); }
+function applySkillMasteriesToAbility(birdKey,skillId,abilityData){ const ids=getSkillMasteries(birdKey,skillId||abilityData?.id); abilityData._masteries=[...ids]; return abilityData; }
+function recomputePerkAndMasteryEffects(){ applyBirdPerksToStats(G.player?.birdKey); (G.player?.abilities||[]).forEach(ab=>applySkillMasteriesToAbility(G.player?.birdKey,ab.id,ab)); }
+function getAbilityMasteryRuntime(ab){ if(!ab) return {}; if(!ab._masteries) applySkillMasteriesToAbility(G.player?.birdKey,ab.id,ab); const out={accBonus:0,critBonus:0,pierceBonus:0,spellDamageMult:0,openingUseDamageMult:0,damageVsLowHpMult:0,damageVsBleedMult:0,critAppliesBleed:0,spellPoisonOnHit:0,firstCastFear:0}; (ab._masteries||[]).forEach(id=>{ const e=MASTERY_DEFS[id]?.effect||{}; Object.keys(out).forEach(k=>out[k]+=Number(e[k]||0)); }); return out; }
 // removeMimicEverywhere(); // moved to after G init
 const ABILITY_MAIN_ATTACK = {
   id:'mainAttack',
@@ -2386,11 +2949,11 @@ const STAGE_CLEAR_UNLOCKS = {
 };
 
 const SPECIAL_UNLOCKS = [
-  { id:'unlock_penguin', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='tank'), bird:'penguin', label:'Emperor Penguin' },
-  { id:'unlock_emu', test:()=> G.endlessMode && (G.endlessBattle||0) >= 40 && (BIRDS[G.player?.birdKey]?.class==='tank'), bird:'emu', label:'Emu' },
-  { id:'unlock_swan', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='bard'), bird:'swan', label:'Swan' },
-  { id:'unlock_flamingo', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='ranger'), bird:'flamingo', label:'Flamingo' },
-  { id:'unlock_seagull', test:()=> G.endlessMode && (G.player?.birdLevel||1) >= 21 && (BIRDS[G.player?.birdKey]?.class==='mage'), bird:'seagull', label:'Seagull' },
+  { id:'unlock_penguin', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && classMatches(BIRDS[G.player?.birdKey]?.class,'tank'), bird:'penguin', label:'Emperor Penguin' },
+  { id:'unlock_emu', test:()=> G.endlessMode && (G.endlessBattle||0) >= 40 && classMatches(BIRDS[G.player?.birdKey]?.class,'tank'), bird:'emu', label:'Emu' },
+  { id:'unlock_swan', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && classMatches(BIRDS[G.player?.birdKey]?.class,'bard'), bird:'swan', label:'Swan' },
+  { id:'unlock_flamingo', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && classMatches(BIRDS[G.player?.birdKey]?.class,'ranger'), bird:'flamingo', label:'Flamingo' },
+  { id:'unlock_seagull', test:()=> G.endlessMode && (G.player?.birdLevel||1) >= 21 && classMatches(BIRDS[G.player?.birdKey]?.class,'mage'), bird:'seagull', label:'Seagull' },
   { id:'unlock_albatross', test:()=> G.endlessMode && (G.endlessBattle||0) >= 50, bird:'albatross', label:'Albatross' },
 ];
 
@@ -2622,6 +3185,12 @@ let G = {
     expandedBird:null,
     combatDropdownOpen:{player:true,enemy:true},
   },
+  rewardChoiceState:null,
+  masteryChoiceState:null,
+  runPerks:[],
+  birdPerks:{},
+  runMasteries:[],
+  skillMasteries:{},
 };
 
 const DEFAULT_UI_STATE = Object.freeze({
@@ -2634,7 +3203,9 @@ const DEFAULT_UI_STATE = Object.freeze({
 
 function ensureUIState(){
   if(!G.ui || typeof G.ui!=='object') G.ui={};
+  const endlessUnlocked=isEndlessModeUnlocked();
   G.ui.gameMode = (G.ui.gameMode==='endless') ? 'endless' : 'story';
+  if(!endlessUnlocked && G.ui.gameMode==='endless') G.ui.gameMode='story';
   G.ui.battleLayout = (G.ui.battleLayout==='mobile') ? 'mobile' : 'desktop';
   G.ui.selectionView = String(G.ui.selectionView || DEFAULT_UI_STATE.selectionView);
   G.ui.expandedBird = G.ui.expandedBird ? String(G.ui.expandedBird) : null;
@@ -2642,6 +3213,9 @@ function ensureUIState(){
   G.ui.combatDropdownOpen.player = !!G.ui.combatDropdownOpen.player;
   G.ui.combatDropdownOpen.enemy = !!G.ui.combatDropdownOpen.enemy;
   return G.ui;
+}
+function isEndlessModeUnlocked(){
+  return isUnlocked('stage20') || isUnlocked('storyCompleted');
 }
 
 const TELEMETRY_KEY='avianAscent_telemetry_v1';
@@ -2806,6 +3380,23 @@ function renderPassiveBadge() {
   else badge.style.display='none';
 }
 
+function captureStatSnapshot(p){
+  const s=p?.stats||{};
+  return {hp:Number(s.hp||0),maxHp:Number(s.maxHp||0),atk:Number(s.atk||0),matk:Number(s.matk||0),def:Number(s.def||0),mdef:Number(s.mdef||0),spd:Number(s.spd||0),acc:Number(s.acc||0),dodge:Number(s.dodge||0)};
+}
+function diffStatSnapshot(before, after){
+  const out={};
+  Object.keys(before||{}).forEach(k=>{ const d=Number((after?.[k]||0)-(before?.[k]||0)); if(d!==0) out[k]=d; });
+  return out;
+}
+function recordCollectedReward(item, bonusStats={}){
+  if(!item) return;
+  if(!G.collectedRewards) G.collectedRewards=[];
+  const cleaned={};
+  Object.entries(bonusStats||{}).forEach(([k,v])=>{ if(Number(v)!==0) cleaned[k]=Number(v); });
+  G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc,bonusStats:cleaned});
+}
+
 // ============================================================
 //  NEST / INVENTORY
 // ============================================================
@@ -2815,6 +3406,7 @@ function openNest() {
   const sub=document.getElementById('nest-subtitle');
   const p=G.player;
   if(!p){content.innerHTML='<p style="color:var(--text-dim);text-align:center">No active run.</p>';modal.classList.add('open');return;}
+  const ps=G.playerStatus||{};
   sub.textContent=`${p.name} · Stage ${G.stage} · Lv.${p.birdLevel}`;
   let html='';
   // Passive trait
@@ -2827,10 +3419,10 @@ function openNest() {
   // Compute effective in-battle stats
   const _nestWarcry=G.warcryActive?Math.floor(s.atk*(1+G.warcryATK/100)):s.atk;
   const _nestDef=s.def+(G.battleHymnActive?G.battleHymnDEF:0);
-  const _nestAcc=Math.min(100,s.acc+(G.battleHymnActive?G.battleHymnACC:0)-(G.playerStatus.accDebuff||0));
+  const _nestAcc=Math.min(100,s.acc+(G.battleHymnActive?G.battleHymnACC:0)-(ps.accDebuff||0));
   const _nestDodge=getEffectiveDodge(p);
   const _nestMDodge=getEffectiveMdodge(p);
-  const _nestCrit=Math.min(100,(s.critChance||5)+(G.playerStatus.burning>0?20:0)+(p._velocityStacks||0));
+  const _nestCrit=Math.min(100,(s.critChance||5)+((ps.burning||0)>0?20:0)+(p._velocityStacks||0));
   const _nestCritMult=p.goldCritMult||1.8;
   function _nestStat(val,base,suffix=''){const d=val-base;const col=d>0?'#6ab89a':d<0?'#e87070':'var(--gold)';const arr=d>0?' ↑':d<0?' ↓':'';return `<span style="color:${col}">${val}${suffix}${arr}</span>`;}
   html+=`<div class="nest-section"><div class="nest-section-title">📊 Stats ${G.turn?'(In Battle)':''}</div>
@@ -2862,24 +3454,59 @@ function openNest() {
     </div>`;
   });
   html+=`</div></div>`;
-  // Collected rewards
+  // Collected rewards + compact upgrade summary
   if(G.collectedRewards&&G.collectedRewards.length>0){
+    const formatBonusLine=(bonusMap)=>{
+      const order=['atk','matk','def','mdef','spd','acc','dodge','maxHp','hp'];
+      const labels={atk:'ATT',matk:'MATT',def:'DEF',mdef:'MDEF',spd:'SPD',acc:'ACC',dodge:'DODGE',maxHp:'MAX HP',hp:'HP'};
+      const chunks=order
+        .filter(k=>Number(bonusMap?.[k]||0)!==0)
+        .map(k=>`${labels[k]} ${Number(bonusMap[k])>0?'+':''}${Math.round(Number(bonusMap[k]))}`);
+      return chunks.length?chunks.join(' · '):'No direct stat boosts recorded.';
+    };
+    const totalUpgradeBonuses={};
+    const applyBonus=(target,key,val)=>{ if(!key||!Number.isFinite(Number(val))||Number(val)===0) return; target[key]=(target[key]||0)+Number(val); };
+    const parseBonusFromText=(txt='')=>{
+      const out={};
+      const map={ATK:'atk',ATT:'atk','M.ATK':'matk',MATK:'matk',MATT:'matk','M. DEF':'mdef','M.DEF':'mdef',MDEF:'mdef',DEF:'def',SPD:'spd',ACC:'acc',DODGE:'dodge',HP:'hp','MAX HP':'maxHp'};
+      String(txt).replace(/([+-]?\d+)\s*%?\s*(ATT|ATK|M\.ATK|MATK|MATT|M\. ?DEF|MDEF|DEF|SPD|ACC|DODGE|MAX HP|HP)/gi,(_,n,label)=>{
+        const norm=map[String(label).toUpperCase().replace(/\s+/g,' ')];
+        if(norm) applyBonus(out,norm,Number(n));
+        return _;
+      });
+      return out;
+    };
     // Group duplicates
     const rewardMap=new Map();
     G.collectedRewards.forEach(r=>{
       const key=r.name;
+      const b=(r&&typeof r.bonusStats==='object')?r.bonusStats:parseBonusFromText(r?.desc||'');
+      Object.entries(b).forEach(([k,v])=>applyBonus(totalUpgradeBonuses,k,v));
       if(rewardMap.has(key)){rewardMap.get(key).count++;}
       else{rewardMap.set(key,{...r,count:1});}
     });
+    const perkBonuses={};
+    (G.runPerks||[]).forEach(r=>{
+      if(r?.birdKey && r.birdKey!==p.birdKey) return;
+      const sm=PERK_DEFS[r?.perkId]?.effect?.statMods||{};
+      Object.entries(sm).forEach(([k,v])=>applyBonus(perkBonuses,k,v));
+    });
+    html+=`<div class="nest-section"><div class="nest-section-title">📈 Upgrade / Perk Totals</div>
+      <div class="nest-bonus-line"><span class="nest-bonus-label">Upgrades:</span> ${formatBonusLine(totalUpgradeBonuses)}</div>
+      <div class="nest-bonus-line"><span class="nest-bonus-label">Perks:</span> ${formatBonusLine(perkBonuses)}</div>
+    </div>`;
     const tierOrder={gold:0,purple:1,blue:2,green:3,grey:4};
     const grouped=[...rewardMap.values()].sort((a,b)=>(tierOrder[a.tier]||4)-(tierOrder[b.tier]||4));
-    html+=`<div class="nest-section"><div class="nest-section-title">🎁 Collected Rewards (${G.collectedRewards.length})</div><div class="nest-rewards-list">`;
+    html+=`<div class="nest-section">
+      <details class="nest-dropdown">
+        <summary class="nest-dropdown-title">🎁 Upgrades Chosen (${G.collectedRewards.length})</summary>
+        <div class="nest-rewards-list">`;
     grouped.forEach(r=>{
       const tierColor={gold:'var(--gold)',purple:'var(--purple-light)',blue:'var(--blue-light)',green:'var(--green-light)',grey:'var(--text-dim)'}[r.tier]||'var(--text-dim)';
       const countBadge=r.count>1?`<span style="background:rgba(201,168,76,.2);border:1px solid var(--gold);border-radius:10px;padding:1px 7px;font-size:.72rem;color:var(--gold);font-family:Cinzel,serif;margin-left:6px">${r.count}×</span>`:'';
       html+=`<div class="nest-reward-row"><span class="nest-reward-icon">${r.icon}</span><span class="nest-reward-name" style="color:${tierColor}">${r.name}${countBadge}</span><span class="nest-reward-desc">${r.desc}</span></div>`;
     });
-    html+=`</div></div>`;
+    html+=`</div></details></div>`;
   }
   content.innerHTML=html;
   modal.classList.add('open');
@@ -2915,6 +3542,14 @@ function saveRun() {
       runUpgradesPurchased: [...(G.runUpgradesPurchased||new Set())],
       codex: JSON.parse(JSON.stringify(G.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}})),
       ui: JSON.parse(JSON.stringify(ensureUIState())),
+      runPerks: JSON.parse(JSON.stringify(G.runPerks||[])),
+      birdPerks: JSON.parse(JSON.stringify(G.birdPerks||{})),
+      runMasteries: JSON.parse(JSON.stringify(G.runMasteries||[])),
+      skillMasteries: JSON.parse(JSON.stringify(G.skillMasteries||{})),
+      endlessLieutenantHistory: JSON.parse(JSON.stringify(G.endlessLieutenantHistory||[])),
+      endlessLieutenantRotation: JSON.parse(JSON.stringify(G.endlessLieutenantRotation||[])),
+      lieutenantKills: JSON.parse(JSON.stringify(G.lieutenantKills||{})),
+      lastLieutenantId: G.lastLieutenantId||G._lastLieutenantId||'',
       inBattle: onBattleScreen && !!G.enemy && !G.battleOver,
       battle: (onBattleScreen && G.enemy && !G.battleOver) ? {
         enemy: JSON.parse(JSON.stringify(G.enemy)),
@@ -2952,11 +3587,23 @@ function continueRun() {
   G.endlessBattle=save.endlessBattle||0;
   G.bossKills=save.bossKills||0;
   G.stage=save.stage||1;
+  const ui=ensureUIState();
+  const uiWantsEndless=(ui.gameMode==='endless') && isEndlessModeUnlocked();
+  if(!uiWantsEndless) G.endlessMode=false;
+  if(!G.endlessMode && G.stage>STORY_STAGE_CAP) G.stage=STORY_STAGE_CAP;
   G.collectedRewards=save.collectedRewards||[];
   G.player=save.player;
   if(!Array.isArray(G.player.endlessRewards)) G.player.endlessRewards=[];
   G.runUpgradesPurchased=new Set(save.runUpgradesPurchased||[]);
   G.codex=save.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
+  G.runPerks=Array.isArray(save.runPerks)?save.runPerks:[];
+  G.birdPerks=save.birdPerks&&typeof save.birdPerks==='object'?save.birdPerks:{};
+  G.runMasteries=Array.isArray(save.runMasteries)?save.runMasteries:[];
+  G.skillMasteries=save.skillMasteries&&typeof save.skillMasteries==='object'?save.skillMasteries:{};
+  G.endlessLieutenantHistory=Array.isArray(save.endlessLieutenantHistory)?save.endlessLieutenantHistory:[];
+  G.endlessLieutenantRotation=Array.isArray(save.endlessLieutenantRotation)?save.endlessLieutenantRotation:[];
+  G.lieutenantKills=save.lieutenantKills&&typeof save.lieutenantKills==='object'?save.lieutenantKills:{};
+  G.lastLieutenantId=save.lastLieutenantId||G._lastLieutenantId||'';
   // Re-attach passive reference (fns can't be serialized)
   const bd=BIRDS[G.player.birdKey];
   if(bd) G.player.passive=bd.passive||null;
@@ -2964,6 +3611,7 @@ function continueRun() {
   removeMimicEverywhere();
   normalizeAbilityCooldownsForPlayer(G.player);
   enforceAbilityCosts(G.player);
+  recomputePerkAndMasteryEffects();
   // Migration: ensure mdodge and card stats exist
   if(G.player.stats.mdodge===undefined) G.player.stats.mdodge = G.player.stats.dodge||20;
   if(G.player.cardDodge===undefined) G.player.cardDodge=0;
@@ -2992,8 +3640,208 @@ function continueRun() {
   loadStage();
 }
 function goMainMenu() {
+  clearTimeout(G._victoryReturnTimer);
   if(G.player) saveRun();
   showScreen('screen-select');initSelectionSafe();
+}
+
+function returnToMenuFromVictory(){
+  clearTimeout(G._victoryReturnTimer);
+  if(G._pendingEndlessContinuation){
+    G._pendingEndlessContinuation=false;
+    G.endlessBattle=0;
+    advanceStage();
+    return;
+  }
+  if(G._pendingStage20Narrative){
+    G._pendingStage20Narrative=false;
+    startStage20NarrativeSequence();
+    return;
+  }
+  goMainMenu();
+}
+
+const STAGE20_NARRATIVE_TEXT = `Your feathers settle.
+
+The wind stills.
+
+Duke Blakiston lies before you.
+
+The tyrant of Blackstone — the owl whose shadow once ruled the forest — is now nothing more than a broken heap of dark feathers against the cold earth.
+
+For a long moment…
+
+no one moves.
+
+Then the branches begin to tremble.
+
+Wings approach.
+
+First a few.
+
+Then dozens.
+
+Then hundreds.
+
+Birds of every kind descend upon the clearing — robins, starlings, finches, crows, thrushes, hawks, and sparrows.
+
+Creatures who once feared even whispering rebellion now gather around the fallen Duke.
+
+They stare.
+
+At him.
+
+At you.
+
+A quiet sound begins to ripple through the flock.
+
+A whisper.
+
+A murmur.
+
+Then the forest speaks your name.
+
+"[Chosen Bird Title]..."
+
+Again.
+
+Louder.
+
+"[Chosen Bird Title]...!"
+
+The Murmur rises into the night sky.
+
+For the first time since Blackstone fell under tyrant rule…
+
+hope takes wing.
+
+But the night is not finished.
+
+The moon vanishes behind sudden shadows.
+
+Six shapes tear through the sky.
+
+The Court of Blakiston descends.
+
+Condor wings crash like thunder.
+
+Hawk talons slice through the air.
+
+The assassin’s silent glide cuts through the flock like a blade.
+
+Chaos erupts as the Court forces their way through the gathered birds.
+
+Two of them seize the fallen Duke by his talons.
+
+As they lift him from the ground, his chest feathers shudder.
+
+A breath.
+
+Another.
+
+Then the great owl’s eyes snap open.
+
+Blakiston lives.
+
+His hoot rolls across the clearing like distant thunder.
+
+"You and this forest will pay for this…"
+
+His burning gaze fixes upon you.
+
+"My fledglings will rout you all."
+
+The Court beats their wings violently, driving back the gathering flock.
+
+Feathers scatter as birds are forced away from the clearing.
+
+Then they rise.
+
+Up.
+
+Higher.
+
+Carrying their wounded tyrant into the night.
+
+Toward the distant silhouette of Blackstone Castle.
+
+The flock slowly regathers.
+
+The Murmur is quieter now.
+
+But it has not died.
+
+The forest has seen something tonight.
+
+The tyrant can bleed.
+
+And you…
+
+have begun something far greater than a battle.
+
+Your ascent is not over.
+
+It has only just begun.`;
+
+function getChosenBirdTitle(){
+  const b=BIRDS?.[G.player?.birdKey]||{};
+  return b.title || b.name || G.player?.name || 'Wings of Dawn';
+}
+function startStage20NarrativeSequence(){
+  const gameover=document.getElementById('screen-gameover');
+  const scroll=document.getElementById('stage20-story-scroll');
+  const viewport=document.getElementById('stage20-story-viewport');
+  const btn=document.getElementById('stage20-story-continue');
+  if(!scroll||!viewport||!btn){ goMainMenu(); return; }
+
+  clearTimeout(G._victoryReturnTimer);
+  btn.style.display='none';
+  const birdTitle=getChosenBirdTitle();
+  scroll.textContent=STAGE20_NARRATIVE_TEXT.replace(/\[Chosen Bird Title\]/g,birdTitle);
+
+  if(gameover){ gameover.style.transition='opacity .7s ease'; gameover.style.opacity='0'; }
+  setTimeout(()=>{
+    if(gameover){ gameover.style.opacity=''; gameover.style.transition=''; }
+    showScreen('screen-stage20-story');
+    runStage20NarrativeAutoScroll();
+  },700);
+}
+function runStage20NarrativeAutoScroll(){
+  const scroll=document.getElementById('stage20-story-scroll');
+  const viewport=document.getElementById('stage20-story-viewport');
+  const btn=document.getElementById('stage20-story-continue');
+  if(!scroll||!viewport||!btn) return;
+  btn.style.display='none';
+  const total=Math.max(1,scroll.scrollHeight + viewport.clientHeight + 120);
+  const basePxPerSec=22;
+  let speedMult=1;
+  let y=viewport.clientHeight;
+  let last=performance.now();
+  if(G._stage20NarrativeRAF) cancelAnimationFrame(G._stage20NarrativeRAF);
+  if(G._stage20NarrativeKeyHandler) document.removeEventListener('keydown', G._stage20NarrativeKeyHandler);
+  G._stage20NarrativeKeyHandler=(ev)=>{ if(ev.key===' '||ev.key==='Enter') speedMult=2.2; };
+  document.addEventListener('keydown', G._stage20NarrativeKeyHandler);
+  function tick(now){
+    const dt=Math.max(0,(now-last)/1000); last=now;
+    y-=basePxPerSec*speedMult*dt;
+    scroll.style.transform=`translateY(${y}px)`;
+    if((viewport.clientHeight - y) < total){
+      G._stage20NarrativeRAF=requestAnimationFrame(tick);
+      return;
+    }
+    if(G._stage20NarrativeKeyHandler){ document.removeEventListener('keydown', G._stage20NarrativeKeyHandler); G._stage20NarrativeKeyHandler=null; }
+    btn.style.display='inline-block';
+  }
+  G._stage20NarrativeRAF=requestAnimationFrame(tick);
+}
+function finishStage20Narrative(){
+  if(G._stage20NarrativeRAF){ cancelAnimationFrame(G._stage20NarrativeRAF); G._stage20NarrativeRAF=null; }
+  if(G._stage20NarrativeKeyHandler){ document.removeEventListener('keydown', G._stage20NarrativeKeyHandler); G._stage20NarrativeKeyHandler=null; }
+  grantUnlock('stage20');
+  grantUnlock('juvenileWin');
+  grantUnlock('storyCompleted');
+  G.courtLieutenantsUnlocked=true;
+  goMainMenu();
 }
 
 // ============================================================
@@ -3003,9 +3851,9 @@ function showNextStagePreview() {
   const el=document.getElementById('next-stage-preview');
   if(!el) return;
   const nextStage=G.stage+1;
-  if(nextStage>ENEMIES.length&&!G.endlessMode){el.style.display='none';return;}
+  if(nextStage>STORY_STAGE_CAP&&!G.endlessMode){el.style.display='none';return;}
   let enemy;
-  if(G.endlessMode&&nextStage>ENEMIES.length){
+  if(G.endlessMode&&nextStage>STORY_STAGE_CAP){
     el.innerHTML=`<div class="nsp-title">Next Up</div><div class="nsp-enemy">⚔</div><div class="nsp-name" style="color:var(--gold)">Endless Battle ${G.endlessBattle+1}</div><div class="nsp-stats">Scaled enemies await...</div>`;
   } else {
     enemy=ENEMIES[Math.min(nextStage-1,ENEMIES.length-1)];
@@ -3020,9 +3868,22 @@ function showNextStagePreview() {
 // ============================================================
 const SIZE_ORDER = ['tiny','small','medium','large','xl'];
 const SIZE_LABELS = {tiny:'Tiny',small:'Small',medium:'Medium',large:'Large',xl:'X-Large'};
-const CLASS_ORDER = ['assassin','knight','mage','bard','tank','ranger','summoner'];
-const CLASS_LABELS = {assassin:'⚔️ Assassin',knight:'🛡️ Knight',mage:'✨ Mage',bard:'🎵 Bard',tank:'🪨 Tank',ranger:'🏹 Ranger',summoner:'🌊 Summoner'};
-const CLASS_FLAVOR = {assassin:'Burst dmg, crit fishing, evasive.',knight:'Balanced physical, DEF/ACC.',mage:'Pure songs/spells, debuff control.',bard:'Song mix + physical hybrid.',tank:'Sustain bricks, high HP.',ranger:'Projectile pressure, pierce and slows.',summoner:'Mob caller, flock tactics.'};
+const CLASS_ORDER = ['trickster','ranger','bruiser','caster','support'];
+const CLASS_LABELS = {trickster:'🗡️ Trickster',ranger:'🏹 Ranger',bruiser:'🛡️ Bruiser',caster:'✨ Caster',support:'🎵 Support'};
+const CLASS_FLAVOR = {trickster:'Burst damage, crit pressure, evasive tempo.',ranger:'Projectile pressure, pierce and slows.',bruiser:'Frontline durability with reliable physical pressure.',caster:'Spells/songs with control, ailments, and scaling.',support:'Team utility, sustain, and battlefield tempo buffs.'};
+
+function getBirdClassTag(bird){
+  return normalizeClassTag(bird?.class||'');
+}
+function getBirdClassStyleTag(bird){
+  const cls=String(bird?.class||'').toLowerCase();
+  if(cls==='trickster' || cls==='assassin') return 'assassin';
+  if(cls==='ranger') return 'ranger';
+  if(cls==='bruiser' || cls==='knight' || cls==='tank') return 'knight';
+  if(cls==='caster' || cls==='mage' || cls==='summoner') return 'mage';
+  if(cls==='support' || cls==='bard') return 'bard';
+  return 'knight';
+}
 let shopPurchaseMade = false;
 
 function initSelection() {
@@ -3063,12 +3924,19 @@ function buildGameModeToggle(){
   const host=document.getElementById('game-mode-toggle');
   if(!host) return;
   const ui=ensureUIState();
+  const endlessUnlocked=isEndlessModeUnlocked();
   const isEndless=(ui.gameMode==='endless');
-  host.innerHTML=`<div class="mode-toggle"><button class="mode-toggle-btn ${!isEndless?'active':''}" onclick="setGameMode('story',this)">📖 Story Mode</button><button class="mode-toggle-btn ${isEndless?'active':''}" onclick="setGameMode('endless',this)">♾ Endless Mode</button></div>`;
+  host.innerHTML=`<div class="mode-toggle"><button class="mode-toggle-btn ${!isEndless?'active':''}" onclick="setGameMode('story',this)">📖 Story Mode</button><button class="mode-toggle-btn ${isEndless?'active':''} ${!endlessUnlocked?'locked':''}" onclick="setGameMode('endless',this)" ${endlessUnlocked?'':'disabled title="Defeat Duke Blakiston (Stage 20) to unlock Endless Mode."'}>♾ Endless Mode${endlessUnlocked?'':' 🔒'}</button></div>${endlessUnlocked?'':'<div style="margin-top:6px;font-size:.72rem;color:var(--text-dim)">Defeat Duke Blakiston in Story Mode to unlock Endless.</div>'}`;
 }
 
 function setGameMode(mode,btn){
   const ui=ensureUIState();
+  if(mode==='endless' && !isEndlessModeUnlocked()){
+    ui.gameMode='story';
+    buildGameModeToggle();
+    logMsg('🔒 Endless Mode unlocks after defeating Duke Blakiston (Stage 20).','system');
+    return;
+  }
   ui.gameMode=(mode==='endless')?'endless':'story';
   applyUIStateToDOM();
   buildGameModeToggle();
@@ -3197,7 +4065,7 @@ function buildBirdGrid() {
   let safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
     return !!(b && b.stats && Number.isFinite(b.stats.hp) && Number.isFinite(b.stats.atk) && Number.isFinite(b.stats.def));
   });
-  if(classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>String(b.class||'').toLowerCase()===classFilter);
+  if(classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>getBirdClassTag(b)===classFilter);
   const fallbackStarters = ['sparrow','goose','blackbird','crow','macaw','robin'];
 
   // Compute global max stats for bars
@@ -3222,7 +4090,7 @@ function buildBirdGrid() {
   orderedKeys.forEach(k => groups[k]=[]);
 
   safeBirdEntries.forEach(([key, bird]) => {
-    const groupKey = view==='size' ? (bird.size||'medium') : (bird.class||'knight');
+    const groupKey = view==='size' ? (bird.size||'medium') : getBirdClassTag(bird);
     if(!groups[groupKey]) groups[groupKey]=[];
     groups[groupKey].push([key, bird]);
   });
@@ -3307,13 +4175,14 @@ document.addEventListener('click', (e)=>{
 
 
 function buildBirdExpandedContent(key, bird){
-  const cls = bird.class||'knight';
+  const cls = getBirdClassTag(bird);
+  const clsStyle = getBirdClassStyleTag(bird);
   const sizeClass = getUISizeClass(bird, 'panel');
   const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
   return `
     <div class="bird-card-expanded">
       <div class="ascent-panel-tagline">${bird.tagline||''}</div>
-      <div class="ascent-panel-class"><span class="class-badge class-${cls}">${cls.toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
+      <div class="ascent-panel-class"><span class="class-badge class-${clsStyle}">${idToClassLabel(cls).toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
       ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
       <div class="ascent-abilities">${tags}</div>
       <div style="text-align:left;font-size:.72rem;color:var(--text);background:rgba(0,0,0,.25);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px;margin:8px 0;"><strong>Full Stats:</strong> HP ${bird.stats.hp} · ATK ${bird.stats.atk} · DEF ${bird.stats.def} · SPD ${bird.stats.spd} · ACC ${bird.stats.acc}% · Dodge ${bird.stats.dodge}% · MATK ${bird.stats.matk||0} · MDEF ${bird.stats.mdef||0} · Crit ${bird.stats.critChance||0}%</div>
@@ -3327,7 +4196,8 @@ function buildBirdCard(key, bird, locked, globalMax) {
   card.className = 'bird-card' + (locked ? ' bird-locked' : '') + (ui.expandedBird===key?' selected':'');
   if (!locked) card.onclick = () => selectBird(key, card);
 
-  const cls = bird.class||'knight';
+  const cls = getBirdClassTag(bird);
+  const clsStyle = getBirdClassStyleTag(bird);
   const sizeClass = getUISizeClass(bird, 'select');
 
   const keyStats = [
@@ -3353,7 +4223,7 @@ function buildBirdCard(key, bird, locked, globalMax) {
   if(locked) {
     card.innerHTML = `
       <div class="bird-card-head">
-        <span class="class-badge class-${cls}">${(cls).toUpperCase()}</span>
+        <span class="class-badge class-${clsStyle}">${idToClassLabel(cls).toUpperCase()}</span>
         <span class="bird-size-chip">${SIZE_LABELS[bird.size||'medium']||bird.size}</span>
       </div>
       <div style="display:flex;justify-content:center;margin:2px auto 6px;">${renderBirdIconHTML(key,sizeClass,true)}</div>
@@ -3363,7 +4233,7 @@ function buildBirdCard(key, bird, locked, globalMax) {
     const expanded = (ui.expandedBird===key) ? buildBirdExpandedContent(key,bird) : '';
     card.innerHTML = `
       <div class="bird-card-head">
-        <span class="class-badge class-${cls}">${(cls).toUpperCase()}</span>
+        <span class="class-badge class-${clsStyle}">${idToClassLabel(cls).toUpperCase()}</span>
         <span class="bird-size-chip">${SIZE_LABELS[bird.size||'medium']||bird.size}</span>
       </div>
       <div style="display:flex;justify-content:center;margin:2px auto 6px;">${renderBirdIconHTML(key,sizeClass,false)}</div>
@@ -3441,7 +4311,8 @@ function updateAscentPanel(key) {
     return;
   }
 
-  const cls = bird.class||'knight';
+  const cls = getBirdClassTag(bird);
+  const clsStyle = getBirdClassStyleTag(bird);
   const sizeClass = getUISizeClass(bird, 'panel');
   const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
 
@@ -3449,7 +4320,7 @@ function updateAscentPanel(key) {
     <div class="ascent-panel-portrait">${renderBirdIconHTML(key, sizeClass, false)}</div>
     <div class="ascent-panel-name">${bird.name}</div>
     <div class="ascent-panel-tagline">${bird.tagline}</div>
-    <div class="ascent-panel-class"><span class="class-badge class-${cls}">${cls.toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
+    <div class="ascent-panel-class"><span class="class-badge class-${clsStyle}">${idToClassLabel(cls).toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
     ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
     <div class="ascent-abilities">${tags}</div>
     <div style="text-align:left;font-size:.72rem;color:var(--text);background:rgba(0,0,0,.25);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px;margin:8px 0;"><strong>Full Stats:</strong> HP ${bird.stats.hp} · ATK ${bird.stats.atk} · DEF ${bird.stats.def} · SPD ${bird.stats.spd} · ACC ${bird.stats.acc}% · Dodge ${bird.stats.dodge}% · MATK ${bird.stats.matk||0} · MDEF ${bird.stats.mdef||0} · Crit ${bird.stats.critChance||0}%</div>
@@ -3470,6 +4341,11 @@ function beginRun(){ return startGame(); }
 function startGame() {
   if(!G.selected) return;
   G.endlessMode = (ensureUIState().gameMode==='endless');
+  if(G.endlessMode && !isEndlessModeUnlocked()){
+    G.endlessMode=false;
+    ensureUIState().gameMode='story';
+    applyUIStateToDOM();
+  }
   G.difficulty = G._selectedDifficulty || 'juvenile';
   const bd = BIRDS[G.selected];
   G.collectedRewards=[];
@@ -3512,12 +4388,25 @@ function startGame() {
   G.endlessBattle = 0;
   G.autoQueuedAbilityId=null;
   G._breakClampStreak=0;
+  G._lastLieutenantId='';
+  G.lastLieutenantId='';
+  G._lieutenantRotationIndex=0;
+  G.endlessLieutenantHistory=[];
+  G.endlessLieutenantRotation=[];
+  G.lieutenantKills={};
   G.bossKills = 0;
   G.abilityCooldowns={};
   G.runCrits = 0; G.runBuffs = 0; G.runDebuffs = 0;
   G.runUpgradesPurchased = new Set();
   G.codex = {abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
   G.shinyObjects = 0;
+  G.rewardChoiceState=null;
+  G.masteryChoiceState=null;
+  G.runPerks=[];
+  G.birdPerks={};
+  G.runMasteries=[];
+  G.skillMasteries={};
+  recomputePerkAndMasteryEffects();
   saveRun();
   G.phase='PLAYER';
   const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
@@ -3529,6 +4418,10 @@ function startGame() {
 // Build endless-mode enemy from base pool (scaling happens in loadStage via stage-depth curve)
 function makeEndlessEnemy(stage) {
   const isBoss = (stage % 10 === 0);
+  const lieutenantStage = isBoss && stage>=30 && (stage%10===0);
+  if(lieutenantStage){
+    return makeCourtLieutenantByStage(stage);
+  }
   const pool = ENEMIES.filter(e=>!!e.isBoss===isBoss);
   const src = (pool.length?pool:ENEMIES)[Math.floor(Math.random()*(pool.length?pool.length:ENEMIES.length))];
   const clone = JSON.parse(JSON.stringify(src));
@@ -3564,6 +4457,7 @@ function resetForNewBattle(){
   G._incomingAttackKind=null;
   G._firstAttackUsed=false;
   G._firstSpellUsed=false;
+  G.playerStatus.masteryUsed={};
   G._spellCastCount=0;
   if(G.player){
     G.player._mimicStored=null;
@@ -3635,13 +4529,21 @@ function loadStage() {
     }
 
   }
-  const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
-  ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
-  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
-  ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
-  ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
-  ed.mdef=scaled.mdef; ed.matk=scaled.matk;
-  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
+  if(ed?.lieutenant){
+    ed.stats = ed.stats || {};
+    ed.hp=ed.stats.hp; ed.maxHp=ed.stats.maxHp;
+    ed.atk=ed.stats.atk; ed.def=ed.stats.def; ed.spd=ed.stats.spd;
+    ed.acc=ed.stats.acc; ed.dodge=ed.stats.dodge; ed.mdodge=ed.stats.mdodge||Math.floor((ed.stats.dodge||0)*0.6);
+    ed.mdef=ed.stats.mdef; ed.matk=ed.stats.matk;
+  }else{
+    const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
+    ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
+    if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
+    ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
+    ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
+    ed.mdef=scaled.mdef; ed.matk=scaled.matk;
+    ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
+  }
   const baseEnemyEnergy = ed.isBoss ? 6 : (ed.size==='xl'?5:ed.size==='large'?4:ed.size==='medium'?4:3);
   ed.energyMax=baseEnemyEnergy;
   ed.energy=baseEnemyEnergy;
@@ -3653,6 +4555,7 @@ function loadStage() {
   if(!G.enemy.aiType) G.enemy.aiType=mapAiStyleToType(G.enemy.aiStyle);
   codexMark('enemies', G.enemy.id||G.enemy.name, 'seen');
   enforceAbilityCosts(G.player);
+  recomputePerkAndMasteryEffects();
   applyBiomeModifiers();
   // Remove stat bonuses before resetting flags (avoid accumulating across battles)
   resetForNewBattle();
@@ -3686,9 +4589,10 @@ function loadStage() {
   updateStageProgress();
   refreshBattleUI();
   if (G.enemy.isBoss) {
-    const stageLabel = G.endlessMode && G.stage > ENEMIES.length
+    const stageLabel = G.endlessMode && G.stage > STORY_STAGE_CAP
       ? `Endless Battle ${G.endlessBattle}` : `Stage ${G.stage}`;
     logMsg(`👑 ${G.enemy.bossTitle}: ${G.enemy.name} descends! [${stageLabel}]`,'boss');
+    if(G.enemy?.introLine) logMsg(`🪶 ${G.enemy.introLine}`,'boss');
     logMsg(`Defeat them for a guaranteed Epic reward!`,'system');
     SFX.boss(); doScreenShake(true);
   } else {
@@ -4681,10 +5585,12 @@ function normalizeAbilityCooldownsForPlayer(p){
 function getPlayerPiercePctForAbility(ab){
   const cls=(G.player?.class || BIRDS[G.player?.birdKey]?.class || '').toLowerCase();
   const isAttack=(ab?.btnType==='attack'||ab?.type==='attack'||/strike|shot|peck|slash|talon|arrow|pierce/i.test(ab?.name||''));
+  let out=ab?.piercePct||0;
   if(cls==='ranger'&&isAttack){
-    return Math.max(ab?.piercePct||0,0.25);
+    out=Math.max(out,0.25);
   }
-  return ab?.piercePct||0;
+  out += (getAbilityMasteryRuntime(ab).pierceBonus||0);
+  return out;
 }
 
 function applyRangerPassiveOnTurnStart(){
@@ -5291,6 +6197,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     }
     if(G.comboReady&&!isCrit){isCrit=true;dmg=Math.max(1,Math.floor(dmg*(G.player.goldCritMult||1.5)));consumeCombo();logMsg('🔥 Combo Crit!','crit');}
     G.enemy.stats.hp-=dmg;
+    if(G.enemy?.id==='lt_seraph' && G.enemy?.lieutenant){
+      G.enemy.lieutenant.velocityStacks=0;
+    }
     const _atkKind=String(srcAbility?.btnType||srcAbility?.type||G._activePlayerAbility?.btnType||G._activePlayerAbility?.type||'').toLowerCase();
     if((_atkKind==='physical'||_atkKind==='ranged') && dmg>0){
       if((G.player?.bleedOnHitChance||0)>0 && chance(Math.min(95,G.player.bleedOnHitChance))) applyAilment('enemy','bleed',1);
@@ -5300,10 +6209,13 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
       if((G.player?.relCarrionLedger||false) && (G.enemyStatus?.bleed?.stacks||0)>0) G.enemy.stats.hp=Math.max(0,G.enemy.stats.hp-1);
       if((G.player?.augHuntersMarkPct||0)>0) G.playerStatus.huntersMarkBonusPct=G.player.augHuntersMarkPct;
     }
+    const m=getAbilityMasteryRuntime(srcAbility||G._activePlayerAbility||null);
     if(_atkKind==='spell' && dmg>0){
       if(G.player?.augSpellPoison) applyAilment('enemy','poison',1);
       if(G.player?.augSpellCritPoison && isCrit) applyAilment('enemy','poison',1);
       if(G.player?.augFirstSpellFear && !G._firstSpellUsed) applyAilment('enemy','feared',1);
+      if((m.spellPoisonOnHit||0)>0) applyAilment('enemy','poison',m.spellPoisonOnHit);
+      if((m.firstCastFear||0)>0 && !G._firstSpellUsed) applyAilment('enemy','feared',m.firstCastFear);
     }
     if(G.enemy?.id==='duke_blakiston' && (G.enemyStatus.wardens||0)>0){
       G.enemyStatus.wardens-=1;
@@ -5328,12 +6240,14 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     const canBleedHit = (abType==='physical' || abType==='ranged');
     const bleedFromCrit = isCrit ? ((G.player?.critBleed||0) + (G.player?.passiveBleedOnCrit||0)) : 0;
     if(canBleedHit && bleedFromCrit>0) applyAilment('enemy','bleed',bleedFromCrit);
+    if(canBleedHit && isCrit && (m.critAppliesBleed||0)>0) applyAilment('enemy','bleed',m.critAppliesBleed);
     registerHit();
   }
   return {dmgDealt:dmg,wasDodged:false,wasBlocked,isCrit};
 }
 
 function pdmg(mult=1,ab=null) {
+  const m=getAbilityMasteryRuntime(ab);
   let b=G.player.stats.atk;
   if (G.warcryActive) b=Math.floor(b*(1+G.warcryATK/100));
   if (G.sitAndWaitActive) b=Math.floor(b*1.25);
@@ -5342,6 +6256,10 @@ function pdmg(mult=1,ab=null) {
   if (G.playerStatus.flamingoATK&&G.playerStatus.flamingoATK.turns>0) b=Math.floor(b*1.20);
   const __adm=(G.actionDamageHitsRemaining&&G.actionDamageHitsRemaining>0)?(G.actionDamageMult||1):1;
   let base=Math.floor(roll(Math.floor(b*.8),Math.floor(b*1.2))*mult*__adm);
+  if((m.spellDamageMult||0)>0 && String(ab?.btnType||ab?.type||'').toLowerCase()==='spell') base=Math.floor(base*(1+m.spellDamageMult));
+  if((m.damageVsLowHpMult||0)>0 && (G.enemy?.stats?.hp||0)<=Math.floor((G.enemy?.stats?.maxHp||1)*0.5)) base=Math.floor(base*(1+m.damageVsLowHpMult));
+  if((m.damageVsBleedMult||0)>0 && (G.enemyStatus?.bleed?.stacks||0)>0) base=Math.floor(base*(1+m.damageVsBleedMult));
+  if((m.openingUseDamageMult||0)>0){ G.playerStatus.masteryUsed=G.playerStatus.masteryUsed||{}; const k=ab?.id||'main'; if(!G.playerStatus.masteryUsed[k]){ base=Math.floor(base*(1+m.openingUseDamageMult)); G.playerStatus.masteryUsed[k]=1; } }
   if((G.actionDamageHitsRemaining||0)>0){ G.actionDamageHitsRemaining=Math.max(0,G.actionDamageHitsRemaining-1); if(G.actionDamageHitsRemaining===0) G.actionDamageMult=1; }
   if (G.playerStatus.weaken&&G.playerStatus.weaken>0) base=Math.floor(base*.75);
   // Pierce DEF: reduce enemy effective DEF before damage calc (store on G for dealDamage to read)
@@ -5393,9 +6311,10 @@ function getPlayerMissChance(ab) {
   if (G.battleHymnActive) accBonus+=G.battleHymnACC;
   if (G.humMissBonus>0) accBonus+=G.humMissBonus;
   const tookiePenalty = G.tookieActive && G.playerStatus.tookie ? G.playerStatus.tookie.missPen : 0;
+  const m=getAbilityMasteryRuntime(ab);
   const bClass=(BIRDS[G.player.birdKey]&&BIRDS[G.player.birdKey].class)||'';
   const bSize=(G.player&&G.player.size)||'medium';
-  const classAdj=(tmpl.type==='physical'&&bClass==='assassin')?-2:(tmpl.type==='ranged'&&bClass==='ranger')?-2:(tmpl.type==='spell'&&MAGIC_CLASSES.has(bClass))?-1:0;
+  const classAdj=(tmpl.type==='physical'&&classMatches(bClass,'assassin'))?-2:(tmpl.type==='ranged'&&classMatches(bClass,'ranger'))?-2:(tmpl.type==='spell'&&MAGIC_CLASSES.has(String(bClass||'').toLowerCase()))?-1:0;
   const sizeAdj=(tmpl.type==='physical'&&bSize==='xl')?2:(tmpl.type==='physical'&&bSize==='tiny')?-1:0;
   const missReduce=((G.player&&G.player.missReduce)||0)*100;
   let extra=0;
@@ -5406,7 +6325,7 @@ function getPlayerMissChance(ab) {
   if(isSpell) extra+=(G.player?.augSpellAcc||0);
   if((G.player?.augPostDefAcc||0)>0 && G.playerStatus?.postDefAccNext){ extra += G.player.augPostDefAcc; delete G.playerStatus.postDefAccNext; }
   if(G.player?.relHawkLedger && isEndlessRunActive()){ const eb=G.endlessBattle||0; if(eb>=10) extra+=8; if(eb>=20) extra+=8; if(eb>=30) extra+=8; }
-  return Math.max(floor, reduced - accBonus + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
+  return Math.max(floor, reduced - accBonus - (m.accBonus||0) + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
 }
 
 function getPlayerAccuracy() {
@@ -5426,6 +6345,11 @@ function playerAttackMisses(ab) {
   const isAttack=(kind==='physical'||kind==='ranged');
   if(isAttack && !G._firstAttackUsed && G.player?.firstAttackAlwaysHit) return false;
   let moveMiss = getPlayerMissChance(ab);
+  if(G.enemy?.id==='lt_koro' && G.enemyStatus?.koroVeilReady){
+    moveMiss=Math.max(0,moveMiss+20);
+    G.enemyStatus.koroVeilReady=false;
+    logMsg('🌫 Veil of Fog distorts your first strike!','boss');
+  }
   if(isAttack && !G._firstAttackUsed) moveMiss=Math.max(0,moveMiss-(G.player?.firstAttackAccBonus||0));
   return chance(moveMiss);
 }
@@ -5522,6 +6446,7 @@ function getPlayerCritChance(ab) {
     base += (G.player?.firstAttackCritBonus||0);
   }
   if(isAttack) base += (G.player?.augAttackCrit||0);
+  base += (getAbilityMasteryRuntime(ab).critBonus||0);
   return Math.min(100,base);
 }
 
@@ -5613,7 +6538,7 @@ function tickStatuses(who) {
 const ACTIONS = {
   async mainAttack(ab) {
     const birdClass=(BIRDS[G.player.birdKey]&&BIRDS[G.player.birdKey].class)||'';
-    const isMagicUser=MAGIC_CLASSES.has(birdClass);
+    const isMagicUser=MAGIC_CLASSES.has(String(birdClass||'').toLowerCase());
     const missC=isMagicUser?20:Math.max(3,10-(G.player.birdLevel-1));
     if(chance(missC)){
       await doMiss('player');
@@ -6143,10 +7068,13 @@ const ACTIONS = {
       if((G.player?.relCarrionLedger||false) && (G.enemyStatus?.bleed?.stacks||0)>0) G.enemy.stats.hp=Math.max(0,G.enemy.stats.hp-1);
       if((G.player?.augHuntersMarkPct||0)>0) G.playerStatus.huntersMarkBonusPct=G.player.augHuntersMarkPct;
     }
+    const m=getAbilityMasteryRuntime(srcAbility||G._activePlayerAbility||null);
     if(_atkKind==='spell' && dmg>0){
       if(G.player?.augSpellPoison) applyAilment('enemy','poison',1);
       if(G.player?.augSpellCritPoison && isCrit) applyAilment('enemy','poison',1);
       if(G.player?.augFirstSpellFear && !G._firstSpellUsed) applyAilment('enemy','feared',1);
+      if((m.spellPoisonOnHit||0)>0) applyAilment('enemy','poison',m.spellPoisonOnHit);
+      if((m.firstCastFear||0)>0 && !G._firstSpellUsed) applyAilment('enemy','feared',m.firstCastFear);
     }
     await doAttack('player','enemy',{dmgDealt:dmg,wasDodged:false,wasBlocked:false,isCrit:false});
     setHpBar('enemy',G.enemy.stats.hp,G.enemy.stats.maxHp);
@@ -6970,6 +7898,7 @@ function startPlayerTurn(player){
   if(isEndlessRunActive() && player.relFeatheredClock && ((G.endlessBattle||0)%3===0)) player.energy += 1;
   G.playerActionsThisTurn=0;
   G.playerTurnFlags={energyGainedThisTurn:0,onHitTriggered:false,firstAttackResolved:false};
+  if(G.enemy?.id==='lt_koro') G.enemyStatus.koroVeilReady=true;
   if(player.mutSuddenFlight) player._mutSuddenFlightUsed=false;
   G.turn='player';
   G.turnPhase=TURN.PLAYER;
@@ -7540,15 +8469,15 @@ function planEnemyTurn(e,p){
   const mode=getEnemyMode(e,p);
   const pool=buildEnemyActionPool(e,mode);
   const actions=[];
-  let energy=e.energyMax||3;
+  let energy=Math.max(0,e.energy||e.energyMax||3);
   let projected=0;
   let hardCCUsedLast=(G.enemyLastPlan||[]).some(a=>a.type==='ability'&&a.abilityId==='eStun');
-  let nonDmgEvery2=0;
   const diff=G.difficulty||'juvenile';
   const murderMode=diff==='murder';
   const hardMode=diff==='predator';
+  let lastKey='';
+  let lastDidDamage=true;
 
-  // Turn-1 debuff opener guaranteed on Murder, preferred on Hard
   const hardCCBlocked=!!G.enemyUsedHardCCLastTurn;
   if((G.enemyTurnCount||0)<=1){
     const openers=(e.abilities||[]).filter(id=>['eWeaken','eBlind','eFear'].includes(id));
@@ -7558,56 +8487,67 @@ function planEnemyTurn(e,p){
       if(oc<=energy && (murderMode || (hardMode&&chance(70)))){
         actions.push({...opener,energyCost:oc});
         energy-=oc;
+        lastKey=`ability:${opener.abilityId}`;
+        lastDidDamage=projectedEnemyActionDamage(opener,e)>0;
       }
     }
   }
 
-  // Smarter heal gate: only if meaningful missing HP
   const hpMissingPct=1-((e.stats.hp||1)/Math.max(1,e.stats.maxHp||1));
+  let localPool=pool.slice();
   if(hpMissingPct<=0.12){
-    for(let i=pool.length-1;i>=0;i--){ if(pool[i].type==='ability'&&pool[i].abilityId==='eHeal') pool.splice(i,1); }
+    localPool=localPool.filter(a=>!(a.type==='ability'&&a.abilityId==='eHeal'));
   }
-  while(energy>0&&pool.length){
-    let pick=pool[Math.floor(Math.random()*pool.length)];
+
+  while(energy>0 && localPool.length && actions.length<MAX_ENEMY_ACTIONS_PER_TURN){
+    let affordable=localPool.filter(a=>getEnemyActionEnergyCost(a)<=energy);
+    if(!affordable.length) break;
+
+    // Pressure rule: after non-damaging action, strongly prefer damaging actions.
+    if(!lastDidDamage){
+      const dmgFirst=affordable.filter(a=>projectedEnemyActionDamage(a,e)>0);
+      if(dmgFirst.length) affordable=dmgFirst;
+    }
+
+    // Anti-spam: avoid repeating same move if alternatives exist.
+    const alternatives=affordable.filter(a=>`${a.type}:${a.abilityId||a.label||a.type}`!==lastKey);
+    if(alternatives.length) affordable=alternatives;
+
+    // Cost-efficient preference: matching exact remaining EN is favored.
+    const exactCost=affordable.filter(a=>getEnemyActionEnergyCost(a)===energy);
+    if(exactCost.length && chance(70)) affordable=exactCost;
+
+    let pick=affordable[Math.floor(Math.random()*affordable.length)];
+
     if((hardMode||murderMode) && chance(murderMode?65:45)){
-      const weighted=pool.slice().sort((a,b)=>projectedEnemyActionDamage(b,e)-projectedEnemyActionDamage(a,e));
+      const weighted=affordable.slice().sort((a,b)=>projectedEnemyActionDamage(b,e)-projectedEnemyActionDamage(a,e));
       pick=weighted[0]||pick;
     }
-    const c=getEnemyActionEnergyCost(pick);
-    if(c>energy){
-      const affordable=pool.filter(a=>getEnemyActionEnergyCost(a)<=energy);
-      if(!affordable.length) break;
-      pick=affordable[Math.floor(Math.random()*affordable.length)];
-    }
+
     if((hardCCUsedLast||hardCCBlocked)&&pick.type==='ability'&&pick.abilityId==='eStun'){
-      const noCC=pool.filter(a=>!(a.type==='ability'&&a.abilityId==='eStun')&&getEnemyActionEnergyCost(a)<=energy);
+      const noCC=affordable.filter(a=>!(a.type==='ability'&&a.abilityId==='eStun'));
       if(noCC.length) pick=noCC[Math.floor(Math.random()*noCC.length)];
     }
+
     const dmg=projectedEnemyActionDamage(pick,e);
     const capPct=e.isBoss?0.60:0.45;
     if(projected+dmg > (p.stats.maxHp||1)*capPct){
-      const lighter=pool.filter(a=>projectedEnemyActionDamage(a,e)<=Math.max(1,(p.stats.maxHp||1)*capPct-projected)&&getEnemyActionEnergyCost(a)<=energy);
+      const lighter=affordable.filter(a=>projectedEnemyActionDamage(a,e)<=Math.max(1,(p.stats.maxHp||1)*capPct-projected));
       if(lighter.length) pick=lighter[Math.floor(Math.random()*lighter.length)];
     }
-    actions.push({...pick,energyCost:getEnemyActionEnergyCost(pick)});
-    energy-=getEnemyActionEnergyCost(pick);
+
+    const cost=getEnemyActionEnergyCost(pick);
+    if(cost>energy) break;
+    actions.push({...pick,energyCost:cost});
+    energy=Math.max(0,energy-cost);
     projected+=projectedEnemyActionDamage(pick,e);
     if(pick.type==='ability'&&pick.abilityId==='eStun') hardCCUsedLast=true;
-    if(['defend'].includes(pick.type) || (pick.type==='ability'&&['eWeaken','eFear','eBlind','eRage','eHeal','eShield'].includes(pick.abilityId))) nonDmgEvery2=0;
-    else nonDmgEvery2++;
-    if(nonDmgEvery2>=2){
-      const support=pool.filter(a=>(a.type==='defend'||(a.type==='ability'&&['eWeaken','eFear','eBlind','eShield','eHeal'].includes(a.abilityId)))&&getEnemyActionEnergyCost(a)<=energy);
-      if(support.length&&energy>0){
-        const sup=support[Math.floor(Math.random()*support.length)];
-        actions.push({...sup,energyCost:getEnemyActionEnergyCost(sup)});
-        energy-=getEnemyActionEnergyCost(sup);
-      }
-      break;
-    }
-    if(actions.length>=4) break;
+    lastKey=`${pick.type}:${pick.abilityId||pick.label||pick.type}`;
+    lastDidDamage=projectedEnemyActionDamage(pick,e)>0;
   }
   return {mode,actions};
 }
+
 
 const ENEMY_AI = {
   aggressive(enemy){
@@ -7663,20 +8603,12 @@ function bossScriptPick(enemy){ return enemyUse(enemy,'heavy')||enemyUse(enemy,'
 function planEnemyAction() {
   const e=G.enemy;
   const aiType=(e.aiType||mapAiStyleToType(e.aiStyle)||'aggressive').toLowerCase();
-  const fn=ENEMY_AI[aiType]||ENEMY_AI.aggressive;
-  let actions=[];
-  const first=fn(e);
-  if(first) actions.push(first);
-  const second=(Math.random()<0.55)?fn(e):null;
-  if(second) actions.push(second);
-  if(!actions.length){
-    const plan=planEnemyTurn(e,G.player);
-    actions=plan.actions;
-  }
+  const plan=planEnemyTurn(e,G.player);
+  const actions=(plan?.actions||[]).slice(0,MAX_ENEMY_ACTIONS_PER_TURN);
   G.enemyPlannedActions=actions;
   const preview=actions.slice(0,2).map(a=>`${a.icon||'•'} ${a.type==='ability'?(ENEMY_ABILITY_POOL[a.abilityId]?.name||a.abilityId):a.label}`).join(' → ');
   const more=actions.length>2?' +':'';
-  return {label:`${preview}${more}`,type:'plan',actions,mode:aiType};
+  return {label:`${preview||'• Wait'}${more}`,type:'plan',actions,mode:aiType};
 }
 
 
@@ -7720,21 +8652,488 @@ function dukeSummonCourt(){
 }
 function dukeTurnAI(){
   const e=G.enemy; const d=e.duke;
+  if(!d) return {didAct:false,didDamage:false,reason:'no_duke_state'};
   const enraged=isBossEnrageAllowed() && e.stats.hp<=Math.floor(e.stats.maxHp*0.35);
   if(enraged) setStatusMax(G.enemyStatus,'enraged',2);
   d.riverCd=Math.max(0,(d.riverCd||0)-1);
   d.summonCd=Math.max(0,(d.summonCd||0)-1);
   d.verdictCd=Math.max(0,(d.verdictCd||0)-1);
   if(d.phase>=3) dukeApplyDecreePunish();
-  if(d.phase===1 && e.stats.hp<=Math.floor(e.stats.maxHp*0.75)){ dukeNightfall(); return; }
-  if(d.phase===2){ d.nightfallTurns--; if(d.nightfallTurns<=0){ d.phase=3; logMsg('📜 The Court speaks in decree.','boss'); } }
-  if(d.summonCd===0){ d.summonCd=4; dukeSummonCourt(); return; }
-  if(d.riverCd===0){ d.riverCd=3; dukeRiverGrip(); return; }
+
+  const can=(c)=>Math.max(0,e.energy||0)>=c;
+  const spend=(c)=>{e.energy=Math.max(0,(e.energy||0)-c); return c;};
+
   const p=G.player.stats;
-  if(d.verdictCd===0 && (p.hp<=Math.floor(p.maxHp*0.35) || (G.enemyStatus.enraged||0)>0)){ d.verdictCd=3; dukeOwlsVerdict(); return; }
-  const r=dealDamage('player',edmg(1.0));
-  spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
+  const nonDamageLast=(d.lastDidDamage===false);
+  const last=d.lastAction||'';
+
+  const tryAct=(key, cost, fn, didDamage=false)=>{
+    if(!can(cost)) return null;
+    spend(cost);
+    fn();
+    d.lastAction=key;
+    d.lastDidDamage=!!didDamage;
+    return {didAct:true,didDamage:!!didDamage,actionKey:key,cost};
+  };
+
+  if(d.phase===1 && e.stats.hp<=Math.floor(e.stats.maxHp*0.75) && last!=='nightfall'){
+    const r=tryAct('nightfall',2,()=>dukeNightfall(),false); if(r) return r;
+  }
+  if(d.phase===2){
+    d.nightfallTurns--;
+    if(d.nightfallTurns<=0){ d.phase=3; logMsg('📜 The Court speaks in decree.','boss'); }
+  }
+
+  if(d.summonCd===0 && last!=='summon' && !nonDamageLast){
+    const r=tryAct('summon',1,()=>{ d.summonCd=4; dukeSummonCourt(); },false); if(r) return r;
+  }
+  if(d.riverCd===0 && last!=='river' && !nonDamageLast){
+    const r=tryAct('river',1,()=>{ d.riverCd=3; dukeRiverGrip(); },false); if(r) return r;
+  }
+  if(d.verdictCd===0 && (p.hp<=Math.floor(p.maxHp*0.35) || (G.enemyStatus.enraged||0)>0)){
+    const r=tryAct('verdict',2,()=>{ d.verdictCd=3; dukeOwlsVerdict(); },true); if(r) return r;
+  }
+
+  if(!can(1)) return {didAct:false,didDamage:false,reason:'no_energy'};
+  spend(1);
+  const rr=dealDamage('player',edmg(1.0));
+  spawnFloat('player',`-${rr.dmgDealt}`,'fn-dmg');
   logMsg('🦉 Talons in the dark.','boss');
+  d.lastAction='talons';
+  d.lastDidDamage=!!((rr?.dmgDealt||0)>0 && !rr?.wasDodged);
+  return {didAct:true,didDamage:d.lastDidDamage,actionKey:'talons',cost:1};
+}
+
+function lieutenantBaseMult(e){
+  const lt=e?.lieutenant||{};
+  let mult=1;
+  if(e?.id==='lt_seraph') mult += (lt.velocityStacks||0)*0.10;
+  if(e?.id==='lt_ashwing' && (G.player?.stats?.hp||0)<=Math.floor((G.player?.stats?.maxHp||1)*0.5)) mult*=1.25;
+  if(e?.id==='lt_skarn' && lt.deathCircle) mult*=(1 + (lt.deathCircleStacks||0)*0.08);
+  if(e?.id==='lt_khar' && lt.lastHitConnected) mult*=1.40;
+  return mult;
+}
+function lieutenantStrike(mult=1,label='hits!'){
+  const r=dealDamage('player',edmg(mult));
+  spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
+  logMsg(`👑 ${G.enemy.name} ${label}`,'boss');
+  return r;
+}
+function lieutenantApplyKharChain(r){
+  const lt=G.enemy.lieutenant||{};
+  lt.lastHitConnected=!!(r && !r.wasDodged && (r.dmgDealt||0)>0);
+  G.enemy.lieutenant=lt;
+}
+function lieutenantApplyDodgeBuff(e,lt,amt,turns,label){
+  if((lt.dodgeBuffTurns||0)>0 && lt.dodgeBuffAmt){
+    e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt);
+  }
+  lt.dodgeBuffTurns=turns;
+  lt.dodgeBuffAmt=amt;
+  e.stats.dodge=Math.min(95,(e.stats.dodge||0)+amt);
+  logMsg(label,'boss');
+}
+function lieutenantActionDamageMult(def,e,baseMult){
+  const atk=e.stats.atk||1;
+  const matk=e.stats.matk||atk;
+  const stat=((def.matkScale||0)>0)?matk:atk;
+  const base=(def.baseDamage||0) + stat*((def.atkScale||0)+(def.matkScale||0));
+  const denom=Math.max(1,atk+8);
+  return clamp((base/denom)*baseMult,0.45,2.6);
+}
+function performLieutenantAbility(abilityId,opts={}){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  const def=LIEUTENANT_ABILITY_DEFS[abilityId];
+  if(!def) return {didDamage:false,type:'utility',didAct:false};
+  const cost=Math.max(0,def.enCost||1);
+  if((e.energy||0)<cost) return {didDamage:false,type:def.type||'utility',didAct:false,insufficientEnergy:true};
+  e.energy=Math.max(0,(e.energy||0)-cost);
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  if(Number.isFinite(def.accuracy) && Math.random()>def.accuracy){
+    logMsg(`👑 ${e.name}'s ${def.name} missed!`,'miss');
+    lt.lastMoveType=def.type||'utility';
+    lt.lastMoveDidDamage=false;
+    return {didDamage:false,type:def.type||'utility'};
+  }
+
+  const baseMult=lieutenantBaseMult(e) * (opts.damageMult||1);
+  let didDamage=false;
+  const doHit=(mult,label)=>{
+    const r=lieutenantStrike(mult,label||`uses ${def.name}!`);
+    if(e.id==='lt_khar') lieutenantApplyKharChain(r);
+    if((r?.dmgDealt||0)>0 && !r?.wasDodged) didDamage=true;
+    return r;
+  };
+
+  if(def.type==='utility' && def.dodgeBuff){
+    lieutenantApplyDodgeBuff(e,lt,def.dodgeBuff,def.dodgeTurns||1,`💨 ${def.name}: ${e.name} gains +${def.dodgeBuff}% dodge.`);
+  }else if(def.type==='buff' && abilityId==='lt_patrol_command'){
+    lt.patrolBuffTurns=Math.max(lt.patrolBuffTurns||0,def.buffTurns||2);
+    e.stats.def=(e.stats.def||0)+(def.defBuff||0);
+    e.stats.spd=(e.stats.spd||0)+(def.spdBuff||0);
+    logMsg(`📯 Patrol Command hardens the line (+${def.defBuff||0} DEF, +${def.spdBuff||0} SPD).`,'boss');
+  }else if(def.type==='buff' && abilityId==='lt_future_sight'){
+    lt.futureSight=1;
+    lt.futureSpellMult=def.nextSpellMult||1.3;
+    logMsg('🔮 Future Sight: the next spell is empowered.','boss');
+  }else if(def.type==='buff' && abilityId==='lt_death_circle'){
+    lt.deathCircle=true;
+    lt.deathCircleStacks=0;
+    logMsg('☠ Death Circle begins to spiral.','boss');
+  }else if(abilityId==='lt_predator_mark'){
+    lt.markTurns=def.markTurns||1;
+    lt.markMult=def.markMult||1.2;
+    logMsg('🎯 Predator Mark! Seraph lines up a kill angle.','boss');
+  }else if(abilityId==='lt_shatter_grip'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'slams with Shatter Grip!');
+    setStatusMax(G.playerStatus,'rooted',def.statusTurns||1);
+    logMsg('⛓ You are rooted in place!','boss');
+  }else if(abilityId==='lt_dread_stare'){
+    setStatusMax(G.playerStatus,'feared',def.statusTurns||1);
+    logMsg('😨 Dread Stare inflicts fear.','boss');
+  }else if(abilityId==='lt_execution_clamp'){
+    let ex=1;
+    if(pHpPct<=(def.lowHpThreshold||0.4)) ex*=(1+(def.bonusLowHp||0));
+    doHit(lieutenantActionDamageMult(def,e,baseMult*ex),'uses Execution Clamp!');
+  }else if(abilityId==='lt_crush_serpent'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'lashes out with Crush Serpent!');
+    if(chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); }
+    else{ applyPlayerSlow(def.slowTurns||2,def.slowAmt||6,def.slowTurns||2); logMsg('🦵 Crush Serpent slows your movement.','boss'); }
+  }else if(abilityId==='lt_ground_sweep'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'sweeps the ground with crushing force!');
+    if((r?.dmgDealt||0)>0 && chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🌀 Ground Sweep staggers you!','boss'); }
+  }else if(abilityId==='lt_mist_curse'){
+    G.playerStatus.blind=Math.max(G.playerStatus.blind||0,def.statusTurns||1);
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15;
+    logMsg('🌫 Mist Curse blinds your aim.','boss');
+  }else if(abilityId==='lt_tidal_strike'){
+    const fs=(lt.futureSight>0)?(lt.futureSpellMult||1.3):1;
+    lt.futureSight=0;
+    doHit(lieutenantActionDamageMult(def,e,baseMult*fs),'casts Tidal Strike!');
+  }else if(abilityId==='lt_rotting_curse'){
+    applyAilment('player','poison',def.statusStacks||2);
+    logMsg('☣ Rotting Curse infects you with poison.','boss');
+  }else if(abilityId==='lt_bone_harvest'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'reaps with Bone Harvest!');
+    const heal=Math.max(1,Math.floor((r?.dmgDealt||0)*(def.healFromDamage||0.5)));
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal');
+  }else if(abilityId==='lt_ash_cloud'){
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+(def.accDebuff||15);
+    logMsg('🌫 Ash Cloud shrouds the battlefield.','boss');
+  }else {
+    const hits=Math.max(1,def.hits||1);
+    const critMult=1+(def.critBonus||0);
+    for(let i=0;i<hits;i++) doHit(lieutenantActionDamageMult(def,e,baseMult*critMult),`uses ${def.name}!`);
+  }
+
+  lt.lastMoveType=def.type||'utility';
+  lt.lastMoveDidDamage=didDamage;
+  return {didDamage,type:def.type||'utility',didAct:true,cost};
+}
+function lieutenantTurnAI(){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  lt.turn=(lt.turn||0)+1;
+
+  if(lt.dodgeBuffTurns>0){
+    lt.dodgeBuffTurns--;
+    if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; }
+  }
+  if((lt.patrolBuffTurns||0)>0){
+    lt.patrolBuffTurns--;
+    if(lt.patrolBuffTurns<=0){ e.stats.def=Math.max(0,(e.stats.def||0)-2); e.stats.spd=Math.max(1,(e.stats.spd||0)-1); }
+  }
+
+  if(e.id==='lt_seraph') lt.velocityStacks=Math.min(8,(lt.velocityStacks||0)+1);
+  if(e.id==='lt_marshal' && lt.turn%2===0){
+    lt.ironPatrolStacks=Math.min(6,(lt.ironPatrolStacks||0)+1);
+    e.stats.def=(e.stats.def||0)+1;
+    logMsg('🛡 Iron Patrol reinforces Marshal Stride (+1 DEF).','boss');
+  }
+  if(e.id==='lt_skarn' && lt.turn%3===0){
+    const h=Math.floor((e.stats.maxHp||1)*0.12);
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h);
+    setHpBar('enemy',e.stats.hp,e.stats.maxHp);
+    spawnFloat('enemy',`+${h}`,'fn-heal');
+    logMsg('☠ Feast on the Fallen restores Skarn.','boss');
+  }
+  if(e.id==='lt_skarn' && lt.deathCircle) lt.deathCircleStacks=Math.min(8,(lt.deathCircleStacks||0)+1);
+
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  const eHpPct=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+  const forceDamage = (lt.lastMoveDidDamage===false);
+  const avoidSecondUtility = (lt.lastMoveType==='utility' || lt.lastMoveType==='buff' || lt.lastMoveType==='control');
+
+  let chosen='';
+
+  if(e.aiProfile==='executioner'){
+    if(pHpPct<=0.40) chosen='lt_execution_clamp';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_shatter_grip';
+    else if(!forceDamage && Math.random()<0.22) chosen='lt_dread_stare';
+    else chosen='lt_bonecrusher';
+  }else if(e.aiProfile==='duelist'){
+    if(lt.markTurns>0) chosen='lt_skyfall_strike';
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.28) chosen='lt_wind_feint';
+    else if(!forceDamage && Math.random()<0.34) chosen='lt_predator_mark';
+    else chosen=(Math.random()<0.55)?'lt_razor_dive':'lt_skyfall_strike';
+  }else if(e.aiProfile==='warden'){
+    if((lt.turn<=2 || (lt.patrolBuffTurns||0)<=0) && !forceDamage && Math.random()<0.45) chosen='lt_patrol_command';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_crush_serpent';
+    else chosen=(Math.random()<0.45)?'lt_ground_sweep':'lt_iron_kick';
+  }else if(e.aiProfile==='seer'){
+    if(lt.futureSight>0) chosen='lt_tidal_strike';
+    else if(!forceDamage && Math.random()<0.32) chosen='lt_mist_curse';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_future_sight';
+    else if(!forceDamage && eHpPct<0.5 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_ghost_step';
+    else chosen='lt_tidal_strike';
+  }else if(e.aiProfile==='reaper'){
+    if(!(lt.openedWithCurse)) { lt.openedWithCurse=true; chosen='lt_rotting_curse'; }
+    else if(!lt.deathCircle && !forceDamage && Math.random()<0.28) chosen='lt_death_circle';
+    else if(!forceDamage && eHpPct<0.75 && Math.random()<0.34) chosen='lt_bone_harvest';
+    else chosen=(Math.random()<0.4)?'lt_rotting_curse':'lt_carrion_peck';
+  }else if(e.aiProfile==='scavenger'){
+    if(!(lt.openedWithAsh)) { lt.openedWithAsh=true; chosen='lt_ash_cloud'; }
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_smoke_spiral';
+    else if(pHpPct<=0.50) chosen=(Math.random()<0.65)?'lt_burning_dive':'lt_carrion_rush';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_ash_cloud';
+    else chosen=(Math.random()<0.5)?'lt_carrion_rush':'lt_burning_dive';
+  }
+
+  if(avoidSecondUtility && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const fallback={
+      lt_khar:'lt_bonecrusher', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_iron_kick',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_carrion_peck', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=fallback[e.id]||chosen;
+  }
+  if(forceDamage && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const damageFallback={
+      lt_khar:'lt_execution_clamp', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_ground_sweep',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_bone_harvest', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=damageFallback[e.id]||chosen;
+  }
+  if(!chosen) chosen='lt_bonecrusher';
+  const affordable=(e.abilities||[]).map(a=>a.id).filter(id=>(LIEUTENANT_ABILITY_DEFS[id]?.enCost||1)<=Math.max(0,e.energy||0));
+  if(!affordable.length) return {didAct:false,didDamage:false,reason:'no_energy'};
+  if(!affordable.includes(chosen)){
+    const dmgPref=affordable.filter(id=>!['utility','buff','control'].includes(String(LIEUTENANT_ABILITY_DEFS[id]?.type||'')));
+    chosen=(dmgPref[0]||affordable[0]);
+  }
+  const res=performLieutenantAbility(chosen);
+  if(res?.didAct){
+    e.lieutenant=e.lieutenant||{};
+    e.lieutenant.lastAbilityId=chosen;
+  }
+  return res;
+}
+
+function lieutenantBaseMult(e){
+  const lt=e?.lieutenant||{};
+  let mult=1;
+  if(e?.id==='lt_seraph') mult += (lt.velocityStacks||0)*0.10;
+  if(e?.id==='lt_ashwing' && (G.player?.stats?.hp||0)<=Math.floor((G.player?.stats?.maxHp||1)*0.5)) mult*=1.25;
+  if(e?.id==='lt_skarn' && lt.deathCircle) mult*=(1 + (lt.deathCircleStacks||0)*0.08);
+  if(e?.id==='lt_khar' && lt.lastHitConnected) mult*=1.40;
+  return mult;
+}
+function lieutenantStrike(mult=1,label='hits!'){
+  const r=dealDamage('player',edmg(mult));
+  spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
+  logMsg(`👑 ${G.enemy.name} ${label}`,'boss');
+  return r;
+}
+function lieutenantApplyKharChain(r){
+  const lt=G.enemy.lieutenant||{};
+  lt.lastHitConnected=!!(r && !r.wasDodged && (r.dmgDealt||0)>0);
+  G.enemy.lieutenant=lt;
+}
+function lieutenantApplyDodgeBuff(e,lt,amt,turns,label){
+  if((lt.dodgeBuffTurns||0)>0 && lt.dodgeBuffAmt){
+    e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt);
+  }
+  lt.dodgeBuffTurns=turns;
+  lt.dodgeBuffAmt=amt;
+  e.stats.dodge=Math.min(95,(e.stats.dodge||0)+amt);
+  logMsg(label,'boss');
+}
+function lieutenantActionDamageMult(def,e,baseMult){
+  const atk=e.stats.atk||1;
+  const matk=e.stats.matk||atk;
+  const stat=((def.matkScale||0)>0)?matk:atk;
+  const base=(def.baseDamage||0) + stat*((def.atkScale||0)+(def.matkScale||0));
+  const denom=Math.max(1,atk+8);
+  return clamp((base/denom)*baseMult,0.45,2.6);
+}
+function performLieutenantAbility(abilityId,opts={}){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  const def=LIEUTENANT_ABILITY_DEFS[abilityId];
+  if(!def) return {didDamage:false,type:'utility'};
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  if(Number.isFinite(def.accuracy) && Math.random()>def.accuracy){
+    logMsg(`👑 ${e.name}'s ${def.name} missed!`,'miss');
+    lt.lastMoveType=def.type||'utility';
+    lt.lastMoveDidDamage=false;
+    return {didDamage:false,type:def.type||'utility'};
+  }
+
+  const baseMult=lieutenantBaseMult(e) * (opts.damageMult||1);
+  let didDamage=false;
+  const doHit=(mult,label)=>{
+    const r=lieutenantStrike(mult,label||`uses ${def.name}!`);
+    if(e.id==='lt_khar') lieutenantApplyKharChain(r);
+    if((r?.dmgDealt||0)>0 && !r?.wasDodged) didDamage=true;
+    return r;
+  };
+
+  if(def.type==='utility' && def.dodgeBuff){
+    lieutenantApplyDodgeBuff(e,lt,def.dodgeBuff,def.dodgeTurns||1,`💨 ${def.name}: ${e.name} gains +${def.dodgeBuff}% dodge.`);
+  }else if(def.type==='buff' && abilityId==='lt_patrol_command'){
+    lt.patrolBuffTurns=Math.max(lt.patrolBuffTurns||0,def.buffTurns||2);
+    e.stats.def=(e.stats.def||0)+(def.defBuff||0);
+    e.stats.spd=(e.stats.spd||0)+(def.spdBuff||0);
+    logMsg(`📯 Patrol Command hardens the line (+${def.defBuff||0} DEF, +${def.spdBuff||0} SPD).`,'boss');
+  }else if(def.type==='buff' && abilityId==='lt_future_sight'){
+    lt.futureSight=1;
+    lt.futureSpellMult=def.nextSpellMult||1.3;
+    logMsg('🔮 Future Sight: the next spell is empowered.','boss');
+  }else if(def.type==='buff' && abilityId==='lt_death_circle'){
+    lt.deathCircle=true;
+    lt.deathCircleStacks=0;
+    logMsg('☠ Death Circle begins to spiral.','boss');
+  }else if(abilityId==='lt_predator_mark'){
+    lt.markTurns=def.markTurns||1;
+    lt.markMult=def.markMult||1.2;
+    logMsg('🎯 Predator Mark! Seraph lines up a kill angle.','boss');
+  }else if(abilityId==='lt_shatter_grip'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'slams with Shatter Grip!');
+    setStatusMax(G.playerStatus,'rooted',def.statusTurns||1);
+    logMsg('⛓ You are rooted in place!','boss');
+  }else if(abilityId==='lt_dread_stare'){
+    setStatusMax(G.playerStatus,'feared',def.statusTurns||1);
+    logMsg('😨 Dread Stare inflicts fear.','boss');
+  }else if(abilityId==='lt_execution_clamp'){
+    let ex=1;
+    if(pHpPct<=(def.lowHpThreshold||0.4)) ex*=(1+(def.bonusLowHp||0));
+    doHit(lieutenantActionDamageMult(def,e,baseMult*ex),'uses Execution Clamp!');
+  }else if(abilityId==='lt_crush_serpent'){
+    doHit(lieutenantActionDamageMult(def,e,baseMult),'lashes out with Crush Serpent!');
+    if(chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); }
+    else{ applyPlayerSlow(def.slowTurns||2,def.slowAmt||6,def.slowTurns||2); logMsg('🦵 Crush Serpent slows your movement.','boss'); }
+  }else if(abilityId==='lt_ground_sweep'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'sweeps the ground with crushing force!');
+    if((r?.dmgDealt||0)>0 && chance((def.stunChance||0)*100)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🌀 Ground Sweep staggers you!','boss'); }
+  }else if(abilityId==='lt_mist_curse'){
+    G.playerStatus.blind=Math.max(G.playerStatus.blind||0,def.statusTurns||1);
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15;
+    logMsg('🌫 Mist Curse blinds your aim.','boss');
+  }else if(abilityId==='lt_tidal_strike'){
+    const fs=(lt.futureSight>0)?(lt.futureSpellMult||1.3):1;
+    lt.futureSight=0;
+    doHit(lieutenantActionDamageMult(def,e,baseMult*fs),'casts Tidal Strike!');
+  }else if(abilityId==='lt_rotting_curse'){
+    applyAilment('player','poison',def.statusStacks||2);
+    logMsg('☣ Rotting Curse infects you with poison.','boss');
+  }else if(abilityId==='lt_bone_harvest'){
+    const r=doHit(lieutenantActionDamageMult(def,e,baseMult),'reaps with Bone Harvest!');
+    const heal=Math.max(1,Math.floor((r?.dmgDealt||0)*(def.healFromDamage||0.5)));
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal');
+  }else if(abilityId==='lt_ash_cloud'){
+    G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+(def.accDebuff||15);
+    logMsg('🌫 Ash Cloud shrouds the battlefield.','boss');
+  }else {
+    const hits=Math.max(1,def.hits||1);
+    const critMult=1+(def.critBonus||0);
+    for(let i=0;i<hits;i++) doHit(lieutenantActionDamageMult(def,e,baseMult*critMult),`uses ${def.name}!`);
+  }
+
+  lt.lastMoveType=def.type||'utility';
+  lt.lastMoveDidDamage=didDamage;
+  return {didDamage,type:def.type||'utility'};
+}
+function lieutenantTurnAI(){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  lt.turn=(lt.turn||0)+1;
+
+  if(lt.dodgeBuffTurns>0){
+    lt.dodgeBuffTurns--;
+    if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; }
+  }
+  if((lt.patrolBuffTurns||0)>0){
+    lt.patrolBuffTurns--;
+    if(lt.patrolBuffTurns<=0){ e.stats.def=Math.max(0,(e.stats.def||0)-2); e.stats.spd=Math.max(1,(e.stats.spd||0)-1); }
+  }
+
+  if(e.id==='lt_seraph') lt.velocityStacks=Math.min(8,(lt.velocityStacks||0)+1);
+  if(e.id==='lt_marshal' && lt.turn%2===0){
+    lt.ironPatrolStacks=Math.min(6,(lt.ironPatrolStacks||0)+1);
+    e.stats.def=(e.stats.def||0)+1;
+    logMsg('🛡 Iron Patrol reinforces Marshal Stride (+1 DEF).','boss');
+  }
+  if(e.id==='lt_skarn' && lt.turn%3===0){
+    const h=Math.floor((e.stats.maxHp||1)*0.12);
+    e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h);
+    setHpBar('enemy',e.stats.hp,e.stats.maxHp);
+    spawnFloat('enemy',`+${h}`,'fn-heal');
+    logMsg('☠ Feast on the Fallen restores Skarn.','boss');
+  }
+  if(e.id==='lt_skarn' && lt.deathCircle) lt.deathCircleStacks=Math.min(8,(lt.deathCircleStacks||0)+1);
+
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+  const eHpPct=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+  const forceDamage = (lt.lastMoveDidDamage===false);
+  const avoidSecondUtility = (lt.lastMoveType==='utility' || lt.lastMoveType==='buff' || lt.lastMoveType==='control');
+
+  let chosen='';
+
+  if(e.aiProfile==='executioner'){
+    if(pHpPct<=0.40) chosen='lt_execution_clamp';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_shatter_grip';
+    else if(!forceDamage && Math.random()<0.22) chosen='lt_dread_stare';
+    else chosen='lt_bonecrusher';
+  }else if(e.aiProfile==='duelist'){
+    if(lt.markTurns>0) chosen='lt_skyfall_strike';
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.28) chosen='lt_wind_feint';
+    else if(!forceDamage && Math.random()<0.34) chosen='lt_predator_mark';
+    else chosen=(Math.random()<0.55)?'lt_razor_dive':'lt_skyfall_strike';
+  }else if(e.aiProfile==='warden'){
+    if((lt.turn<=2 || (lt.patrolBuffTurns||0)<=0) && !forceDamage && Math.random()<0.45) chosen='lt_patrol_command';
+    else if(!forceDamage && Math.random()<0.30) chosen='lt_crush_serpent';
+    else chosen=(Math.random()<0.45)?'lt_ground_sweep':'lt_iron_kick';
+  }else if(e.aiProfile==='seer'){
+    if(lt.futureSight>0) chosen='lt_tidal_strike';
+    else if(!forceDamage && Math.random()<0.32) chosen='lt_mist_curse';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_future_sight';
+    else if(!forceDamage && eHpPct<0.5 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_ghost_step';
+    else chosen='lt_tidal_strike';
+  }else if(e.aiProfile==='reaper'){
+    if(!(lt.openedWithCurse)) { lt.openedWithCurse=true; chosen='lt_rotting_curse'; }
+    else if(!lt.deathCircle && !forceDamage && Math.random()<0.28) chosen='lt_death_circle';
+    else if(!forceDamage && eHpPct<0.75 && Math.random()<0.34) chosen='lt_bone_harvest';
+    else chosen=(Math.random()<0.4)?'lt_rotting_curse':'lt_carrion_peck';
+  }else if(e.aiProfile==='scavenger'){
+    if(!(lt.openedWithAsh)) { lt.openedWithAsh=true; chosen='lt_ash_cloud'; }
+    else if(!forceDamage && eHpPct<0.55 && (lt.dodgeBuffTurns||0)<=0 && Math.random()<0.24) chosen='lt_smoke_spiral';
+    else if(pHpPct<=0.50) chosen=(Math.random()<0.65)?'lt_burning_dive':'lt_carrion_rush';
+    else if(!forceDamage && Math.random()<0.28) chosen='lt_ash_cloud';
+    else chosen=(Math.random()<0.5)?'lt_carrion_rush':'lt_burning_dive';
+  }
+
+  if(avoidSecondUtility && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const fallback={
+      lt_khar:'lt_bonecrusher', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_iron_kick',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_carrion_peck', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=fallback[e.id]||chosen;
+  }
+  if(forceDamage && ['lt_wind_feint','lt_predator_mark','lt_patrol_command','lt_future_sight','lt_ghost_step','lt_death_circle','lt_ash_cloud','lt_smoke_spiral','lt_mist_curse','lt_rotting_curse','lt_dread_stare','lt_shatter_grip'].includes(chosen)){
+    const damageFallback={
+      lt_khar:'lt_execution_clamp', lt_seraph:'lt_skyfall_strike', lt_marshal:'lt_ground_sweep',
+      lt_koro:'lt_tidal_strike', lt_skarn:'lt_bone_harvest', lt_ashwing:'lt_burning_dive'
+    };
+    chosen=damageFallback[e.id]||chosen;
+  }
+  if(!chosen) chosen='lt_bonecrusher';
+  performLieutenantAbility(chosen);
 }
 
 
@@ -7743,8 +9142,30 @@ async function enemyTurn() {
   lockActionUI(true);
   G.enemyTurnCount=(G.enemyTurnCount||0)+1;
   startEnemyTurn(e);
-  if(G.enemy?.aiType==='boss_duke'){
-    dukeTurnAI();
+  if(G.enemy?.aiType==='boss_duke' || /^boss_lt_/.test(String(G.enemy?.aiType||''))){
+    let actionsTaken=0;
+    let lastDidDamage=true;
+    const maxActions=Math.min(MAX_ENEMY_ACTIONS_PER_TURN,5);
+    while((G.enemy.energy||0)>0 && actionsTaken<maxActions){
+      let step;
+      if(G.enemy?.aiType==='boss_duke') step=dukeTurnAI();
+      else step=lieutenantTurnAI();
+      if(!step || !step.didAct) break;
+      actionsTaken++;
+      lastDidDamage=!!step.didDamage;
+      if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+      if((G.enemy.energy||0)<=0) break;
+      if(!lastDidDamage){
+        // pressure follow-up: if prior move dealt no damage, attempt another pass quickly
+      }
+    }
+    G.animLock=false;
+    if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+    afterEnemyTurn();
+    return;
+  }
+  if(/^boss_lt_/.test(String(G.enemy?.aiType||''))){
+    lieutenantTurnAI();
     G.animLock=false;
     if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
     afterEnemyTurn();
@@ -7935,6 +9356,11 @@ function checkDeath() {
     if(G.enemy.isBoss){
       G.bossKills++;
       logMsg(`💀 Boss kill #${G.bossKills}! Future enemies grow stronger.`,'boss');
+      if(G.enemy?.lieutenant){
+        if(!G.lieutenantKills||typeof G.lieutenantKills!=='object') G.lieutenantKills={};
+        G.lieutenantKills[G.enemy.id]=(G.lieutenantKills[G.enemy.id]||0)+1;
+        G.lastLieutenantId=G.enemy.id;
+      }
       const _harpyBd=BIRDS[G.player.birdKey];
       if(_harpyBd&&_harpyBd.passive&&_harpyBd.passive.onBossKill) _harpyBd.passive.onBossKill(G.player);
       // Kookaburra Ambush Master: reset on boss kill
@@ -8041,8 +9467,7 @@ function postCombat() {
     SFX.exp();
 
     // Post-battle heal
-    const postHealMult=G.player?.mutHuntersCruelty?0.5:1;
-    const postHeal = Math.max(1, Math.floor(G.player.stats.maxHp * 0.10 * postHealMult));
+    const postHeal = Math.max(1, Math.floor(G.player.stats.maxHp * 0.10));
     G.player.stats.hp = Math.min(G.player.stats.hp + postHeal, G.player.stats.maxHp);
     spawnFloat('player', `+${postHeal} 🩹`, 'fn-heal');
 
@@ -8132,10 +9557,9 @@ function postCombat() {
         mdef:(_postStats.mdef||0)-(_preStats.mdef||0)
       };
 
-      // Level-up heal depends on bird size
-      const sizeHeal = { tiny: 0.60, small: 0.50, medium: 0.35, large: 0.25, xl: 0.15 };
-      const healPct = sizeHeal[G.player.size] || 0.35;
-      const lvHeal = Math.max(1, Math.floor(G.player.stats.maxHp * healPct));
+      // Level-up heal: restore 50% of currently missing HP
+      const missingHp = Math.max(0, G.player.stats.maxHp - G.player.stats.hp);
+      const lvHeal = Math.max(1, Math.floor(missingHp * 0.50));
       G.player.stats.hp = Math.min(G.player.stats.hp + lvHeal, G.player.stats.maxHp);
 
       leveled = true;
@@ -8225,12 +9649,14 @@ function showRewardScreen(hasLevelUp) {
 function confirmReward() {
   if(!G._pendingReward) return;
   if(document.getElementById('gold-replace-ui')) return;
-  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=3){
+  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=getGoldUpgradeLimit()){
     showGoldReplaceUI(G._pendingReward);
     return;
   }
 
+  const _beforeRewardStats=captureStatSnapshot(G.player);
   G._pendingReward.apply(G.player);
+  const _rewardBonusStats=diffStatSnapshot(_beforeRewardStats,captureStatSnapshot(G.player));
   if(G._pendingReward.endlessOnly){ logMsg('♾ Endless-only reward acquired (not available in Story Mode).','system'); }
   const rewardEvt={tier:G._pendingReward.tier, id:G._pendingReward.id||G._pendingReward.name};
   AvianEvents.emit('reward:confirmed', rewardEvt);
@@ -8238,13 +9664,7 @@ function confirmReward() {
   codexMark('artifacts', G._pendingReward.id||G._pendingReward.name, 'seen');
   logMsg(`✦ Gained: ${G._pendingReward.name}!`,'system');
 
-  if(!G.collectedRewards) G.collectedRewards=[];
-  G.collectedRewards.push({
-    icon:G._pendingReward.icon,
-    tier:G._pendingReward.tier,
-    name:G._pendingReward.name,
-    desc:G._pendingReward.desc
-  });
+  recordCollectedReward(G._pendingReward,_rewardBonusStats);
 
   G._pendingReward=null;
   G._goldReplaceMode=false;
@@ -8290,8 +9710,9 @@ function showGoldReplaceUI(newReward){
   const ui=document.createElement('div');
   ui.id='gold-replace-ui';
   ui.style.cssText='background:rgba(20,15,5,.97);border:1px solid var(--gold);border-radius:12px;padding:16px;margin-top:12px;text-align:center;';
+  const goldLimit=getGoldUpgradeLimit();
   ui.innerHTML=`<div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:8px;font-size:.85rem;letter-spacing:.08em">⚠ LEGENDARY LIMIT — Replace a Gold Card</div>
-    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold 3 Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
+    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold ${goldLimit} Legendary card${goldLimit===1?'':'s'}. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
     <div id="gold-replace-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     <button onclick="document.getElementById('gold-replace-ui').remove();G._goldReplaceMode=false;" style="margin-top:10px;background:rgba(40,35,25,.8);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;">✕ Cancel</button>`;
   const list=ui.querySelector('#gold-replace-list');
@@ -8313,16 +9734,9 @@ function showGoldReplaceUI(newReward){
 }
 
 function generateNormalRewards() {
-  const out=[];
   const used=new Set();
-  let guard=0;
-  while(out.length<3 && guard<30){
-    guard++;
-    const rw=rollUpgradeCard();
-    if(!rw || used.has(rw.id)) continue;
-    used.add(rw.id);
-    out.push(rw);
-  }
+  const storyOrEndless = isEndlessRunActive() ? REWARD_FILTERS.battle : rw => (REWARD_FILTERS.battle(rw) && REWARD_FILTERS.story(rw));
+  const out=rollRewardPool(CORE_UPGRADE_REWARDS,{count:3,usedIds:used,predicates:[storyOrEndless,REWARD_FILTERS.notRunLocked()]});
   if(isEndlessRunActive()){
     const eb=G.endlessBattle||0;
     const milestone=eb>0 && (eb%5===0);
@@ -8346,28 +9760,22 @@ function generateBossRewards() {
   const endlessBattle=G.endlessBattle||0;
   
   function pickTier(tier){
-    const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-    if(!pool.length) return null;
-    const rw=pool[Math.floor(Math.random()*pool.length)];
-    used.add(rw.id); return rw;
+    const [rw]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle,REWARD_FILTERS.notRunLocked()]});
+    if(!rw) return null;
+    return rw;
   }
   function pick(forced,optional){
     const r=pickTier(forced)||pickTier('purple')||pickTier('blue');
     if(r) out.push(r);
-    if(optional&&out.length<3&&chance(optional*100)){const r2=pickTier('gold');if(r2)out.push(r2);}
+    // Stage rewards no longer grant gold-tier cards directly.
   }
   
-  // Stage 40 endless boss: 3 gold
-  if(endlessBattle>0&&endlessBattle%20===0){
-    for(let i=0;i<3;i++){const r=pickTier('gold');if(r)out.push(r);}
+  // Boss stage rewards are capped at purple tier (no direct gold cards).
+  if(stage%10===0){
+    pick('purple', 0);
   }
-  // Stage 10/20 main bosses: 1 purple guaranteed + 25% gold
-  else if(stage%10===0){
-    pick('purple', 0.20);
-  }
-  // Default boss: purple + possible gold
   else {
-    pick('purple', 0.12);
+    pick('purple', 0);
   }
   
   if(isEndlessRunActive()){
@@ -8380,9 +9788,9 @@ function generateBossRewards() {
   // Fill remaining 3 slots
   while(out.length<3){
     let tier;
-    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
-    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
-    else{tier=rollTier(true);}
+    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple'],[50,50]);}
+    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple'],[50,50]);}
+    else{tier=rollWeighted(['grey','green','blue','purple'],[1,3,46,50]);}
     const r=pickTier(tier);
     if(r) out.push(r);
     else {const fallback=pickTier('blue')||pickTier('purple');if(fallback)out.push(fallback);else break;}
@@ -8397,7 +9805,12 @@ function rollWeighted(tiers,weights){
   return tiers[tiers.length-1];
 }
 
-// Gold card limit: max 3, prompt replacement if at limit
+// Gold card limit: Story=1. Endless increases +1 each endless boss milestone (10,20,...) up to 3.
+function getGoldUpgradeLimit(){
+  if(!isEndlessRunActive()) return 1;
+  const eb=Math.max(0,G.endlessBattle||0);
+  return Math.min(3,1+Math.floor(eb/10));
+}
 function getGoldCardCount(){return(G.collectedRewards||[]).filter(r=>r.tier==='gold').length;}
 
 // ============================================================
@@ -8449,20 +9862,16 @@ function applyMainAttackAutoLevel(){
 function getBirdExclusiveLearnPool(birdKey){
   const bd=BIRDS[birdKey];
   if(!bd) return LEARNABLE_ABILITIES;
-  const birdClass=bd.class||'';
   const uniqueFromStarts=(bd.startAbilities||[]).filter(id=>id!=='mainAttack'&&id!=='skipTurn'&&id!=='sittingDuck');
-  let classSpecific=[];
-  if(birdClass==='ranger') classSpecific=[...ABILITY_POOL_RANGED];
-  else if(MAGIC_CLASSES.has(birdClass)) classSpecific=[...ABILITY_POOL_MAGIC];
-  else classSpecific=[...ABILITY_POOL_PHYSICAL];
-  return [...new Set([...uniqueFromStarts,...classSpecific,...ABILITY_POOL_UTILITY])];
+  // Class-specific learn gating removed: all birds can roll from the unified learn pool.
+  return [...new Set([...uniqueFromStarts,...ABILITY_POOL_PHYSICAL,...ABILITY_POOL_RANGED,...ABILITY_POOL_MAGIC,...ABILITY_POOL_UTILITY])];
 }
 
 function ensureMainAttackAndLoadoutRules(){
   if(!G.player) return;
   const bd=BIRDS[G.player.birdKey]||{};
   const birdClass=bd.class||'';
-  const isMagic=MAGIC_CLASSES.has(birdClass);
+  const isMagic=MAGIC_CLASSES.has(String(birdClass||'').toLowerCase());
   if(!Array.isArray(G.player.abilities)) G.player.abilities=[];
   G.player.abilities=G.player.abilities.filter(ab=>ab&&ab.id&&ab.id!=='skipTurn'&&ab.id!=='sittingDuck');
   if(!isMagic){
@@ -8547,14 +9956,16 @@ function buildSkillGrid() {
   const grid=document.getElementById('lu-skill-grid'); grid.innerHTML='';
   G.player.abilities.filter(a=>a&&a.id&&a.id!=='skipTurn'&&a.id!=='sittingDuck').forEach(ab=>{
     const tmpl=ABILITY_TEMPLATES[ab.id];
-    if(!tmpl||ab.level>=4)return;
-    const nextLv=ab.level+1;
-    const nextDesc=tmpl.levels[Math.min(nextLv-1,tmpl.levels.length-1)].desc;
+    if(!tmpl) return;
+    const capped=(ab.level>=4);
+    if(capped && !G.endlessMode) return;
+    const nextLv=Math.min((ab.level||1)+1,4);
+    const nextDesc=capped?'Capped skill: this upgrade becomes a Mastery choice in Endless.':tmpl.levels[Math.min(nextLv-1,tmpl.levels.length-1)].desc;
     const c=document.createElement('div');
     c.className='skill-upgrade-card';
     c.innerHTML=`
       <div class="su-name">${ab.name}</div>
-      <div class="su-lv">Lv.${ab.level} → Lv.${nextLv}</div>
+      <div class="su-lv">${capped?`Lv.${ab.level} (CAP) → Mastery`:`Lv.${ab.level} → Lv.${nextLv}`}</div>
       <div class="su-effect">${nextDesc}</div>`;
     c.onclick=()=>{
       document.querySelectorAll('#lu-skill-grid .skill-upgrade-card').forEach(x=>x.classList.remove('selected'));
@@ -8591,44 +10002,102 @@ function deriveAbilityAilments(ab, tmpl){
   }
   const cap=ailmentSlotsForLevel(tmpl, ab.level||1);
   let out=ailIds.slice(0,cap);
-  if((ab.level||1)>=4 && ab.modAilmentChoice && !out.includes(ab.modAilmentChoice) && out.length<cap){
-    out.push(ab.modAilmentChoice);
-  }
   return out.slice(0,cap);
 }
-function openAbilityModificationChoice(ab, tmpl){
-  const pool=['poison','burning','weaken','paralyzed','feared','confused','slow','bleed'];
-  const existing=new Set(deriveAbilityAilments({...ab,modAilmentChoice:null}, tmpl));
-  const options=pool.filter(a=>!existing.has(a));
-  options.sort(()=>Math.random()-0.5);
-  const picks=options.slice(0,3);
-  if(!picks.length) return Promise.resolve(null);
-  const modal=document.getElementById('ability-mod-modal');
-  const sub=document.getElementById('ability-mod-sub');
-  const list=document.getElementById('ability-mod-options');
-  if(!modal||!list) return Promise.resolve(picks[0]);
-  if(sub) sub.textContent=`${ab.name} reached Lv.4 — choose 1 ailment to add.`;
-  return new Promise(resolve=>{
-    list.innerHTML='';
-    picks.forEach(id=>{
-      const btn=document.createElement('button');
-      btn.className='abandon-confirm-btn';
-      btn.style.width='100%';
-      btn.textContent=id.charAt(0).toUpperCase()+id.slice(1);
-      btn.onclick=()=>{ modal.classList.remove('open'); resolve(id); };
-      list.appendChild(btn);
-    });
-    globalThis._abilityModCancelResolver=()=>resolve(null);
-    modal.classList.add('open');
+
+function renderRewardChoiceOptions(config){
+  const host=document.getElementById('reward-choice-options');
+  if(!host) return;
+  host.innerHTML='';
+  (config.options||[]).forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='reward-card tier-blue';
+    btn.style.textAlign='left';
+    btn.innerHTML=`<div class="reward-name">${opt.name||opt.id}</div><div class="reward-tier-label">${opt.type||config.kind||'REWARD'}</div><div class="reward-desc">${opt.desc||''}</div><div style="margin-top:6px">${(opt.tags||[]).map(t=>`<span class="enemy-ab-tag" style="margin-right:4px">${t}</span>`).join('')}</div>`;
+    btn.onclick=()=>applyRewardChoice(opt);
+    host.appendChild(btn);
   });
 }
-function closeAbilityModModal(){
-  const modal=document.getElementById('ability-mod-modal');
-  if(modal) modal.classList.remove('open');
-  if(typeof globalThis._abilityModCancelResolver==='function'){
-    globalThis._abilityModCancelResolver();
-    globalThis._abilityModCancelResolver=null;
+function openRewardChoiceModal(config={}){
+  const modal=document.getElementById('reward-choice-modal');
+  if(!modal) return Promise.resolve(null);
+  const inner=document.getElementById('reward-choice-inner');
+  const banner=document.getElementById('reward-choice-banner');
+  const flavor=document.getElementById('reward-choice-flavor');
+  const source=String(config.source||'default').trim();
+  const headerClass=String(config.headerClass||'').trim();
+  const frameStyle=String(config.frameStyle||'standard').trim();
+  modal.setAttribute('data-perk-source', source);
+  modal.setAttribute('data-frame-style', frameStyle);
+  if(inner){
+    inner.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
+    if(headerClass) inner.classList.add(headerClass);
   }
+  if(banner) banner.textContent=config.bannerText||'Reward';
+  document.getElementById('reward-choice-title').textContent=config.title||'Choose Reward';
+  document.getElementById('reward-choice-sub').textContent=config.subtitle||'';
+  if(flavor){
+    const f=String(config.flavor||'').trim();
+    flavor.textContent=f;
+    flavor.style.display=f?'block':'none';
+  }
+  const cancel=document.getElementById('reward-choice-cancel');
+  if(cancel) cancel.style.display=config.mustChoose?'none':'inline-block';
+  G.rewardChoiceState=config;
+  renderRewardChoiceOptions(config);
+  modal.classList.add('open');
+  const prevLock=G.animLock; G.animLock=true;
+  return new Promise(resolve=>{ G.rewardChoiceState._resolve=(choice)=>{ G.animLock=prevLock; resolve(choice||null); }; });
+}
+function closeRewardChoiceModal(){
+  const modal=document.getElementById('reward-choice-modal');
+  const inner=document.getElementById('reward-choice-inner');
+  const cfg=G.rewardChoiceState||{};
+  if(cfg.mustChoose) return;
+  if(modal) modal.classList.remove('open');
+  if(modal){ modal.removeAttribute('data-perk-source'); modal.removeAttribute('data-frame-style'); }
+  if(inner) inner.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
+  if(typeof cfg._resolve==='function') cfg._resolve(null);
+  G.rewardChoiceState=null;
+}
+function applyRewardChoice(choice){
+  const cfg=G.rewardChoiceState||{};
+  const modal=document.getElementById('reward-choice-modal');
+  const inner=document.getElementById('reward-choice-inner');
+  if(typeof cfg.onSelect==='function') cfg.onSelect(choice);
+  if(typeof choice?.apply==='function') choice.apply(choice);
+  modal?.classList.remove('open');
+  modal?.removeAttribute('data-perk-source');
+  modal?.removeAttribute('data-frame-style');
+  inner?.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
+  if(typeof cfg._resolve==='function') cfg._resolve(choice);
+  G.rewardChoiceState=null;
+}
+function shouldOpenMasteryChoice(birdKey, skillId){
+  const ab=(G.player?.abilities||[]).find(a=>a.id===skillId);
+  return !!(G.endlessMode && ab && (ab.level||1)>=4);
+}
+async function openMasteryChoice(skillId,birdKey){
+  const options=getAvailableMasteriesForSkill(birdKey,skillId);
+  const picks=[...options].sort(()=>Math.random()-0.5).slice(0,3);
+  if(!picks.length) return null;
+  G.masteryChoiceState={birdKey,skillId};
+  return await openRewardChoiceModal({
+    kind:'mastery',
+    title:'♾ Endless Mastery',
+    subtitle:`${ABILITY_TEMPLATES?.[skillId]?.name||skillId} is capped. Choose a mastery:`,
+    mustChoose:true,
+    options:picks.map(m=>({id:m.id,name:m.name,type:'MASTERY',desc:m.desc,tags:m.tags||[],payload:m})),
+    onSelect:resolveMasteryChoice,
+  });
+}
+function resolveMasteryChoice(choice){
+  const state=G.masteryChoiceState||{};
+  const def=MASTERY_DEFS[choice?.id]||choice?.payload;
+  if(!def||!state.skillId||!state.birdKey) return false;
+  const ok=grantMastery(state.birdKey,state.skillId,def,'endless-skill-cap');
+  G.masteryChoiceState=null;
+  return ok;
 }
 function refreshPlayerAbilityAilments(){
   (G.player?.abilities||[]).forEach(ab=>{
@@ -8642,16 +10111,18 @@ async function confirmSkillUpgrade() {
   const ab=G.player.abilities.find(a=>a.id===_luSelectedSkillId);
   if(!ab){return;}
   const prevLevel=ab.level||1;
-  ab.level=Math.min(ab.level+1,4);
   const tmpl=ABILITY_TEMPLATES[_luSelectedSkillId];
-  if(tmpl){
-    if(prevLevel<4 && ab.level===4 && (tmpl.type==='physical'||tmpl.type==='ranged') && ailmentSlotsForLevel(tmpl,4)>ailmentSlotsForLevel(tmpl,3)){
-      const choice=await openAbilityModificationChoice(ab, tmpl);
-      if(choice) ab.modAilmentChoice=choice;
+  if(shouldOpenMasteryChoice(G.player?.birdKey,_luSelectedSkillId)){
+    const choice=await openMasteryChoice(_luSelectedSkillId,G.player?.birdKey);
+    if(!choice) logMsg('No mastery options available. Upgrade was safely skipped.','system');
+    else logMsg(`🌟 ${ab.name} gained a mastery!`,'exp-gain');
+  }else{
+    ab.level=Math.min(ab.level+1,4);
+    if(tmpl){
+      ab.ailmentIds=deriveAbilityAilments(ab, tmpl);
     }
-    ab.ailmentIds=deriveAbilityAilments(ab, tmpl);
+    logMsg(`🌟 ${ab.name} upgraded to Lv.${ab.level}!`,'exp-gain');
   }
-  logMsg(`🌟 ${ab.name} upgraded to Lv.${ab.level}!`,'exp-gain');
   refreshPlayerAbilityAilments();
   normalizeAbilityCooldownsForPlayer(G.player);
   enforceAbilityCosts(G.player);
@@ -8665,10 +10136,23 @@ function afterLevelUp() {
   else advanceStage();
 }
 
-function advanceStage() {
+async function advanceStage(opts={}) {
+  const clearedStage=G.stage;
+  const source = opts.skipPerk ? null : getPerkRewardSourceForStage(clearedStage, !!G.enemy?.isBoss);
+  if(source){
+    try{ await triggerPerkReward(source,{stage:clearedStage}); }catch(e){ console.error(e); }
+  }
   G.stage++;
+  const ui=ensureUIState();
+  const runIsEndless = (ui.gameMode==='endless') && !!G.endlessMode;
   if(isEndlessRunActive()) applyEndlessProgressionMilestones();
-  if(G.stage>ENEMIES.length&&!G.endlessMode){deleteSave();showVictory();return;}
+  if(!runIsEndless && G.stage>STORY_STAGE_CAP){
+    G.endlessMode=false;
+    G.stage=STORY_STAGE_CAP;
+    deleteSave();
+    showVictory();
+    return;
+  }
   // Stage 40 = endless battle 20 — grant unlock
   if(G.endlessMode&&G.endlessBattle>=20&&!isUnlocked('stage40')){
     grantUnlock('stage40');
@@ -8679,16 +10163,11 @@ function advanceStage() {
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
-  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
-  if(signatureDue){
-    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
+  if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
+    const sigEvt={stage:G.stage, type:'grove-random'};
     AvianEvents.emit('signature:event', sigEvt);
     runModuleHook('onSignatureEvent', sigEvt);
-    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
-    setTimeout(()=>showGroveEvent(), 350);
-    return;
-  }
-  if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
+    logMsg('🌳 Whispering Grove appears in the distance.', 'system');
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
   }
@@ -8812,60 +10291,32 @@ async function resolveGrove(idx){
       spawnFloat('player',`-${dmg}`,'fn-dmg');
       break;
     }
-    // ── SNAKE: size-dependent ────────────────────────────────────
+    // ── SNAKE: always restorative (+20% max HP) ─────────────────
     case 'snake':{
       chosen.className='grove-tree revealed outcome-snake';
-      if(isSmall){
-        // Bad for tiny/small: venom bite −25% current HP
-        const dmg = Math.max(1, Math.floor(hp * 0.25));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Venom Bite!</span>`;
-        msg = `🐍 Snake venom seeps in. −${dmg} HP (−25% current)`;
-        flavor = 'Too small to resist the fangs…';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.poison();
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      } else {
-        // Good for medium/XL: crush the snake, +50% missing HP
-        const heal = Math.max(1, Math.floor(missing * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍💪</span><span class="grove-outcome-label">Snake Crushed!</span>`;
-        msg = `💪 You crush the snake underfoot! +${heal} HP restored`;
-        flavor = 'Your strength turned the tables.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.20));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Shed Skin Remedy!</span>`;
+      msg = `🐍 The snake's shed skin restores +${heal} HP`;
+      flavor = 'A strange remedy invigorates your feathers.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
-    // ── EGG: size-dependent ──────────────────────────────────────
+    // ── EGG: always restorative (+10% max HP) ────────────────────
     case 'egg':{
       chosen.className='grove-tree revealed outcome-egg';
-      if(isSmall){
-        // Good for tiny/small: raid the nest +50% current HP
-        const heal = Math.max(1, Math.floor(hp * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Raided!</span>`;
-        msg = `🥚 You slip inside and feast on eggs! +${heal} HP`;
-        flavor = 'Small enough to sneak past the thorns.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      } else {
-        // Bad for medium/XL: thorn trap −40% missing HP
-        const dmg = Math.max(1, Math.floor(missing * 0.40));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🌿</span><span class="grove-outcome-label">Thorns Shred!</span>`;
-        msg = `🌿 Hidden thorns tear through your feathers! −${dmg} HP`;
-        flavor = 'Too large to fit without getting shredded.';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.hit(1.0);
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.10));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Feast!</span>`;
+      msg = `🥚 You recover +${heal} HP`;
+      flavor = 'Nourishing and safe for any bird size.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
   }
@@ -8891,10 +10342,8 @@ function showGroveNestRewards(){
   const used = new Set();
   const picks=[];
   const pick=(tier)=>{
-    const avail=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id));
-    if(!avail.length) return null;
-    const r=avail[Math.floor(Math.random()*avail.length)];
-    used.add(r.id); return r;
+    const [r]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle]});
+    return r||null;
   };
   const rollNestTier=()=>{
     if(chance(5)) return 'gold';
@@ -8931,9 +10380,10 @@ function groveFinish(){
   // If a nest reward was selected, apply it
   if(G._groveNestReward){
     const rw=G._groveNestReward;
+    const _beforeRewardStats=captureStatSnapshot(G.player);
     rw.apply(G.player);
-    if(!G.collectedRewards)G.collectedRewards=[];
-    G.collectedRewards.push({icon:rw.icon,tier:rw.tier,name:rw.name,desc:rw.desc});
+    const _rewardBonusStats=diffStatSnapshot(_beforeRewardStats,captureStatSnapshot(G.player));
+    recordCollectedReward(rw,_rewardBonusStats);
     codexMark('artifacts', rw.id||rw.name, 'seen');
     logMsg(`🪹 Grove Nest: ${rw.name} claimed!`,'exp-gain');
     G._groveNestReward=null;
@@ -8984,20 +10434,39 @@ function showVictory(){
   const runUnlocks=document.getElementById('run-unlocks');
   if(runUnlocks){
     runUnlocks.innerHTML=`<div style="margin:10px 0 6px;font-size:.82rem;color:var(--gold-light)">🏆 Achievement: Court Cleared</div>
-    <div style="font-size:.76rem;color:var(--text-dim);line-height:1.5">${G.player.name} · HP ${G.player.stats.hp}/${G.player.stats.maxHp} · ATK ${G.player.stats.atk} · DEF ${G.player.stats.def} · SPD ${G.player.stats.spd}<br/>Abilities: ${abilityList||'—'}<br/>Unlocked roster: ${unlockedNow.join(', ')||'None yet'}</div>`;
+    <div style="font-size:.76rem;color:var(--text-dim);line-height:1.5">${G.player.name} · HP ${G.player.stats.hp}/${G.player.stats.maxHp} · ATK ${G.player.stats.atk} · DEF ${G.player.stats.def} · SPD ${G.player.stats.spd}<br/>Abilities: ${abilityList||'—'}<br/>Unlocked roster (${unlockedNow.length}/${unlockIds.length}): ${unlockedNow.join(', ')||'None yet'}</div>`;
   }
   showRunStats();
-  if(G.endlessMode){
-    G.endlessBattle=0;
+  const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
+  const mainMenuBtn=document.getElementById('gameover-main-menu-btn');
+  G._pendingEndlessContinuation=false;
+  if(victoryMenuBtn) victoryMenuBtn.style.display='inline-block';
+  const ui=ensureUIState();
+  const isEndlessRun = (ui.gameMode==='endless') && !!G.endlessMode;
+  if(isEndlessRun){
+    G._pendingStage20Narrative=false;
+    G._pendingEndlessContinuation=true;
+    if(victoryMenuBtn) victoryMenuBtn.innerHTML='Continue to Endless';
+    if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
     logMsg('🌟 Stage 20 complete! Endless mode continues — bosses await!','boss');
-    advanceStage();
-    return;
+  }else{
+    const dukeVictory = (G.stage>=STORY_STAGE_CAP) || !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
+    if(dukeVictory && victoryMenuBtn){
+      G._pendingStage20Narrative=true;
+      victoryMenuBtn.innerHTML='Continue';
+      if(mainMenuBtn) mainMenuBtn.style.display='none';
+    }else{
+      G._pendingStage20Narrative=false;
+      if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
+      if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
+    }
   }
   renderUnlockPopupsOnGameover();
-  const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:!!G.endlessMode};
+  const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:false};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
+  clearTimeout(G._victoryReturnTimer);
 }
 function showDefeat(){
   G.phase='REWARD';
@@ -9013,8 +10482,12 @@ function showDefeat(){
   saveHighscoreEntry(false);
   document.getElementById('gameover-inner').className='gameover-inner lose';
   document.getElementById('gameover-title').textContent='💀 Fallen';
-  const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
+  const stageLabel=G.endlessMode&&G.stage>STORY_STAGE_CAP?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
+  const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
+  const mainMenuBtn=document.getElementById('gameover-main-menu-btn');
+  if(victoryMenuBtn) victoryMenuBtn.style.display='none';
+  if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
   const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
@@ -9341,13 +10814,26 @@ function buildRefGuide() {
     return card(e.name, `HP ${e.stats?.maxHp||e.hp||0} · ATK ${e.stats?.atk||e.atk||0} · AI: ${ai}`,u,ai);
   }).join('');
 
-  const packStatusGlossary = G.dataPacks?.abilityPassiveUpgrade?.STATUS_GLOSSARY || {};
-  const statusIds=[...new Set([...Object.keys(AILMENTS||{}), ...Object.keys(packStatusGlossary), ...Object.keys(G.codex?.statuses||{})])];
+  const statusDetailMap={
+    poison:'Tick: 1 damage per stack (3 turns). Max stacks: 5 → max single tick 5 damage.',
+    bleed:'Tick: floor(stacks × 1.5) damage (3 turns). Max stacks: 5 → max single tick 7 damage.',
+    burning:'Tick: 4% of target max HP (minimum 1) for 3 turns. Not stack-based.',
+    delayed:'Resonance/Delayed detonates once for stored flat damage, then clears.',
+    weaken:'Reduces outgoing attack effectiveness while active (typically 3 turns).',
+    paralyzed:'Hard crowd-control chance/lockout while active (typically up to 3 turns).',
+    feared:'Prevents/restricts specific actions while active; often applied as turn counters.',
+    confused:'May cause skipped actions each turn based on confusion skip chance.',
+    slow:'Reduces speed and can reduce dodge while active.',
+    mud:'Mud/soak style debuff that impairs action reliability briefly.',
+    chilled:'Cold debuff that applies slow-like penalties for short duration.',
+  };
+  const statusIds=[...new Set([...Object.keys(AILMENTS||{}), ...Object.keys(G.codex?.statuses||{})])];
   const statuses=statusIds.filter(id=>isMatch(id)).map(id=>{
     const u=!!G.codex?.statuses?.[id]?.seen;
     if(!u&&!showLocked) return '';
-    const d=(packStatusGlossary[id]||AILMENTS[id]?.desc)||'Status effect.';
-    return card(id[0].toUpperCase()+id.slice(1),d,u,'status');
+    const base=(AILMENTS[id]?.desc)||'Status effect.';
+    const detail=statusDetailMap[id]||'See combat log for exact per-skill values and duration interactions.';
+    return card(id[0].toUpperCase()+id.slice(1),`${base}<br><br><strong style="color:var(--gold-light)">Tick & Scaling:</strong> ${detail}`,u,'status');
   }).join('');
 
   const tierOrder=['grey','green','blue','purple','gold'];
@@ -9367,6 +10853,18 @@ function buildRefGuide() {
   const arts=artsByTier || (showLocked?card('???','Find rewards in runs to fill this section.',false,'locked'):'' );
 
   const mechanics=`<div class="ref-skills-grid">
+    ${card('Damage Formula — Physical / Ranged',
+      'Base hit starts from attacker ATK and ability multipliers. The result is reduced by target DEF after pierce/ignore effects, then clamped to minimum damage. Crit applies after base damage and scales by crit multiplier.',
+      true,'damage')}
+    ${card('Damage Formula — Spell / Magic',
+      'Spell damage starts from attacker MATK and spell multipliers. The result is mitigated by target MDEF (and magic mitigation effects), then clamped to minimum damage. Magic dodge/avoidance checks still occur before damage lands.',
+      true,'damage')}
+    ${card('Mitigation & Avoidance',
+      'Mitigation layers include DEF/MDEF, guarding/defend states, passive reductions, and temporary shields. Avoidance layers include miss chance, ACC vs Dodge/MDodge interactions, and hard-control prevention effects.',
+      true,'mitigation')}
+    ${card('DoT Tick Reference',
+      'Poison: 1×stacks per tick (max 5). Bleed: floor(1.5×stacks) per tick (max 7 at 5 stacks). Burning: 4% max HP per tick (min 1). Delayed: stored flat detonation once.',
+      true,'ailments')}
     ${card('Energy & Cooldowns','Main attacks are free unless spells. Abilities spend energy and may go on cooldown.',true,'core')}
     ${card('Enemy AI Types','Aggressive, Defensive, Trickster, Predator, and Boss AI patterns influence action choice.',true,'ai')}
     ${card('Ability Rarity','Ability offers are weighted by rarity: common, rare, epic, legendary.',true,'rarity')}
@@ -9438,12 +10936,18 @@ function rollShopTier(weights){
   const vals=tiers.map(t=>weights[t]);
   return rollWeighted(tiers,vals);
 }
-function pickUniqueRewardByTier(tier,used){
-  const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  used.add(pick.id);
-  return pick;
+function pickUniqueRewardByTier(tier,used,extraPredicates=[]){
+  const [pick]=rollRewardPool(CORE_UPGRADE_REWARDS,{
+    count:1,
+    usedIds:used,
+    predicates:[
+      REWARD_FILTERS.tier(tier),
+      REWARD_FILTERS.shop,
+      REWARD_FILTERS.notRunLocked(),
+      ...extraPredicates
+    ]
+  });
+  return pick||null;
 }
 function makeUtilityOffer(kind='regular'){
   const utilsRegular=[
@@ -9462,7 +10966,7 @@ function makeUtilityOffer(kind='regular'){
   ];
   const arr=kind==='boss'?utilsBoss:utilsRegular;
   const pick=arr[Math.floor(Math.random()*arr.length)];
-  return {...pick};
+  return createReward({...pick,kind:'utility',source:['shop'],oncePerRun:pick.stackable===false});
 }
 const ABILITY_RARITY_WEIGHTS = { common:70, rare:22, epic:7, legendary:1 };
 function rollByRarity(list){
@@ -9476,7 +10980,6 @@ function rollByRarity(list){
 
 function makeAbilityOffer(highQuality=false){
   const bd=BIRDS[G.player.birdKey]||{};
-  const birdClass=bd.class||'';
   const existing=new Set((G.player.abilities||[]).map(a=>a.id));
   const classPool=(bd.exclusiveLearnPool&&bd.exclusiveLearnPool.length?bd.exclusiveLearnPool:Object.keys(ABILITY_TEMPLATES_LEARNABLE));
   const candidates=classPool.filter(id=>{
@@ -9489,8 +10992,10 @@ function makeAbilityOffer(highQuality=false){
     const tmpl=rollByRarity(picks)||ABILITY_TEMPLATES[unknown[Math.floor(Math.random()*unknown.length)]];
     const id=tmpl.id;
     const tier=highQuality?'blue':'green';
-    return {
+    return createReward({
       id:`shop_ab_learn_${id}`,
+      kind:'ability',
+      source:['shop'],
       tier,
       icon:highQuality?'📘':'📗',
       name:`Learn: ${tmpl.name}`,
@@ -9499,14 +11004,14 @@ function makeAbilityOffer(highQuality=false){
         // NOTE: shopBuySelected() will handle replacement UI if you're at the non-main cap.
         p.abilities.push({...tmpl,level:1,ailmentIds:[]});
       }
-    };
+    });
   }
   const upgradable=(G.player.abilities||[]).filter(a=>!isMainAttackAbility(a)&&(a.level||1)<4);
   if(upgradable.length){
     const pick=upgradable[Math.floor(Math.random()*upgradable.length)];
-    return {id:`shop_ab_upgrade_${pick.id}`,tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}};
+    return createReward({id:`shop_ab_upgrade_${pick.id}`,kind:'ability',source:['shop'],tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}});
   }
-  return {id:'shop_ab_focus',tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}};
+  return createReward({id:'shop_ab_focus',kind:'ability',source:['shop'],tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}});
 }
 function generateShopItems() {
   _shopItems=[];
@@ -9539,14 +11044,8 @@ const SHOP_BANNED_IDS = new Set(['skipTurn','sittingDuck','endTurn','mimic']);
 function canOfferAbilityInShop(p, tmpl){
   if(!tmpl || !tmpl.id) return false;
   if(SHOP_BANNED_IDS.has(tmpl.id)) return false;
-  const cls=((p.class||BIRDS[p.birdKey]?.class||'').toLowerCase());
-  if(Array.isArray(tmpl.allowedClasses) && tmpl.allowedClasses.length) return tmpl.allowedClasses.includes(cls);
-  if(tmpl.isNeutral) return true;
-  const bt=tmpl.btnType||tmpl.type;
-  if(bt==='ranged') return cls==='ranger';
-  if(bt==='spell') return MAGIC_CLASSES.has(cls);
-  if(bt==='physical') return !MAGIC_CLASSES.has(cls);
-  return bt==='utility';
+  // Class-specific offer gating removed to keep old/new class systems from interfering.
+  return true;
 }
 
 const SHOP_STATE = {
@@ -9760,14 +11259,12 @@ async function shopBuySelected() {
           if(idx>=0) G.player.abilities.splice(idx,1,{...tmpl,level:1,ailmentIds:[]});
           else G.player.abilities.push({...tmpl,level:1,ailmentIds:[]});
 
-          if(!G.collectedRewards) G.collectedRewards=[];
-          G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc});
+          recordCollectedReward(item,{});
 
           logMsg(`🌟 Purchased: ${item.name}!`,'exp-gain');
           const log=document.getElementById('shop-purchase-log');
           if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-          if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
           _shopItems.splice(selected,1);
           refreshPlayerAbilityAilments();
           enforceAbilityCosts(G.player);
@@ -9783,32 +11280,36 @@ async function shopBuySelected() {
 
   G.shinyObjects-=cost;
   if(discount>0) G._nextShopDiscount=0;
+  const _beforeShopStats=captureStatSnapshot(G.player);
   if(item.id && item.id.startsWith('shop_ab_upgrade_')){
     const abId=item.id.replace('shop_ab_upgrade_','');
     const a=G.player.abilities.find(x=>x.id===abId);
     if(a){
       const prevLevel=a.level||1;
-      a.level=Math.min(4,(a.level||1)+1);
-      const tmpl=ABILITY_TEMPLATES[a.id];
-      if(tmpl && prevLevel<4 && a.level===4 && (tmpl.type==='physical'||tmpl.type==='ranged') && ailmentSlotsForLevel(tmpl,4)>ailmentSlotsForLevel(tmpl,3)){
-        const choice=await openAbilityModificationChoice(a, tmpl);
-        if(choice) a.modAilmentChoice=choice;
+      if(shouldOpenMasteryChoice(G.player?.birdKey,a.id)){
+        const mChoice=await openMasteryChoice(a.id,G.player?.birdKey);
+        if(!mChoice){
+          logMsg('No mastery options available. Refunded as +1 ATK/+1 MATK.','system');
+          G.player.stats.atk+=1; G.player.stats.matk=(G.player.stats.matk||0)+1;
+        }
+      }else{
+        a.level=Math.min(4,(a.level||1)+1);
+        const tmpl=ABILITY_TEMPLATES[a.id];
       }
     }
   } else {
-    item.apply(G.player);
+    applyRewardEffect(item,G.player,{preventDuplicates:true,source:'shop'});
   }
   refreshPlayerAbilityAilments();
   enforceAbilityCosts(G.player);
+  const _shopBonusStats=diffStatSnapshot(_beforeShopStats,captureStatSnapshot(G.player));
 
-  if(!G.collectedRewards) G.collectedRewards=[];
-  G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc});
+  recordCollectedReward(item,_shopBonusStats);
   codexMark('artifacts', item.id||item.name, 'seen');
   logMsg(`🌟 Purchased: ${item.name}!`,'exp-gain');
   const log=document.getElementById('shop-purchase-log');
   if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-  if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
   _shopItems.splice(selected,1);
   shopLockVisitState();
   saveRun();
