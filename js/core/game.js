@@ -2457,12 +2457,64 @@ function getRunPerks(){ return Array.isArray(G.runPerks)?G.runPerks:[]; }
 function getRunMasteries(){ return Array.isArray(G.runMasteries)?G.runMasteries:[]; }
 function getBirdPerks(birdKey){ const k=birdKey||G.player?.birdKey||''; if(!k) return []; if(!G.birdPerks||typeof G.birdPerks!=='object') G.birdPerks={}; if(!Array.isArray(G.birdPerks[k])) G.birdPerks[k]=[]; return G.birdPerks[k]; }
 function hasPerk(perkId,birdKey){ return getBirdPerks(birdKey).includes(perkId); }
-function grantPerk(perkDef,birdKey,source='generic'){ const def=(typeof perkDef==='string')?PERK_DEFS[perkDef]:perkDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k||hasPerk(def.id,k)) return false; getBirdPerks(k).push(def.id); if(!Array.isArray(G.runPerks)) G.runPerks=[]; G.runPerks.push({perkId:def.id,source,birdKey:k}); applyBirdPerksToStats(k); return true; }
+function grantPerk(perkDef,birdKey,source='generic',meta={}){ const def=(typeof perkDef==='string')?PERK_DEFS[perkDef]:perkDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k) return false; const owned=getBirdPerks(k); const count=owned.filter(x=>x===def.id).length; const cap=Number.isFinite(def?.stackCap)?def.stackCap:(def?.stackable?Infinity:1); if(count>=cap) return false; if(count>0 && !def.stackable) return false; owned.push(def.id); if(!Array.isArray(G.runPerks)) G.runPerks=[]; G.runPerks.push({perkId:def.id,source,birdKey:k,...(meta||{})}); applyBirdPerksToStats(k); recomputePerkAndMasteryEffects(); return true; }
 function getSkillMasteries(birdKey,skillId){ const k=birdKey||G.player?.birdKey||''; if(!k||!skillId) return []; if(!G.skillMasteries||typeof G.skillMasteries!=='object') G.skillMasteries={}; if(!G.skillMasteries[k]||typeof G.skillMasteries[k]!=='object') G.skillMasteries[k]={}; if(!Array.isArray(G.skillMasteries[k][skillId])) G.skillMasteries[k][skillId]=[]; return G.skillMasteries[k][skillId]; }
 function hasMastery(birdKey,skillId,masteryId){ return getSkillMasteries(birdKey,skillId).includes(masteryId); }
 function grantMastery(birdKey,skillId,masteryDef,source='endless-skill-cap'){ const def=(typeof masteryDef==='string')?MASTERY_DEFS[masteryDef]:masteryDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k||!skillId) return false; const owned=getSkillMasteries(k,skillId); if(owned.includes(def.id)&&!def.stackable) return false; owned.push(def.id); if(!Array.isArray(G.runMasteries)) G.runMasteries=[]; G.runMasteries.push({birdKey:k,skillId,masteryId:def.id,source}); recomputePerkAndMasteryEffects(); return true; }
 function getAbilityMasteryTags(ab,tmpl){ const t=tmpl||ABILITY_TEMPLATES?.[ab?.id]||ab||{}; const kind=String(t.btnType||t.type||'').toLowerCase(); const tags=[]; if(t.isBasic||/mainattack|peck/i.test(t.id||ab?.id||'')) tags.push('BASIC'); if(kind==='spell') tags.push('SPELL'); if(kind==='utility') tags.push('UTILITY'); if(kind==='physical'||kind==='ranged') tags.push((Number(ab?.energyCost??t.energyCost??0)>=2)?'HEAVY':'BASIC'); const d=String(t.desc||'').toLowerCase(); if(/stun|fear|confuse|slow|paraly/.test(d)) tags.push('CONTROL'); if(/guard|shield|defend|counter|brace/.test(d)||t.id==='crowDefend') tags.push('GUARD'); return [...new Set(tags)]; }
 function getAvailableMasteriesForSkill(birdKey,skillId){ const ab=(G.player?.abilities||[]).find(x=>x.id===skillId)||{id:skillId}; const tmpl=ABILITY_TEMPLATES?.[skillId]||ab; const tags=getAbilityMasteryTags(ab,tmpl); const owned=new Set(getSkillMasteries(birdKey,skillId)); return Object.values(MASTERY_DEFS).filter(m=>{ if(m.skillId&&m.skillId!==skillId) return false; if(!m.skillId&&m.skillTag&&!tags.includes(String(m.skillTag).toUpperCase())) return false; if(owned.has(m.id)&&!m.stackable) return false; return true; }); }
+
+function getPerkCount(){ return (Array.isArray(G.runPerks)?G.runPerks:[]).length; }
+function hasPerkSource(source, stage){
+  return (G.runPerks||[]).some(p=>p?.source===source && (stage===undefined || p?.stage===stage));
+}
+function getAvailablePerkOptions(maxChoices=3){
+  const birdKey=G.player?.birdKey;
+  const defs=Object.values(PERK_DEFS||{});
+  const available=defs.filter(def=>{
+    if(!def?.id) return false;
+    const owned=getBirdPerks(birdKey).filter(x=>x===def.id).length;
+    const cap=Number.isFinite(def?.stackCap)?def.stackCap:(def?.stackable?Infinity:1);
+    return owned < cap;
+  });
+  const shuffled=[...available].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0, Math.max(1, Math.min(maxChoices, shuffled.length)));
+}
+function getPerkRewardSourceForStage(clearedStage, isBoss){
+  if(!isBoss) return null;
+  if(!G.endlessMode){
+    if(clearedStage===10) return 'story-boss-10';
+    if(clearedStage===20) return 'story-boss-20';
+    return null;
+  }
+  const endlessStage=Math.max(0, clearedStage-20);
+  if(endlessStage>0 && endlessStage%10===0) return 'endless-milestone';
+  return null;
+}
+async function triggerPerkReward(source, ctx={}){
+  const storyCap=2, endlessCap=5;
+  const cap=G.endlessMode?endlessCap:storyCap;
+  if(getPerkCount()>=cap) return false;
+  if(source==='story-boss-10' && getPerkCount()>=1 && hasPerkSource('story-boss-10')) return false;
+  if(source==='story-boss-20' && getPerkCount()>=2 && hasPerkSource('story-boss-20')) return false;
+  if(source==='endless-milestone' && hasPerkSource('endless-milestone', ctx?.stage)) return false;
+
+  const opts=getAvailablePerkOptions(3);
+  if(!opts.length) return false;
+  const title = source==='story-boss-20' ? 'Final Perk Before Endless' : 'Choose a Perk';
+  const subtitle = source==='endless-milestone'
+    ? `Endless Stage ${Math.max(1,(ctx?.stage||G.stage)-20)} milestone reached.`
+    : 'Choose 1 perk for this run.';
+  const choice=await openRewardChoiceModal({
+    kind:'perk', title, subtitle, mustChoose:true,
+    options:opts.map(p=>({id:p.id,name:p.name,type:'PERK',desc:p.desc,tags:p.tags||[],payload:p})),
+  });
+  const picked=PERK_DEFS[choice?.id]||choice?.payload;
+  if(!picked) return false;
+  const ok=grantPerk(picked, G.player?.birdKey, source, {stage:ctx?.stage||G.stage});
+  if(ok) logMsg(`✨ Perk chosen: ${picked.name}`,'exp-gain');
+  return ok;
+}
 function applyBirdPerksToStats(birdKey){ if(!G.player||G.player.birdKey!==(birdKey||G.player.birdKey)) return; G.player._appliedPerkIds=G.player._appliedPerkIds||{}; getBirdPerks(G.player.birdKey).forEach(pid=>{ if(G.player._appliedPerkIds[pid]) return; const sm=PERK_DEFS[pid]?.effect?.statMods||{}; Object.entries(sm).forEach(([k,v])=>{ G.player.stats[k]=(G.player.stats[k]||0)+Number(v||0); }); G.player._appliedPerkIds[pid]=true; }); }
 function applySkillMasteriesToAbility(birdKey,skillId,abilityData){ const ids=getSkillMasteries(birdKey,skillId||abilityData?.id); abilityData._masteries=[...ids]; return abilityData; }
 function recomputePerkAndMasteryEffects(){ applyBirdPerksToStats(G.player?.birdKey); (G.player?.abilities||[]).forEach(ab=>applySkillMasteriesToAbility(G.player?.birdKey,ab.id,ab)); }
@@ -2946,6 +2998,23 @@ function renderPassiveBadge() {
   else badge.style.display='none';
 }
 
+function captureStatSnapshot(p){
+  const s=p?.stats||{};
+  return {hp:Number(s.hp||0),maxHp:Number(s.maxHp||0),atk:Number(s.atk||0),matk:Number(s.matk||0),def:Number(s.def||0),mdef:Number(s.mdef||0),spd:Number(s.spd||0),acc:Number(s.acc||0),dodge:Number(s.dodge||0)};
+}
+function diffStatSnapshot(before, after){
+  const out={};
+  Object.keys(before||{}).forEach(k=>{ const d=Number((after?.[k]||0)-(before?.[k]||0)); if(d!==0) out[k]=d; });
+  return out;
+}
+function recordCollectedReward(item, bonusStats={}){
+  if(!item) return;
+  if(!G.collectedRewards) G.collectedRewards=[];
+  const cleaned={};
+  Object.entries(bonusStats||{}).forEach(([k,v])=>{ if(Number(v)!==0) cleaned[k]=Number(v); });
+  G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc,bonusStats:cleaned});
+}
+
 // ============================================================
 //  NEST / INVENTORY
 // ============================================================
@@ -3002,24 +3071,59 @@ function openNest() {
     </div>`;
   });
   html+=`</div></div>`;
-  // Collected rewards
+  // Collected rewards + compact upgrade summary
   if(G.collectedRewards&&G.collectedRewards.length>0){
+    const formatBonusLine=(bonusMap)=>{
+      const order=['atk','matk','def','mdef','spd','acc','dodge','maxHp','hp'];
+      const labels={atk:'ATT',matk:'MATT',def:'DEF',mdef:'MDEF',spd:'SPD',acc:'ACC',dodge:'DODGE',maxHp:'MAX HP',hp:'HP'};
+      const chunks=order
+        .filter(k=>Number(bonusMap?.[k]||0)!==0)
+        .map(k=>`${labels[k]} ${Number(bonusMap[k])>0?'+':''}${Math.round(Number(bonusMap[k]))}`);
+      return chunks.length?chunks.join(' · '):'No direct stat boosts recorded.';
+    };
+    const totalUpgradeBonuses={};
+    const applyBonus=(target,key,val)=>{ if(!key||!Number.isFinite(Number(val))||Number(val)===0) return; target[key]=(target[key]||0)+Number(val); };
+    const parseBonusFromText=(txt='')=>{
+      const out={};
+      const map={ATK:'atk',ATT:'atk','M.ATK':'matk',MATK:'matk',MATT:'matk','M. DEF':'mdef','M.DEF':'mdef',MDEF:'mdef',DEF:'def',SPD:'spd',ACC:'acc',DODGE:'dodge',HP:'hp','MAX HP':'maxHp'};
+      String(txt).replace(/([+-]?\d+)\s*%?\s*(ATT|ATK|M\.ATK|MATK|MATT|M\. ?DEF|MDEF|DEF|SPD|ACC|DODGE|MAX HP|HP)/gi,(_,n,label)=>{
+        const norm=map[String(label).toUpperCase().replace(/\s+/g,' ')];
+        if(norm) applyBonus(out,norm,Number(n));
+        return _;
+      });
+      return out;
+    };
     // Group duplicates
     const rewardMap=new Map();
     G.collectedRewards.forEach(r=>{
       const key=r.name;
+      const b=(r&&typeof r.bonusStats==='object')?r.bonusStats:parseBonusFromText(r?.desc||'');
+      Object.entries(b).forEach(([k,v])=>applyBonus(totalUpgradeBonuses,k,v));
       if(rewardMap.has(key)){rewardMap.get(key).count++;}
       else{rewardMap.set(key,{...r,count:1});}
     });
+    const perkBonuses={};
+    (G.runPerks||[]).forEach(r=>{
+      if(r?.birdKey && r.birdKey!==p.birdKey) return;
+      const sm=PERK_DEFS[r?.perkId]?.effect?.statMods||{};
+      Object.entries(sm).forEach(([k,v])=>applyBonus(perkBonuses,k,v));
+    });
+    html+=`<div class="nest-section"><div class="nest-section-title">📈 Upgrade / Perk Totals</div>
+      <div class="nest-bonus-line"><span class="nest-bonus-label">Upgrades:</span> ${formatBonusLine(totalUpgradeBonuses)}</div>
+      <div class="nest-bonus-line"><span class="nest-bonus-label">Perks:</span> ${formatBonusLine(perkBonuses)}</div>
+    </div>`;
     const tierOrder={gold:0,purple:1,blue:2,green:3,grey:4};
     const grouped=[...rewardMap.values()].sort((a,b)=>(tierOrder[a.tier]||4)-(tierOrder[b.tier]||4));
-    html+=`<div class="nest-section"><div class="nest-section-title">🎁 Collected Rewards (${G.collectedRewards.length})</div><div class="nest-rewards-list">`;
+    html+=`<div class="nest-section">
+      <details class="nest-dropdown">
+        <summary class="nest-dropdown-title">🎁 Upgrades Chosen (${G.collectedRewards.length})</summary>
+        <div class="nest-rewards-list">`;
     grouped.forEach(r=>{
       const tierColor={gold:'var(--gold)',purple:'var(--purple-light)',blue:'var(--blue-light)',green:'var(--green-light)',grey:'var(--text-dim)'}[r.tier]||'var(--text-dim)';
       const countBadge=r.count>1?`<span style="background:rgba(201,168,76,.2);border:1px solid var(--gold);border-radius:10px;padding:1px 7px;font-size:.72rem;color:var(--gold);font-family:Cinzel,serif;margin-left:6px">${r.count}×</span>`:'';
       html+=`<div class="nest-reward-row"><span class="nest-reward-icon">${r.icon}</span><span class="nest-reward-name" style="color:${tierColor}">${r.name}${countBadge}</span><span class="nest-reward-desc">${r.desc}</span></div>`;
     });
-    html+=`</div></div>`;
+    html+=`</div></details></div>`;
   }
   content.innerHTML=html;
   modal.classList.add('open');
@@ -8426,7 +8530,9 @@ function confirmReward() {
     return;
   }
 
-  if(!applyRewardEffect(G._pendingReward,G.player,{preventDuplicates:true,source:'battle'})) return;
+  const _beforeRewardStats=captureStatSnapshot(G.player);
+  G._pendingReward.apply(G.player);
+  const _rewardBonusStats=diffStatSnapshot(_beforeRewardStats,captureStatSnapshot(G.player));
   if(G._pendingReward.endlessOnly){ logMsg('♾ Endless-only reward acquired (not available in Story Mode).','system'); }
   const rewardEvt={tier:G._pendingReward.tier, id:G._pendingReward.id||G._pendingReward.name};
   AvianEvents.emit('reward:confirmed', rewardEvt);
@@ -8434,13 +8540,7 @@ function confirmReward() {
   codexMark('artifacts', G._pendingReward.id||G._pendingReward.name, 'seen');
   logMsg(`✦ Gained: ${G._pendingReward.name}!`,'system');
 
-  if(!G.collectedRewards) G.collectedRewards=[];
-  G.collectedRewards.push({
-    icon:G._pendingReward.icon,
-    tier:G._pendingReward.tier,
-    name:G._pendingReward.name,
-    desc:G._pendingReward.desc
-  });
+  recordCollectedReward(G._pendingReward,_rewardBonusStats);
 
   G._pendingReward=null;
   G._goldReplaceMode=false;
@@ -8885,7 +8985,12 @@ function afterLevelUp() {
   else advanceStage();
 }
 
-function advanceStage() {
+async function advanceStage(opts={}) {
+  const clearedStage=G.stage;
+  const source = opts.skipPerk ? null : getPerkRewardSourceForStage(clearedStage, !!G.enemy?.isBoss);
+  if(source){
+    try{ await triggerPerkReward(source,{stage:clearedStage}); }catch(e){ console.error(e); }
+  }
   G.stage++;
   const ui=ensureUIState();
   const runIsEndless = (ui.gameMode==='endless') && !!G.endlessMode;
@@ -9156,9 +9261,10 @@ function groveFinish(){
   // If a nest reward was selected, apply it
   if(G._groveNestReward){
     const rw=G._groveNestReward;
-    if(!applyRewardEffect(rw,G.player,{preventDuplicates:true,source:'grove'})) return;
-    if(!G.collectedRewards)G.collectedRewards=[];
-    G.collectedRewards.push({icon:rw.icon,tier:rw.tier,name:rw.name,desc:rw.desc});
+    const _beforeRewardStats=captureStatSnapshot(G.player);
+    rw.apply(G.player);
+    const _rewardBonusStats=diffStatSnapshot(_beforeRewardStats,captureStatSnapshot(G.player));
+    recordCollectedReward(rw,_rewardBonusStats);
     codexMark('artifacts', rw.id||rw.name, 'seen');
     logMsg(`🪹 Grove Nest: ${rw.name} claimed!`,'exp-gain');
     G._groveNestReward=null;
@@ -10021,8 +10127,7 @@ async function shopBuySelected() {
           if(idx>=0) G.player.abilities.splice(idx,1,{...tmpl,level:1,ailmentIds:[]});
           else G.player.abilities.push({...tmpl,level:1,ailmentIds:[]});
 
-          if(!G.collectedRewards) G.collectedRewards=[];
-          G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc});
+          recordCollectedReward(item,{});
 
           logMsg(`🌟 Purchased: ${item.name}!`,'exp-gain');
           const log=document.getElementById('shop-purchase-log');
@@ -10043,6 +10148,7 @@ async function shopBuySelected() {
 
   G.shinyObjects-=cost;
   if(discount>0) G._nextShopDiscount=0;
+  const _beforeShopStats=captureStatSnapshot(G.player);
   if(item.id && item.id.startsWith('shop_ab_upgrade_')){
     const abId=item.id.replace('shop_ab_upgrade_','');
     const a=G.player.abilities.find(x=>x.id===abId);
@@ -10064,9 +10170,9 @@ async function shopBuySelected() {
   }
   refreshPlayerAbilityAilments();
   enforceAbilityCosts(G.player);
+  const _shopBonusStats=diffStatSnapshot(_beforeShopStats,captureStatSnapshot(G.player));
 
-  if(!G.collectedRewards) G.collectedRewards=[];
-  G.collectedRewards.push({icon:item.icon,tier:item.tier,name:item.name,desc:item.desc});
+  recordCollectedReward(item,_shopBonusStats);
   codexMark('artifacts', item.id||item.name, 'seen');
   logMsg(`🌟 Purchased: ${item.name}!`,'exp-gain');
   const log=document.getElementById('shop-purchase-log');
