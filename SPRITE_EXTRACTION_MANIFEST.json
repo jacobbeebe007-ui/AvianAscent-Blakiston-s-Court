@@ -31,12 +31,12 @@
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/shoebill.png",
+    "sprite_file": "assets/sprites/Shoebill Stork.png",
     "bytes": 1157492
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/secretarybird.png",
+    "sprite_file": "assets/sprites/Secretary Bird.png",
     "bytes": 1181175
   },
   {
@@ -51,17 +51,17 @@
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/robin.png",
+    "sprite_file": "assets/sprites/Robin.png",
     "bytes": 1481152
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/flamingo.png",
+    "sprite_file": "assets/sprites/Flamingo.png",
     "bytes": 1319850
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/seagull.png",
+    "sprite_file": "assets/sprites/Seagull.png",
     "bytes": 540935
   },
   {
@@ -76,12 +76,12 @@
   },
   {
     "css_file": "main.css",
-    "sprite_file": "assets/sprites/penguin.png",
+    "sprite_file": "assets/sprites/Emperor Penguin.png",
     "bytes": 1591533
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/dukeblakiston.png",
+    "sprite_file": "assets/sprites/Duke Blakiston.png",
     "bytes": 3599756
   },
   {
@@ -91,12 +91,12 @@
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/seagull.png",
+    "sprite_file": "assets/sprites/Seagull.png",
     "bytes": 1393876
   },
   {
     "css_file": "sprites.css",
-    "sprite_file": "assets/sprites/albatross.png",
+    "sprite_file": "assets/sprites/Albatross.png",
     "bytes": 1573703
   },
   {

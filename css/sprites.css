@@ -2,7 +2,7 @@
 
 /* ===== Duke Blakiston sprite ===== */
 .sprite-dukeblakiston{
-  background-image:url("../assets/sprites/dukeblakiston.png");
+  background-image:url("../assets/sprites/Duke Blakiston.png");
 }
 /* Boss-scale render */
 .sprite4.boss.sprite-dukeblakiston,
@@ -55,7 +55,7 @@
 
 /* ===== Seagull sprite replacement ===== */
 .sprite-seagull {
-  background-image: url("../assets/sprites/seagull.png");
+  background-image: url("../assets/sprites/Seagull.png");
   background-size: 200% 200%;
   background-repeat: no-repeat;
 }
@@ -96,7 +96,7 @@
 
 /* ===== 08_albatross-sprite-replacement.css ===== */
 
-.sprite-albatross{background-image:url("../assets/sprites/albatross.png");background-size:200% 200%;background-repeat:no-repeat;}
+.sprite-albatross{background-image:url("../assets/sprites/Albatross.png");background-size:200% 200%;background-repeat:no-repeat;}
 .sprite-albatross.frame-0{background-position:0% 0%;}
 .sprite-albatross.frame-1{background-position:100% 0%;}
 .sprite-albatross.frame-2{background-position:0% 100%;}

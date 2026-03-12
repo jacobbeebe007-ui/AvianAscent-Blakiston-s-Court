@@ -54,15 +54,13 @@
 <!-- DIFFICULTY PICKER -->
 <div class="diff-picker" id="diff-picker"></div>
 <div class="diff-desc" id="diff-desc">Choose your difficulty to begin.</div>
-<div style="text-align:center;margin:-4px 0 10px;">
-<button class="continue-run-btn" onclick="exportCombatTelemetry()">📊 Export Combat Telemetry</button>
-</div>
 <div style="text-align:center;margin:8px auto 10px;max-width:1100px;">
 <input autocomplete="off" id="dev-code-input" maxlength="32" oninput="checkDevCode(this.value)" placeholder="Enter code..." spellcheck="false" style="background:rgba(10,8,4,.7);border:1px solid rgba(80,70,50,.35);border-radius:6px;color:var(--text-dim);font-size:.78rem;padding:5px 12px;width:160px;outline:none;text-align:center;letter-spacing:.05em;" type="password"/>
 <div id="dev-code-msg" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;min-height:16px;"></div>
 </div>
 <div class="endless-row" style="max-width:1100px;margin:8px auto 14px;text-align:center;">
-<label><input id="endless-check" type="checkbox"/> ♾ Endless Mode — bosses every 10 stages</label>
+<div id="game-mode-toggle"></div>
+<input id="endless-check" type="checkbox" style="display:none"/>
 </div>
 <!-- REFERENCE GUIDE -->
 <div class="ref-guide" id="ref-guide" style="max-width:1100px;margin:0 auto 14px;">
@@ -84,14 +82,10 @@
 <div class="sel-left">
 <!-- VIEW TOGGLE -->
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-<div class="view-toggle" id="view-toggle">
-<button class="view-toggle-btn" onclick="setSelView('all',this)">All</button>
-<button class="view-toggle-btn active" onclick="setSelView('size',this)">By Size</button>
-<button class="view-toggle-btn" onclick="setSelView('class',this)">By Class</button>
-</div>
+<div class="view-toggle" id="view-toggle"></div>
 <span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
 </div>
-<div class="class-filter-tabs" id="class-filter-tabs"></div>
+
 <div id="bird-grid"></div>
 </div>
 <div class="sel-right">
@@ -158,7 +152,10 @@
 <div class="hp-bar-bg"><div class="hp-bar-fill" id="player-hp-bar"></div></div>
 </div>
 <div class="status-effects" id="player-status"></div>
+<details class="combat-stats-dropdown" id="player-stats-drop" open>
+<summary>Player Stats</summary>
 <div class="stats-mini" id="player-stats-mini"></div>
+</details>
 </div>
 <div class="vs-separator">VS</div>
 <div class="combatant-panel enemy" id="enemy-panel">
@@ -173,7 +170,10 @@
 </div>
 <div class="phase-banner" id="boss-phase-banner"></div>
 <div class="status-effects" id="enemy-status"></div>
+<details class="combat-stats-dropdown" id="enemy-stats-drop" open>
+<summary>Enemy Stats</summary>
 <div class="enemy-stats-mini" id="enemy-stats-mini"></div>
+</details>
 <div class="enemy-abilities-list" id="enemy-abilities-list"></div>
 <div class="enemy-intent enemy-plan" id="enemy-intent-panel">🤔 Thinking...</div>
 </div>
@@ -192,9 +192,8 @@
 <div class="levelup-screen-inner">
 <h2>✦ Level Up! ✦</h2>
 <p class="levelup-sub" id="lu-sub">Your bird grows stronger. Choose your path:</p>
-<div class="levelup-choice-row">
-<button class="levelup-choice-btn upgrade-skill" onclick="showLUPanel('skills')">🦅 Upgrade a Skill</button>
-</div>
+<div id="lu-stat-preview"></div>
+<div class="levelup-choice-row"><div class="levelup-choice-title">🦅 Upgrade a Skill</div></div>
 <div class="levelup-panel" id="lu-skills-panel">
 <div class="skill-grid" id="lu-skill-grid"></div>
 </div>
@@ -248,10 +247,10 @@
 <div class="shop-items-grid" id="shop-items-grid"></div>
 <div class="shop-btn-row">
 <button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
-<button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (5🌟)</button>
+<button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (3🌟)</button>
 <button class="shop-exit-btn" data-shop-action="exit" id="shop-exit-btn">Continue ›</button>
 </div>
-<p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 5🌟</p>
+<p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 3🌟</p>
 </div>
 </div>
 <!-- WHISPERING GROVE -->
@@ -314,6 +313,16 @@
 <label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">High Contrast UI
 <input id="setting-high-contrast" onchange="updateAccessibilitySettings()" type="checkbox"/>
 </label>
+<label style="display:flex;justify-content:space-between;align-items:center;gap:12px;">Battle UI Layout
+<select id="setting-ui-mode" onchange="updateAccessibilitySettings()">
+<option value="desktop">Desktop (Default)</option>
+<option value="mobile">Mobile (Compact)</option>
+</select>
+</label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
+<button class="menu-btn" onclick="exportCombatTelemetry()">📊 Export Combat Telemetry</button>
+<button class="menu-btn" onclick="if(window.showErrorHUD) window.showErrorHUD();">🖥 Open Console</button>
 </div>
 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
 <button class="abandon-cancel-btn" onclick="closeSettingsModal()">Close</button>
