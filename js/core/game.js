@@ -2596,7 +2596,34 @@ let G = {
   actionQueue:[],
   actionBusy:false,
   speed:1,
+  ui:{
+    gameMode:'story',
+    battleLayout:'desktop',
+    selectionView:'size',
+    expandedBird:null,
+    combatDropdownOpen:{player:true,enemy:true},
+  },
 };
+
+const DEFAULT_UI_STATE = Object.freeze({
+  gameMode:'story',
+  battleLayout:'desktop',
+  selectionView:'size',
+  expandedBird:null,
+  combatDropdownOpen:{player:true,enemy:true},
+});
+
+function ensureUIState(){
+  if(!G.ui || typeof G.ui!=='object') G.ui={};
+  G.ui.gameMode = (G.ui.gameMode==='endless') ? 'endless' : 'story';
+  G.ui.battleLayout = (G.ui.battleLayout==='mobile') ? 'mobile' : 'desktop';
+  G.ui.selectionView = String(G.ui.selectionView || DEFAULT_UI_STATE.selectionView);
+  G.ui.expandedBird = G.ui.expandedBird ? String(G.ui.expandedBird) : null;
+  if(!G.ui.combatDropdownOpen || typeof G.ui.combatDropdownOpen!=='object') G.ui.combatDropdownOpen={};
+  G.ui.combatDropdownOpen.player = !!G.ui.combatDropdownOpen.player;
+  G.ui.combatDropdownOpen.enemy = !!G.ui.combatDropdownOpen.enemy;
+  return G.ui;
+}
 
 const TELEMETRY_KEY='avianAscent_telemetry_v1';
 function loadTelemetry(){
@@ -2868,6 +2895,7 @@ function saveRun() {
       collectedRewards: G.collectedRewards||[],
       runUpgradesPurchased: [...(G.runUpgradesPurchased||new Set())],
       codex: JSON.parse(JSON.stringify(G.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}})),
+      ui: JSON.parse(JSON.stringify(ensureUIState())),
       inBattle: onBattleScreen && !!G.enemy && !G.battleOver,
       battle: (onBattleScreen && G.enemy && !G.battleOver) ? {
         enemy: JSON.parse(JSON.stringify(G.enemy)),
@@ -2897,7 +2925,11 @@ function deleteSave() {
 function continueRun() {
   const save=loadSaveData();
   if(!save) return;
+  G.ui = {...DEFAULT_UI_STATE, ...(save.ui||{})};
+  ensureUIState();
   G.endlessMode=save.endlessMode||false;
+  if(!save.ui) G.ui.gameMode = G.endlessMode ? 'endless' : 'story';
+  applyUIStateToDOM();
   G.endlessBattle=save.endlessBattle||0;
   G.bossKills=save.bossKills||0;
   G.stage=save.stage||1;
@@ -2972,11 +3004,12 @@ const SIZE_LABELS = {tiny:'Tiny',small:'Small',medium:'Medium',large:'Large',xl:
 const CLASS_ORDER = ['assassin','knight','mage','bard','tank','ranger','summoner'];
 const CLASS_LABELS = {assassin:'⚔️ Assassin',knight:'🛡️ Knight',mage:'✨ Mage',bard:'🎵 Bard',tank:'🪨 Tank',ranger:'🏹 Ranger',summoner:'🌊 Summoner'};
 const CLASS_FLAVOR = {assassin:'Burst dmg, crit fishing, evasive.',knight:'Balanced physical, DEF/ACC.',mage:'Pure songs/spells, debuff control.',bard:'Song mix + physical hybrid.',tank:'Sustain bricks, high HP.',ranger:'Projectile pressure, pierce and slows.',summoner:'Mob caller, flock tactics.'};
-let G_selView = 'size';
-let G_classFilter = 'all';
 let shopPurchaseMade = false;
 
 function initSelection() {
+  const ui=ensureUIState();
+  if(!ui.expandedBird && G.selected) ui.expandedBird=G.selected;
+  applyUIStateToDOM();
   // Check for saved run
   const save=loadSaveData();
   if(save&&save.player){
@@ -2995,34 +3028,30 @@ function initSelection() {
   // Build bird grid
   buildSelectionViewButtons();
   buildGameModeToggle();
-  buildBirdGrid(G_selView);
+  buildBirdGrid();
   renderHighscoreBoard();
 }
 
 function buildSelectionViewButtons(){
   const host=document.getElementById('view-toggle');
   if(!host) return;
+  const ui=ensureUIState();
   const btns=[['all','All'],['size','By Size'],...CLASS_ORDER.map(c=>[`class:${c}`,idToClassLabel(c)])];
-  host.innerHTML=btns.map(([id,label])=>`<button class="view-toggle-btn ${G_selView===id?'active':''}" onclick="setSelView('${id}',this)">${label}</button>`).join('');
+  host.innerHTML=btns.map(([id,label])=>`<button class="view-toggle-btn ${ui.selectionView===id?'active':''}" onclick="setSelView('${id}',this)">${label}</button>`).join('');
 }
 
 function buildGameModeToggle(){
   const host=document.getElementById('game-mode-toggle');
   if(!host) return;
-  const isEndless=!!(G._gameMode==='endless' || document.getElementById('endless-check')?.checked);
+  const ui=ensureUIState();
+  const isEndless=(ui.gameMode==='endless');
   host.innerHTML=`<div class="mode-toggle"><button class="mode-toggle-btn ${!isEndless?'active':''}" onclick="setGameMode('story',this)">📖 Story Mode</button><button class="mode-toggle-btn ${isEndless?'active':''}" onclick="setGameMode('endless',this)">♾ Endless Mode</button></div>`;
 }
 
 function setGameMode(mode,btn){
-  G._gameMode=(mode==='endless')?'endless':'story';
-  const endless=(G._gameMode==='endless');
-  const main=document.getElementById('endless-check');
-  if(main) main.checked=endless;
-  if(btn){
-    const wrap=btn.closest('.mode-toggle');
-    wrap?.querySelectorAll('.mode-toggle-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
+  const ui=ensureUIState();
+  ui.gameMode=(mode==='endless')?'endless':'story';
+  applyUIStateToDOM();
   buildGameModeToggle();
 }
 
@@ -3075,6 +3104,7 @@ function renderStarterFallbackGrid(reason=''){
 
   if(BIRDS?.sparrow){
     G.selected='sparrow';
+    ensureUIState().expandedBird='sparrow';
     updateAscentPanel('sparrow');
   }
   console.warn('Selection recovery fallback used.', reason);
@@ -3129,20 +3159,18 @@ function selectDifficulty(id) {
 }
 
 function setSelView(view, btn) {
-  if(String(view).startsWith('class:')){
-    G_classFilter=String(view).split(':')[1]||'all';
-    G_selView=view;
-    buildBirdGrid('all');
-  }else{
-    G_selView = view;
-    if(view!=='all') G_classFilter='all';
-    buildBirdGrid(view);
-  }
-  document.querySelectorAll('.view-toggle-btn').forEach(b=>b.classList.remove('active'));
-  btn?.classList.add('active');
+  const ui=ensureUIState();
+  ui.selectionView = String(view||'size');
+  buildSelectionViewButtons();
+  buildBirdGrid();
 }
 
-function buildBirdGrid(view='size') {
+function buildBirdGrid() {
+  const ui=ensureUIState();
+  const selectedView=ui.selectionView;
+  const view = String(selectedView).startsWith('class:') ? 'all' : selectedView;
+  const classFilter = String(selectedView).startsWith('class:') ? (String(selectedView).split(':')[1]||'all') : 'all';
+
   const grid = document.getElementById('bird-grid');
   if(!grid) return;
   grid.innerHTML = '';
@@ -3150,7 +3178,7 @@ function buildBirdGrid(view='size') {
   let safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
     return !!(b && b.stats && Number.isFinite(b.stats.hp) && Number.isFinite(b.stats.atk) && Number.isFinite(b.stats.def));
   });
-  if(G_classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>String(b.class||'').toLowerCase()===G_classFilter);
+  if(classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>String(b.class||'').toLowerCase()===classFilter);
   const fallbackStarters = ['sparrow','goose','blackbird','crow','macaw','robin'];
 
   // Compute global max stats for bars
@@ -3231,7 +3259,7 @@ function buildBirdGrid(view='size') {
   });
 
   const label = document.getElementById('bird-count-label');
-  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available${G_classFilter!=='all' ? ` · ${idToClassLabel(G_classFilter)}`:''}`;
+  if(label) label.textContent = `${totalUnlocked}/${totalBirds} available${classFilter!=='all' ? ` · ${idToClassLabel(classFilter)}`:''}`;
 
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
@@ -3276,7 +3304,8 @@ function buildBirdExpandedContent(key, bird){
 
 function buildBirdCard(key, bird, locked, globalMax) {
   const card = document.createElement('div');
-  card.className = 'bird-card' + (locked ? ' bird-locked' : '') + (G.selected===key?' selected':'');
+  const ui=ensureUIState();
+  card.className = 'bird-card' + (locked ? ' bird-locked' : '') + (ui.expandedBird===key?' selected':'');
   if (!locked) card.onclick = () => selectBird(key, card);
 
   const cls = bird.class||'knight';
@@ -3312,7 +3341,7 @@ function buildBirdCard(key, bird, locked, globalMax) {
       <div class="bird-nm" style="color:#555;font-size:.8rem;">${bird.name}</div>
       <div class="lock-overlay"><span class="lock-icon" style="font-size:1rem;">🔒</span><div class="lock-label" style="font-size:.6rem;color:#555;line-height:1.3;">${unlockLabel}</div></div>`;
   } else {
-    const expanded = (G.selected===key) ? buildBirdExpandedContent(key,bird) : '';
+    const expanded = (ui.expandedBird===key) ? buildBirdExpandedContent(key,bird) : '';
     card.innerHTML = `
       <div class="bird-card-head">
         <span class="class-badge class-${cls}">${(cls).toUpperCase()}</span>
@@ -3327,9 +3356,9 @@ function buildBirdCard(key, bird, locked, globalMax) {
 }
 
 function selectBird(key, el) {
+  const ui=ensureUIState();
   G.selected = key;
-  document.querySelectorAll('.bird-card').forEach(c=>c.classList.remove('selected'));
-  if(el) el.classList.add('selected');
+  ui.expandedBird = key;
   // Re-render cards so the selected card expands inline (no side panel/auto-scroll).
   initSelectionSafe();
 }
@@ -3421,7 +3450,7 @@ function beginRun(){ return startGame(); }
 // ============================================================
 function startGame() {
   if(!G.selected) return;
-  G.endlessMode = (G._gameMode==='endless') || !!document.getElementById('endless-check')?.checked;
+  G.endlessMode = (ensureUIState().gameMode==='endless');
   G.difficulty = G._selectedDifficulty || 'juvenile';
   const bd = BIRDS[G.selected];
   G.collectedRewards=[];
@@ -3805,6 +3834,8 @@ Estimated damage: ${eab.dmg||(`${low}-${high}`)}`;
   document.getElementById('enemy-shield-overlay').className='shield-overlay'+(G.enemyStatus.defending>0?' active':'');
 
   renderEnemyPlan();
+  wireCombatDropdownStateSync();
+  applyUIStateToDOM();
   renderActions();
 }
 
@@ -9874,6 +9905,33 @@ function getAccessibilitySettings(){
     return JSON.parse(localStorage.getItem(ACCESS_KEY)||'{"fontSize":100,"colorBlind":"off","reduceMotion":false,"highContrast":false,"uiMode":"desktop"}');
   }catch(_){ return {fontSize:100,colorBlind:'off',reduceMotion:false,highContrast:false,uiMode:'desktop'}; }
 }
+function applyUIStateToDOM(){
+  const ui=ensureUIState();
+  const main=document.getElementById('endless-check');
+  if(main) main.checked=(ui.gameMode==='endless');
+  document.body.classList.toggle('ui-mobile-mode', ui.battleLayout==='mobile');
+  document.body.classList.toggle('ui-desktop-mode', ui.battleLayout==='desktop');
+  const playerDrop=document.getElementById('player-stats-drop');
+  const enemyDrop=document.getElementById('enemy-stats-drop');
+  if(playerDrop) playerDrop.open=!!ui.combatDropdownOpen.player;
+  if(enemyDrop) enemyDrop.open=!!ui.combatDropdownOpen.enemy;
+}
+function syncCombatDropdownUIState(){
+  const ui=ensureUIState();
+  const playerDrop=document.getElementById('player-stats-drop');
+  const enemyDrop=document.getElementById('enemy-stats-drop');
+  if(playerDrop) ui.combatDropdownOpen.player=!!playerDrop.open;
+  if(enemyDrop) ui.combatDropdownOpen.enemy=!!enemyDrop.open;
+}
+
+function wireCombatDropdownStateSync(){
+  ['player-stats-drop','enemy-stats-drop'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el || el.dataset.uiStateWired==='1') return;
+    el.dataset.uiStateWired='1';
+    el.addEventListener('toggle', ()=>syncCombatDropdownUIState());
+  });
+}
 function applyAccessibilitySettings(s){
   const cfg=s||getAccessibilitySettings();
   document.documentElement.style.fontSize=`${Math.max(85,Math.min(140,Number(cfg.fontSize)||100))}%`;
@@ -9883,10 +9941,8 @@ function applyAccessibilitySettings(s){
   if(cfg.colorBlind==='protanopia') document.body.classList.add('cb-protanopia');
   if(cfg.colorBlind==='deuteranopia') document.body.classList.add('cb-deuteranopia');
   if(cfg.colorBlind==='tritanopia') document.body.classList.add('cb-tritanopia');
-  const uiMode=(cfg.uiMode==='mobile')?'mobile':'desktop';
-  document.body.classList.toggle('ui-mobile-mode', uiMode==='mobile');
-  document.body.classList.toggle('ui-desktop-mode', uiMode==='desktop');
-  document.querySelectorAll('.combat-stats-dropdown').forEach(drop=>{ drop.open = (uiMode==='desktop'); });
+  ensureUIState().battleLayout=(cfg.uiMode==='mobile')?'mobile':'desktop';
+  applyUIStateToDOM();
 }
 function openSettingsModal(){
   const cfg=getAccessibilitySettings();
@@ -9899,7 +9955,7 @@ function openSettingsModal(){
   if(cb) cb.value=cfg.colorBlind||'off';
   if(rm) rm.checked=!!cfg.reduceMotion;
   if(hc) hc.checked=!!cfg.highContrast;
-  if(ui) ui.value=(cfg.uiMode==='mobile')?'mobile':'desktop';
+  if(ui) ui.value=ensureUIState().battleLayout;
   const m=document.getElementById('settings-modal'); if(m) m.classList.add('open');
 }
 function closeSettingsModal(){
@@ -9911,7 +9967,7 @@ function updateAccessibilitySettings(){
     colorBlind:String(document.getElementById('setting-color-blind')?.value||'off'),
     reduceMotion:!!document.getElementById('setting-reduce-motion')?.checked,
     highContrast:!!document.getElementById('setting-high-contrast')?.checked,
-    uiMode:String(document.getElementById('setting-ui-mode')?.value||'desktop'),
+    uiMode:String(document.getElementById('setting-ui-mode')?.value||ensureUIState().battleLayout),
   };
   localStorage.setItem(ACCESS_KEY, JSON.stringify(cfg));
   applyAccessibilitySettings(cfg);
@@ -9919,6 +9975,8 @@ function updateAccessibilitySettings(){
 
 installErrorHUD();
 applyAccessibilitySettings();
+wireCombatDropdownStateSync();
+applyUIStateToDOM();
 
 
 /* ============================================================
