@@ -1464,6 +1464,74 @@ const UPGRADE_CARDS_REWORK = [
 
 function getUpgradePool(){ return UPGRADE_CARDS_REWORK.slice(); }
 
+function createReward(def={}){
+  const uiText = def.uiText || {};
+  const source = Array.isArray(def.source)
+    ? def.source
+    : (def.source ? [def.source] : ['battle']);
+  const reward = {
+    ...def,
+    id: String(def.id||''),
+    kind: def.kind || def.type || 'upgrade',
+    tier: def.tier || 'grey',
+    source,
+    uiText: {
+      icon: uiText.icon ?? def.icon ?? '🎁',
+      name: uiText.name ?? def.name ?? def.id ?? 'Reward',
+      desc: uiText.desc ?? def.desc ?? ''
+    },
+    apply: typeof def.apply==='function' ? def.apply : ()=>{}
+  };
+  reward.icon = reward.uiText.icon;
+  reward.name = reward.uiText.name;
+  reward.desc = reward.uiText.desc;
+  return reward;
+}
+
+const REWARD_FILTERS = {
+  story: rw => !rw.source.includes('endless'),
+  endless: rw => rw.source.includes('endless'),
+  shop: rw => rw.source.includes('shop'),
+  battle: rw => rw.source.includes('battle'),
+  tier: tier => rw => rw.tier===tier,
+  notUsed: used => rw => !used.has(rw.id),
+  notRunLocked: () => rw => !(rw.oncePerRun && G.runUpgradesPurchased?.has(rw.id))
+};
+
+function rollRewardPool(pool,{count=1,predicates=[],usedIds=null}={}){
+  const used = usedIds || new Set();
+  const filt = pool.filter(rw=>predicates.every(fn=>fn(rw)));
+  const bag = filt.slice();
+  const picks=[];
+  while(picks.length<count && bag.length){
+    const idx=Math.floor(Math.random()*bag.length);
+    const rw=bag.splice(idx,1)[0];
+    if(used.has(rw.id)) continue;
+    used.add(rw.id);
+    picks.push(rw);
+  }
+  return picks;
+}
+
+function applyRewardEffect(reward, player, context={}){
+  if(!reward || !player) return false;
+  if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased = new Set();
+  const alreadyApplied = G.runUpgradesPurchased.has(reward.id);
+  const preventDuplicates = context.preventDuplicates ?? true;
+  if(preventDuplicates && alreadyApplied && (reward.oncePerRun || reward.stackable===false)) return false;
+
+  reward.apply(player, context);
+
+  if(reward.kind==='relic' || reward.kind==='augment' || reward.kind==='mutation'){
+    if(!player.endlessRewards) player.endlessRewards=[];
+    if(!player.endlessRewards.some(x=>x.id===reward.id)){
+      player.endlessRewards.push({id:reward.id,type:reward.kind,name:reward.name});
+    }
+  }
+  if(reward.oncePerRun || reward.stackable===false) G.runUpgradesPurchased.add(reward.id);
+  return true;
+}
+
 
 const ENDLESS_SKILL_AUGMENTS = [
   {id:'aug_razor_edge',name:'Razor Edge',tier:'blue',type:'augment',desc:'Endless only — Attack skills deal +20% damage to Bleeding enemies.',apply:p=>{p.augAttackVsBleedPct=(p.augAttackVsBleedPct||0)+0.20;}},
@@ -1535,38 +1603,29 @@ const ENDLESS_MUTATIONS = [
 ];
 
 function isEndlessRunActive(){ return !!(G.endlessMode && (G.stage||0)>20); }
-function getEndlessRewardPool(type){
-  if(type==='augment') return ENDLESS_SKILL_AUGMENTS;
-  if(type==='mutation') return ENDLESS_MUTATIONS;
-  return ENDLESS_RELICS;
+function getEndlessRewardPool(kind){
+  const base = kind==='augment' ? ENDLESS_SKILL_AUGMENTS : (kind==='mutation' ? ENDLESS_MUTATIONS : ENDLESS_RELICS);
+  return base.map(entry=>createReward({
+    ...entry,
+    kind: entry.type || kind || 'relic',
+    source:['battle','endless'],
+    endlessOnly:true,
+    oncePerRun:true,
+    uiText:{
+      icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
+      name:entry.name,
+      desc:entry.desc,
+    }
+  }));
 }
 function hasEndlessReward(id){
-  const seen=(G.player?.endlessRewards||[]).map(x=>x.id);
-  return seen.includes(id);
-}
-function buildEndlessRewardCard(entry){
-  return {
-    id:entry.id,
-    tier:entry.tier||'blue',
-    icon:entry.type==='mutation'?'🧬':entry.type==='augment'?'🪶':'🗿',
-    name:entry.name,
-    desc:entry.desc,
-    endlessOnly:true,
-    apply:p=>{
-      if(!isEndlessRunActive()) return;
-      if(!p.endlessRewards) p.endlessRewards=[];
-      if(p.endlessRewards.some(x=>x.id===entry.id)) return;
-      p.endlessRewards.push({id:entry.id,type:entry.type,name:entry.name});
-      entry.apply?.(p);
-    }
-  };
+  return !!G.runUpgradesPurchased?.has(id);
 }
 function rollEndlessReward(kind='relic'){
   if(!isEndlessRunActive()) return null;
-  const pool=getEndlessRewardPool(kind).filter(x=>!hasEndlessReward(x.id));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  return buildEndlessRewardCard(pick);
+  const pool=getEndlessRewardPool(kind);
+  const [pick]=rollRewardPool(pool,{count:1,predicates:[REWARD_FILTERS.endless,REWARD_FILTERS.notRunLocked()]});
+  return pick||null;
 }
 function applyEndlessProgressionMilestones(){
   if(!isEndlessRunActive()) return;
@@ -1591,8 +1650,8 @@ function applyEndlessProgressionMilestones(){
 
 function rollUpgradeCard(){
   const tier=rollRarity();
-  const pool=getUpgradePool().filter(c=>c.tier===tier);
-  return pool.length?pool[Math.floor(Math.random()*pool.length)]:null;
+  const [pick]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,predicates:[REWARD_FILTERS.tier(tier)]});
+  return pick||null;
 }
 
 const REWARD_TIERS = {
@@ -1655,6 +1714,7 @@ const ALL_REWARDS = [
   {id:'l_trueSight', tier:'gold', icon:'👁️', name:'True Sight', desc:'All skills: -12% miss chance (min 0%)', tags:['utility','accuracy'], apply:p=>{ p.missReduce=(p.missReduce||0)+0.12; }},
   {id:'l_roostFeast', tier:'gold', icon:'🔥', name:'Eternal Roost', desc:'Full heal + +12% Max HP extra heal after every battle', tags:['sustain','scaling'], apply:p=>{ p.stats.hp=p.stats.maxHp; p.postBattleHealBonusPct=(p.postBattleHealBonusPct||0)+0.12; }},
 ];
+const CORE_UPGRADE_REWARDS = ALL_REWARDS.map(rw=>createReward({...rw,kind:'upgrade',source:['battle','shop'],oncePerRun:rw.stackable===false}));
 
 // ============================================================
 //  LEARNABLE ABILITIES — universal abilities gained at level-up
@@ -3044,6 +3104,25 @@ function runModuleHook(hook, payload){
   }
 }
 globalThis.registerGameModule = registerGameModule;
+
+let _warnedMissingAbilityPassiveUpgradePack = false;
+function initDataPacks(){
+  const pack = globalThis.ABILITY_PASSIVE_UPGRADE_PACK;
+  if(pack && typeof pack === 'object'){
+    G.dataPacks = G.dataPacks || {};
+    G.dataPacks.abilityPassiveUpgrade = Object.freeze({
+      STATUS_GLOSSARY: pack.STATUS_GLOSSARY || Object.freeze({}),
+      ABILITY_DEFS: pack.ABILITY_DEFS || Object.freeze({}),
+    });
+    return;
+  }
+  G.dataPacks = G.dataPacks || {};
+  G.dataPacks.abilityPassiveUpgrade = null;
+  if(!_warnedMissingAbilityPassiveUpgradePack){
+    _warnedMissingAbilityPassiveUpgradePack = true;
+    console.warn('[DataPack] ABILITY_PASSIVE_UPGRADE_PACK missing; metadata overlays disabled.');
+  }
+}
 
 let G = {
   player: null, enemy: null, stage: 1, turn: 'player', turnPhase:TURN.PLAYER,
@@ -9380,16 +9459,9 @@ function showGoldReplaceUI(newReward){
 }
 
 function generateNormalRewards() {
-  const out=[];
   const used=new Set();
-  let guard=0;
-  while(out.length<3 && guard<30){
-    guard++;
-    const rw=rollUpgradeCard();
-    if(!rw || used.has(rw.id)) continue;
-    used.add(rw.id);
-    out.push(rw);
-  }
+  const storyOrEndless = isEndlessRunActive() ? REWARD_FILTERS.battle : rw => (REWARD_FILTERS.battle(rw) && REWARD_FILTERS.story(rw));
+  const out=rollRewardPool(CORE_UPGRADE_REWARDS,{count:3,usedIds:used,predicates:[storyOrEndless,REWARD_FILTERS.notRunLocked()]});
   if(isEndlessRunActive()){
     const eb=G.endlessBattle||0;
     const milestone=eb>0 && (eb%5===0);
@@ -9413,10 +9485,9 @@ function generateBossRewards() {
   const endlessBattle=G.endlessBattle||0;
   
   function pickTier(tier){
-    const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-    if(!pool.length) return null;
-    const rw=pool[Math.floor(Math.random()*pool.length)];
-    used.add(rw.id); return rw;
+    const [rw]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle,REWARD_FILTERS.notRunLocked()]});
+    if(!rw) return null;
+    return rw;
   }
   function pick(forced,optional){
     const r=pickTier(forced)||pickTier('purple')||pickTier('blue');
@@ -10034,10 +10105,8 @@ function showGroveNestRewards(){
   const used = new Set();
   const picks=[];
   const pick=(tier)=>{
-    const avail=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id));
-    if(!avail.length) return null;
-    const r=avail[Math.floor(Math.random()*avail.length)];
-    used.add(r.id); return r;
+    const [r]=rollRewardPool(CORE_UPGRADE_REWARDS,{count:1,usedIds:used,predicates:[REWARD_FILTERS.tier(tier),REWARD_FILTERS.battle]});
+    return r||null;
   };
   const rollNestTier=()=>{
     if(chance(5)) return 'gold';
@@ -10154,6 +10223,16 @@ function showVictory(){
       if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
       if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
     }
+  }
+  const dukeVictory = !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
+  if(dukeVictory && victoryMenuBtn){
+    G._pendingStage20Narrative=true;
+    victoryMenuBtn.innerHTML='Continue';
+    if(mainMenuBtn) mainMenuBtn.style.display='none';
+  }else{
+    G._pendingStage20Narrative=false;
+    if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
+    if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
   }
   renderUnlockPopupsOnGameover();
   const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:false};
@@ -10480,15 +10559,24 @@ function buildRefGuide() {
     return card(b.name, `${b.tagline||''} · Class: ${(b.class||'').toUpperCase()}`,u,b.class||'bird');
   }).join('');
 
-  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)).map(([id,t])=>{
+  const packAbilityDefs = G.dataPacks?.abilityPassiveUpgrade?.ABILITY_DEFS || {};
+  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>{
+    const metaDef = packAbilityDefs[id] || {};
+    return isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)||isMatch(metaDef.role)||isMatch(metaDef.notes);
+  }).map(([id,t])=>{
     const c=G.codex?.abilities?.[id]||{seen:false,used:false};
     const u=!!c.seen;
     if(!u&&!showLocked) return '';
+    const packDef = packAbilityDefs[id] || null;
     const meta=`${t.rarity||'common'} · ${t.codexType||'attack'}`;
     const base=(t.shortDesc||t.desc||'No description yet.');
+    const roleLine=packDef?.role?`<br><strong style="color:var(--gold-light)">Role:</strong> ${packDef.role}`:'';
+    const notesLine=packDef?.notes?`<br><strong style="color:var(--gold-light)">Pack Notes:</strong> ${packDef.notes}`:'';
+    const tagsLine=(Array.isArray(packDef?.tags)&&packDef.tags.length)?`<br><strong style="color:var(--gold-light)">Tags:</strong> ${packDef.tags.join(', ')}`:'';
     const path=formatAbilityLevelPathway(t);
-    const desc=path?`${base}<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:base;
-    return card(t.name, desc,u,meta);
+    const levelPathLine=path?`<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:'';
+    const desc=`${base}${roleLine}${notesLine}${tagsLine}${levelPathLine}`;
+    return card(packDef?.name||t.name, desc,u,meta);
   }).join('');
 
   const enemies=(ENEMIES||[]).filter(e=>isMatch(e.name)).map(e=>{
@@ -10621,12 +10709,18 @@ function rollShopTier(weights){
   const vals=tiers.map(t=>weights[t]);
   return rollWeighted(tiers,vals);
 }
-function pickUniqueRewardByTier(tier,used){
-  const pool=getUpgradePool().filter(r=>r.tier===tier&&!used.has(r.id)&&!(r.stackable===false && G.runUpgradesPurchased?.has(r.id)));
-  if(!pool.length) return null;
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  used.add(pick.id);
-  return pick;
+function pickUniqueRewardByTier(tier,used,extraPredicates=[]){
+  const [pick]=rollRewardPool(CORE_UPGRADE_REWARDS,{
+    count:1,
+    usedIds:used,
+    predicates:[
+      REWARD_FILTERS.tier(tier),
+      REWARD_FILTERS.shop,
+      REWARD_FILTERS.notRunLocked(),
+      ...extraPredicates
+    ]
+  });
+  return pick||null;
 }
 function makeUtilityOffer(kind='regular'){
   const utilsRegular=[
@@ -10645,7 +10739,7 @@ function makeUtilityOffer(kind='regular'){
   ];
   const arr=kind==='boss'?utilsBoss:utilsRegular;
   const pick=arr[Math.floor(Math.random()*arr.length)];
-  return {...pick};
+  return createReward({...pick,kind:'utility',source:['shop'],oncePerRun:pick.stackable===false});
 }
 const ABILITY_RARITY_WEIGHTS = { common:70, rare:22, epic:7, legendary:1 };
 function rollByRarity(list){
@@ -10659,7 +10753,6 @@ function rollByRarity(list){
 
 function makeAbilityOffer(highQuality=false){
   const bd=BIRDS[G.player.birdKey]||{};
-  const birdClass=bd.class||'';
   const existing=new Set((G.player.abilities||[]).map(a=>a.id));
   const classPool=(bd.exclusiveLearnPool&&bd.exclusiveLearnPool.length?bd.exclusiveLearnPool:Object.keys(ABILITY_TEMPLATES_LEARNABLE));
   const candidates=classPool.filter(id=>{
@@ -10672,8 +10765,10 @@ function makeAbilityOffer(highQuality=false){
     const tmpl=rollByRarity(picks)||ABILITY_TEMPLATES[unknown[Math.floor(Math.random()*unknown.length)]];
     const id=tmpl.id;
     const tier=highQuality?'blue':'green';
-    return {
+    return createReward({
       id:`shop_ab_learn_${id}`,
+      kind:'ability',
+      source:['shop'],
       tier,
       icon:highQuality?'📘':'📗',
       name:`Learn: ${tmpl.name}`,
@@ -10682,14 +10777,14 @@ function makeAbilityOffer(highQuality=false){
         // NOTE: shopBuySelected() will handle replacement UI if you're at the non-main cap.
         p.abilities.push({...tmpl,level:1,ailmentIds:[]});
       }
-    };
+    });
   }
   const upgradable=(G.player.abilities||[]).filter(a=>!isMainAttackAbility(a)&&(a.level||1)<4);
   if(upgradable.length){
     const pick=upgradable[Math.floor(Math.random()*upgradable.length)];
-    return {id:`shop_ab_upgrade_${pick.id}`,tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}};
+    return createReward({id:`shop_ab_upgrade_${pick.id}`,kind:'ability',source:['shop'],tier:highQuality?'purple':'blue',icon:'🪶',name:`Train: ${pick.name}`,desc:`Upgrade ${pick.name} by +1 level (max 4).`,apply:p=>{const a=p.abilities.find(x=>x.id===pick.id);if(a)a.level=Math.min(4,(a.level||1)+1);}});
   }
-  return {id:'shop_ab_focus',tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}};
+  return createReward({id:'shop_ab_focus',kind:'ability',source:['shop'],tier:'green',icon:'🧠',name:'Combat Drill',desc:'ATK +2, MATK +2, ACC +3',apply:p=>{p.stats.atk+=2;p.stats.matk=(p.stats.matk||0)+2;p.stats.acc=(p.stats.acc||80)+3;}});
 }
 function generateShopItems() {
   _shopItems=[];
@@ -10943,7 +11038,6 @@ async function shopBuySelected() {
           const log=document.getElementById('shop-purchase-log');
           if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-          if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
           _shopItems.splice(selected,1);
           refreshPlayerAbilityAilments();
           enforceAbilityCosts(G.player);
@@ -10977,7 +11071,7 @@ async function shopBuySelected() {
       }
     }
   } else {
-    item.apply(G.player);
+    applyRewardEffect(item,G.player,{preventDuplicates:true,source:'shop'});
   }
   refreshPlayerAbilityAilments();
   enforceAbilityCosts(G.player);
@@ -10989,7 +11083,6 @@ async function shopBuySelected() {
   const log=document.getElementById('shop-purchase-log');
   if(log) log.textContent=`✓ Bought: ${item.icon} ${item.name} · One item per visit`;
 
-  if(item.stackable===false){ if(!(G.runUpgradesPurchased instanceof Set)) G.runUpgradesPurchased=new Set(); G.runUpgradesPurchased.add(item.id); }
   _shopItems.splice(selected,1);
   shopLockVisitState();
   saveRun();
