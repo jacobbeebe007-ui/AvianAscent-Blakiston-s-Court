@@ -1399,10 +1399,6 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 }
 
 /* Species tuning requested */
-.sprite4.sprite-robin{
-  width:64px !important;
-  height:64px !important;
-}
 .sprite4.sprite-seagull.medium{
   width:84px !important;
   height:84px !important;
@@ -1440,4 +1436,3 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 
 .nest-ab-path{margin-top:6px;font-size:.7rem;line-height:1.35;color:var(--text-dim);background:rgba(0,0,0,.2);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:6px;}
 .btn-mod{display:block;font-size:.62rem;color:var(--gold-light);opacity:.9;line-height:1.2;}
-.sprite4.sprite-robin{width:56px !important;height:56px !important;}
