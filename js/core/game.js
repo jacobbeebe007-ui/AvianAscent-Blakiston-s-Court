@@ -9190,8 +9190,7 @@ function postCombat() {
     SFX.exp();
 
     // Post-battle heal
-    const postHealMult=G.player?.mutHuntersCruelty?0.5:1;
-    const postHeal = Math.max(1, Math.floor(G.player.stats.maxHp * 0.10 * postHealMult));
+    const postHeal = Math.max(1, Math.floor(G.player.stats.maxHp * 0.10));
     G.player.stats.hp = Math.min(G.player.stats.hp + postHeal, G.player.stats.maxHp);
     spawnFloat('player', `+${postHeal} 🩹`, 'fn-heal');
 
@@ -9281,10 +9280,9 @@ function postCombat() {
         mdef:(_postStats.mdef||0)-(_preStats.mdef||0)
       };
 
-      // Level-up heal depends on bird size
-      const sizeHeal = { tiny: 0.60, small: 0.50, medium: 0.35, large: 0.25, xl: 0.15 };
-      const healPct = sizeHeal[G.player.size] || 0.35;
-      const lvHeal = Math.max(1, Math.floor(G.player.stats.maxHp * healPct));
+      // Level-up heal: restore 50% of currently missing HP
+      const missingHp = Math.max(0, G.player.stats.maxHp - G.player.stats.hp);
+      const lvHeal = Math.max(1, Math.floor(missingHp * 0.50));
       G.player.stats.hp = Math.min(G.player.stats.hp + lvHeal, G.player.stats.maxHp);
 
       leveled = true;
@@ -9893,16 +9891,11 @@ async function advanceStage(opts={}) {
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
-  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
-  if(signatureDue){
-    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
+  if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
+    const sigEvt={stage:G.stage, type:'grove-random'};
     AvianEvents.emit('signature:event', sigEvt);
     runModuleHook('onSignatureEvent', sigEvt);
-    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
-    setTimeout(()=>showGroveEvent(), 350);
-    return;
-  }
-  if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
+    logMsg('🌳 Whispering Grove appears in the distance.', 'system');
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
   }
@@ -10026,60 +10019,32 @@ async function resolveGrove(idx){
       spawnFloat('player',`-${dmg}`,'fn-dmg');
       break;
     }
-    // ── SNAKE: size-dependent ────────────────────────────────────
+    // ── SNAKE: always restorative (+20% max HP) ─────────────────
     case 'snake':{
       chosen.className='grove-tree revealed outcome-snake';
-      if(isSmall){
-        // Bad for tiny/small: venom bite −25% current HP
-        const dmg = Math.max(1, Math.floor(hp * 0.25));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Venom Bite!</span>`;
-        msg = `🐍 Snake venom seeps in. −${dmg} HP (−25% current)`;
-        flavor = 'Too small to resist the fangs…';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.poison();
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      } else {
-        // Good for medium/XL: crush the snake, +50% missing HP
-        const heal = Math.max(1, Math.floor(missing * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍💪</span><span class="grove-outcome-label">Snake Crushed!</span>`;
-        msg = `💪 You crush the snake underfoot! +${heal} HP restored`;
-        flavor = 'Your strength turned the tables.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.20));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Shed Skin Remedy!</span>`;
+      msg = `🐍 The snake's shed skin restores +${heal} HP`;
+      flavor = 'A strange remedy invigorates your feathers.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
-    // ── EGG: size-dependent ──────────────────────────────────────
+    // ── EGG: always restorative (+10% max HP) ────────────────────
     case 'egg':{
       chosen.className='grove-tree revealed outcome-egg';
-      if(isSmall){
-        // Good for tiny/small: raid the nest +50% current HP
-        const heal = Math.max(1, Math.floor(hp * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Raided!</span>`;
-        msg = `🥚 You slip inside and feast on eggs! +${heal} HP`;
-        flavor = 'Small enough to sneak past the thorns.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      } else {
-        // Bad for medium/XL: thorn trap −40% missing HP
-        const dmg = Math.max(1, Math.floor(missing * 0.40));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🌿</span><span class="grove-outcome-label">Thorns Shred!</span>`;
-        msg = `🌿 Hidden thorns tear through your feathers! −${dmg} HP`;
-        flavor = 'Too large to fit without getting shredded.';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.hit(1.0);
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.10));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Feast!</span>`;
+      msg = `🥚 You recover +${heal} HP`;
+      flavor = 'Nourishing and safe for any bird size.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
   }
@@ -10223,16 +10188,6 @@ function showVictory(){
       if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
       if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
     }
-  }
-  const dukeVictory = !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
-  if(dukeVictory && victoryMenuBtn){
-    G._pendingStage20Narrative=true;
-    victoryMenuBtn.innerHTML='Continue';
-    if(mainMenuBtn) mainMenuBtn.style.display='none';
-  }else{
-    G._pendingStage20Narrative=false;
-    if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
-    if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
   }
   renderUnlockPopupsOnGameover();
   const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:false};
