@@ -1141,6 +1141,91 @@ function makeDukeBlakiston(){
     duke:{phase:1,nightfallTurns:0,decreeKey:null,decreeStacks:0,riverCd:0,summonCd:0,verdictCd:0}
   };
 }
+
+const COURT_LIEUTENANTS=[
+  {
+    id:'lt_khar', name:'Khar the Bonebreaker', title:'Executioner', species:'Shoebill', emoji:'🪶', portraitKey:'shoebill', aiType:'boss_lt_khar',
+    passiveName:"Executioner's Bill", passiveDesc:'Second consecutive hit deals +40% damage.',
+    mechanic:'Repeated hits become extremely dangerous.',
+    abilities:[
+      {id:'lt_bonecrusher',name:'Bonecrusher Strike',tag:'HEAVY',desc:'High-damage execution strike.'},
+      {id:'lt_shatter_grip',name:'Shatter Grip',tag:'CONTROL',desc:'Roots the player for 1 turn.'},
+      {id:'lt_execution_clamp',name:'Execution Clamp',tag:'FINISH',desc:'Massive damage vs targets below 40% HP.'},
+      {id:'lt_dread_stare',name:'Dread Stare',tag:'CONTROL',desc:'Applies Fear.'},
+    ],
+    stats:{maxHp:360,hp:360,atk:17,matk:10,def:9,mdef:8,spd:7,acc:84,dodge:6}
+  },
+  {
+    id:'lt_seraph', name:'Seraph Talonstrike', title:'Duelist', species:'Peregrine Falcon', emoji:'🪶', portraitKey:'peregrine', aiType:'boss_lt_seraph',
+    passiveName:'Terminal Velocity', passiveDesc:'Gains +10% damage each turn until hit.',
+    mechanic:'Damage ramps quickly if not interrupted.',
+    abilities:[
+      {id:'lt_skyfall_strike',name:'Skyfall Strike',tag:'HEAVY',desc:'High crit pressure strike.'},
+      {id:'lt_razor_dive',name:'Razor Dive',tag:'MULTI',desc:'Two quick attacks.'},
+      {id:'lt_wind_feint',name:'Wind Feint',tag:'UTILITY',desc:'Gain +15% dodge for 1 turn.'},
+      {id:'lt_predator_mark',name:'Predator Mark',tag:'CONTROL',desc:'Target takes +20% damage next turn.'},
+    ],
+    stats:{maxHp:330,hp:330,atk:15,matk:10,def:8,mdef:8,spd:10,acc:88,dodge:14}
+  },
+  {
+    id:'lt_marshal', name:'Marshal Stride', title:'Warden', species:'Secretary Bird', emoji:'🪶', portraitKey:'secretarybird', aiType:'boss_lt_marshal',
+    passiveName:'Iron Patrol', passiveDesc:'Gains +1 DEF every 2 turns.',
+    mechanic:'Battle gets harder the longer it lasts.',
+    abilities:[
+      {id:'lt_iron_kick',name:'Iron Kick',tag:'HEAVY',desc:'Strong physical kick.'},
+      {id:'lt_crush_serpent',name:'Crush Serpent',tag:'CONTROL',desc:'Stuns or slows the player.'},
+      {id:'lt_patrol_command',name:'Patrol Command',tag:'BUFF',desc:'Gain DEF and SPD.'},
+      {id:'lt_ground_sweep',name:'Ground Sweep',tag:'MULTI',desc:'Sweeping multi-kick attack.'},
+    ],
+    stats:{maxHp:380,hp:380,atk:15,matk:8,def:11,mdef:10,spd:7,acc:82,dodge:6}
+  },
+  {
+    id:'lt_koro', name:'Mistmother Koro', title:'Seer', species:'Great Egret', emoji:'🪶', portraitKey:'seagull', aiType:'boss_lt_koro',
+    passiveName:'Veil of Fog', passiveDesc:'First attack against Koro each turn has -20% accuracy.',
+    mechanic:'Hard to hit and manipulates accuracy.',
+    abilities:[
+      {id:'lt_mist_curse',name:'Mist Curse',tag:'CONTROL',desc:'Blinds the player.'},
+      {id:'lt_future_sight',name:'Future Sight',tag:'BUFF',desc:'Next attack deals +25% damage.'},
+      {id:'lt_ghost_step',name:'Ghost Step',tag:'UTILITY',desc:'Increases dodge.'},
+      {id:'lt_tidal_strike',name:'Tidal Strike',tag:'SPELL',desc:'Magic damage attack.'},
+    ],
+    stats:{maxHp:350,hp:350,atk:12,matk:17,def:8,mdef:11,spd:9,acc:85,dodge:12}
+  },
+  {
+    id:'lt_skarn', name:'Gravecaller Skarn', title:'Reaper', species:'Marabou Stork', emoji:'🪶', portraitKey:'shoebill', aiType:'boss_lt_skarn',
+    passiveName:'Feast on the Fallen', passiveDesc:'Heals 10% max HP every 3 turns.',
+    mechanic:'Sustained survival and attrition pressure.',
+    abilities:[
+      {id:'lt_carrion_peck',name:'Carrion Peck',tag:'BASIC',desc:'Standard attack.'},
+      {id:'lt_rotting_curse',name:'Rotting Curse',tag:'CONTROL',desc:'Applies Poison.'},
+      {id:'lt_death_circle',name:'Death Circle',tag:'BUFF',desc:'Gains damage each turn.'},
+      {id:'lt_bone_harvest',name:'Bone Harvest',tag:'HEAL',desc:'Heals based on damage dealt.'},
+    ],
+    stats:{maxHp:390,hp:390,atk:14,matk:13,def:10,mdef:10,spd:6,acc:82,dodge:5}
+  },
+  {
+    id:'lt_ashwing', name:'Ashwing Pyre', title:'Scavenger', species:'Black Kite', emoji:'🪶', portraitKey:'raven', aiType:'boss_lt_ashwing',
+    passiveName:'Smoke Hunter', passiveDesc:'Deals +25% damage to targets below 50% HP.',
+    mechanic:'Extremely dangerous when the player is low.',
+    abilities:[
+      {id:'lt_burning_dive',name:'Burning Dive',tag:'HEAVY',desc:'High damage strike.'},
+      {id:'lt_ash_cloud',name:'Ash Cloud',tag:'CONTROL',desc:'Reduces player accuracy.'},
+      {id:'lt_carrion_rush',name:'Carrion Rush',tag:'MULTI',desc:'Two fast attacks.'},
+      {id:'lt_smoke_spiral',name:'Smoke Spiral',tag:'UTILITY',desc:'Gain dodge.'},
+    ],
+    stats:{maxHp:345,hp:345,atk:16,matk:10,def:8,mdef:8,spd:9,acc:86,dodge:10}
+  },
+];
+function makeCourtLieutenantByIndex(idx=0){
+  const src=COURT_LIEUTENANTS[((idx%COURT_LIEUTENANTS.length)+COURT_LIEUTENANTS.length)%COURT_LIEUTENANTS.length];
+  const e=JSON.parse(JSON.stringify(src));
+  e.isBoss=true; e.size='xl'; e.bossTitle=`👑 ${src.title}`;
+  e.aiStyle='boss';
+  e.stats=e.stats||{};
+  e.hp=e.stats.hp; e.maxHp=e.stats.maxHp; e.atk=e.stats.atk; e.def=e.stats.def; e.spd=e.stats.spd; e.acc=e.stats.acc; e.dodge=e.stats.dodge; e.matk=e.stats.matk; e.mdef=e.stats.mdef;
+  e.lieutenant={turn:0,lastHitConnected:false,velocityStacks:0,markTurns:0,futureSight:0,dodgeBuffTurns:0,dodgeBuffAmt:0,deathCircle:false,deathCircleStacks:0};
+  return e;
+}
 const ENEMY_ABILITY_POOL = {
   // Enemy abilities are simplified versions
   eVenom:   {name:'Venom Peck', desc:'Applies 2 Poison stacks (DoT).', dmg:'0 direct', dodgeable:true, fn(e,p,G){applyAilment('player','poison',2);logMsg(`☣ ${e.name} spreads Poison!`,'enemy-action');}},
@@ -2499,6 +2584,12 @@ const PERK_POOL_BIAS = {
   skirmisher:{primary:['attack','tempo'],secondary:['status','spell']},
   tyrant:{primary:['attack','status'],secondary:['survival','spell']}
 };
+const PERK_SOURCE_UI = {
+  'story-boss-10': { title:'Choose a Perk', subtitle:'A new edge for the climb ahead.', flavor:'The forest has not broken you yet.', headerClass:'perk-source-stage10', frameStyle:'standard', accentTierFocus:['grey','green','blue'], bannerText:'Boss Reward' },
+  'story-boss-20': { title:'Final Perk Before Endless', subtitle:'Blakiston falls. The hunt continues.', flavor:'The court has fallen. The climb goes on.', headerClass:'perk-source-stage20', frameStyle:'boss', accentTierFocus:['green','blue','purple'], bannerText:'Duke Defeated' },
+  'endless-milestone': { title:'Endless Perk Choice', subtitle:'The deeper hunt grants stranger gifts.', flavor:'The hunt deepens beyond the old path.', headerClass:'perk-source-endless', frameStyle:'endless', accentTierFocus:['green','blue','purple','gold'], bannerText:'Endless Milestone' },
+  'default': { title:'Choose a Perk', subtitle:'Select one reward.', headerClass:'perk-source-default', frameStyle:'standard', accentTierFocus:['grey','green','blue','purple','gold'], bannerText:'Reward' }
+};
 const DEFAULT_PERK_POOL_BIAS={primary:['attack','survival'],secondary:['tempo','status','spell']};
 const PERK_DRAFT_DEBUG=false;
 
@@ -2537,6 +2628,10 @@ function hasPerkSource(source, stage){
 function getPerkSourceTierRule(source='default'){
   const key=String(source||'default').toLowerCase();
   return PERK_SOURCE_TIER_RULES[key]||PERK_SOURCE_TIER_RULES.default;
+}
+function getPerkSourceUIProfile(source='default'){
+  const key=String(source||'default').toLowerCase();
+  return PERK_SOURCE_UI[key]||PERK_SOURCE_UI.default;
 }
 function weightedPick(defs, getWeight){
   if(!Array.isArray(defs)||!defs.length) return null;
@@ -2693,12 +2788,15 @@ async function triggerPerkReward(source, ctx={}){
 
   const opts=getPerkRewardOptions(G.player?.birdKey,3,source);
   if(!opts.length) return false;
-  const title = source==='story-boss-20' ? 'Final Perk Before Endless' : 'Choose a Perk';
+  const uiProfile=getPerkSourceUIProfile(source);
   const subtitle = source==='endless-milestone'
-    ? `Endless Stage ${Math.max(1,(ctx?.stage||G.stage)-20)} milestone reached.`
-    : 'Choose 1 perk for this run.';
+    ? `${uiProfile.subtitle} (Stage ${Math.max(1,(ctx?.stage||G.stage)-20)}).`
+    : uiProfile.subtitle;
   const choice=await openRewardChoiceModal({
-    kind:'perk', title, subtitle, mustChoose:true,
+    kind:'perk', source, title:uiProfile.title, subtitle,
+    flavor:uiProfile.flavor, bannerText:uiProfile.bannerText,
+    headerClass:uiProfile.headerClass, frameStyle:uiProfile.frameStyle,
+    mustChoose:true,
     options:opts.map(p=>({id:p.id,name:p.name,type:'PERK',desc:p.desc,tags:p.tags||[],payload:p})),
   });
   const picked=PERK_DEFS[choice?.id]||choice?.payload;
@@ -3444,6 +3542,194 @@ function goMainMenu() {
 
 function returnToMenuFromVictory(){
   clearTimeout(G._victoryReturnTimer);
+  if(G._pendingStage20Narrative){
+    G._pendingStage20Narrative=false;
+    startStage20NarrativeSequence();
+    return;
+  }
+  goMainMenu();
+}
+
+const STAGE20_NARRATIVE_TEXT = `Your feathers settle.
+
+The wind stills.
+
+Duke Blakiston lies before you.
+
+The tyrant of Blackstone — the owl whose shadow once ruled the forest — is now nothing more than a broken heap of dark feathers against the cold earth.
+
+For a long moment…
+
+no one moves.
+
+Then the branches begin to tremble.
+
+Wings approach.
+
+First a few.
+
+Then dozens.
+
+Then hundreds.
+
+Birds of every kind descend upon the clearing — robins, starlings, finches, crows, thrushes, hawks, and sparrows.
+
+Creatures who once feared even whispering rebellion now gather around the fallen Duke.
+
+They stare.
+
+At him.
+
+At you.
+
+A quiet sound begins to ripple through the flock.
+
+A whisper.
+
+A murmur.
+
+Then the forest speaks your name.
+
+"[Chosen Bird Title]..."
+
+Again.
+
+Louder.
+
+"[Chosen Bird Title]...!"
+
+The Murmur rises into the night sky.
+
+For the first time since Blackstone fell under tyrant rule…
+
+hope takes wing.
+
+But the night is not finished.
+
+The moon vanishes behind sudden shadows.
+
+Six shapes tear through the sky.
+
+The Court of Blakiston descends.
+
+Condor wings crash like thunder.
+
+Hawk talons slice through the air.
+
+The assassin’s silent glide cuts through the flock like a blade.
+
+Chaos erupts as the Court forces their way through the gathered birds.
+
+Two of them seize the fallen Duke by his talons.
+
+As they lift him from the ground, his chest feathers shudder.
+
+A breath.
+
+Another.
+
+Then the great owl’s eyes snap open.
+
+Blakiston lives.
+
+His hoot rolls across the clearing like distant thunder.
+
+"You and this forest will pay for this…"
+
+His burning gaze fixes upon you.
+
+"My fledglings will rout you all."
+
+The Court beats their wings violently, driving back the gathering flock.
+
+Feathers scatter as birds are forced away from the clearing.
+
+Then they rise.
+
+Up.
+
+Higher.
+
+Carrying their wounded tyrant into the night.
+
+Toward the distant silhouette of Blackstone Castle.
+
+The flock slowly regathers.
+
+The Murmur is quieter now.
+
+But it has not died.
+
+The forest has seen something tonight.
+
+The tyrant can bleed.
+
+And you…
+
+have begun something far greater than a battle.
+
+Your ascent is not over.
+
+It has only just begun.`;
+
+function getChosenBirdTitle(){
+  const b=BIRDS?.[G.player?.birdKey]||{};
+  return b.title || b.name || G.player?.name || 'Wings of Dawn';
+}
+function startStage20NarrativeSequence(){
+  const gameover=document.getElementById('screen-gameover');
+  const scroll=document.getElementById('stage20-story-scroll');
+  const viewport=document.getElementById('stage20-story-viewport');
+  const btn=document.getElementById('stage20-story-continue');
+  if(!scroll||!viewport||!btn){ goMainMenu(); return; }
+
+  clearTimeout(G._victoryReturnTimer);
+  btn.style.display='none';
+  const birdTitle=getChosenBirdTitle();
+  scroll.textContent=STAGE20_NARRATIVE_TEXT.replace(/\[Chosen Bird Title\]/g,birdTitle);
+
+  if(gameover){ gameover.style.transition='opacity .7s ease'; gameover.style.opacity='0'; }
+  setTimeout(()=>{
+    if(gameover){ gameover.style.opacity=''; gameover.style.transition=''; }
+    showScreen('screen-stage20-story');
+    runStage20NarrativeAutoScroll();
+  },700);
+}
+function runStage20NarrativeAutoScroll(){
+  const scroll=document.getElementById('stage20-story-scroll');
+  const viewport=document.getElementById('stage20-story-viewport');
+  const btn=document.getElementById('stage20-story-continue');
+  if(!scroll||!viewport||!btn) return;
+  btn.style.display='none';
+  const total=Math.max(1,scroll.scrollHeight + viewport.clientHeight + 120);
+  const basePxPerSec=22;
+  let speedMult=1;
+  let y=viewport.clientHeight;
+  let last=performance.now();
+  if(G._stage20NarrativeRAF) cancelAnimationFrame(G._stage20NarrativeRAF);
+  if(G._stage20NarrativeKeyHandler) document.removeEventListener('keydown', G._stage20NarrativeKeyHandler);
+  G._stage20NarrativeKeyHandler=(ev)=>{ if(ev.key===' '||ev.key==='Enter') speedMult=2.2; };
+  document.addEventListener('keydown', G._stage20NarrativeKeyHandler);
+  function tick(now){
+    const dt=Math.max(0,(now-last)/1000); last=now;
+    y-=basePxPerSec*speedMult*dt;
+    scroll.style.transform=`translateY(${y}px)`;
+    if((viewport.clientHeight - y) < total){
+      G._stage20NarrativeRAF=requestAnimationFrame(tick);
+      return;
+    }
+    if(G._stage20NarrativeKeyHandler){ document.removeEventListener('keydown', G._stage20NarrativeKeyHandler); G._stage20NarrativeKeyHandler=null; }
+    btn.style.display='inline-block';
+  }
+  G._stage20NarrativeRAF=requestAnimationFrame(tick);
+}
+function finishStage20Narrative(){
+  if(G._stage20NarrativeRAF){ cancelAnimationFrame(G._stage20NarrativeRAF); G._stage20NarrativeRAF=null; }
+  if(G._stage20NarrativeKeyHandler){ document.removeEventListener('keydown', G._stage20NarrativeKeyHandler); G._stage20NarrativeKeyHandler=null; }
+  grantUnlock('stage20');
+  grantUnlock('juvenileWin');
+  grantUnlock('storyCompleted');
+  G.courtLieutenantsUnlocked=true;
   goMainMenu();
 }
 
@@ -3979,6 +4265,8 @@ function startGame() {
   G.endlessBattle = 0;
   G.autoQueuedAbilityId=null;
   G._breakClampStreak=0;
+  G._lastLieutenantId='';
+  G._lieutenantRotationIndex=0;
   G.bossKills = 0;
   G.abilityCooldowns={};
   G.runCrits = 0; G.runBuffs = 0; G.runDebuffs = 0;
@@ -4003,6 +4291,16 @@ function startGame() {
 // Build endless-mode enemy from base pool (scaling happens in loadStage via stage-depth curve)
 function makeEndlessEnemy(stage) {
   const isBoss = (stage % 10 === 0);
+  const endlessStage=Math.max(1,stage-20);
+  if(isBoss && endlessStage>=10 && endlessStage%10===0){
+    const len=COURT_LIEUTENANTS.length;
+    let idx=(G._lieutenantRotationIndex||0)%Math.max(1,len);
+    let candidate=makeCourtLieutenantByIndex(idx);
+    if(candidate?.id===G._lastLieutenantId) candidate=makeCourtLieutenantByIndex((idx+1)%Math.max(1,len));
+    G._lieutenantRotationIndex=(idx+1)%Math.max(1,len);
+    G._lastLieutenantId=candidate?.id||'';
+    return candidate;
+  }
   const pool = ENEMIES.filter(e=>!!e.isBoss===isBoss);
   const src = (pool.length?pool:ENEMIES)[Math.floor(Math.random()*(pool.length?pool.length:ENEMIES.length))];
   const clone = JSON.parse(JSON.stringify(src));
@@ -5769,6 +6067,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     }
     if(G.comboReady&&!isCrit){isCrit=true;dmg=Math.max(1,Math.floor(dmg*(G.player.goldCritMult||1.5)));consumeCombo();logMsg('🔥 Combo Crit!','crit');}
     G.enemy.stats.hp-=dmg;
+    if(G.enemy?.id==='lt_seraph' && G.enemy?.lieutenant){
+      G.enemy.lieutenant.velocityStacks=0;
+    }
     const _atkKind=String(srcAbility?.btnType||srcAbility?.type||G._activePlayerAbility?.btnType||G._activePlayerAbility?.type||'').toLowerCase();
     if((_atkKind==='physical'||_atkKind==='ranged') && dmg>0){
       if((G.player?.bleedOnHitChance||0)>0 && chance(Math.min(95,G.player.bleedOnHitChance))) applyAilment('enemy','bleed',1);
@@ -5914,6 +6215,11 @@ function playerAttackMisses(ab) {
   const isAttack=(kind==='physical'||kind==='ranged');
   if(isAttack && !G._firstAttackUsed && G.player?.firstAttackAlwaysHit) return false;
   let moveMiss = getPlayerMissChance(ab);
+  if(G.enemy?.id==='lt_koro' && G.enemyStatus?.koroVeilReady){
+    moveMiss=Math.max(0,moveMiss+20);
+    G.enemyStatus.koroVeilReady=false;
+    logMsg('🌫 Veil of Fog distorts your first strike!','boss');
+  }
   if(isAttack && !G._firstAttackUsed) moveMiss=Math.max(0,moveMiss-(G.player?.firstAttackAccBonus||0));
   return chance(moveMiss);
 }
@@ -7462,6 +7768,7 @@ function startPlayerTurn(player){
   if(isEndlessRunActive() && player.relFeatheredClock && ((G.endlessBattle||0)%3===0)) player.energy += 1;
   G.playerActionsThisTurn=0;
   G.playerTurnFlags={energyGainedThisTurn:0,onHitTriggered:false,firstAttackResolved:false};
+  if(G.enemy?.id==='lt_koro') G.enemyStatus.koroVeilReady=true;
   if(player.mutSuddenFlight) player._mutSuddenFlightUsed=false;
   G.turn='player';
   G.turnPhase=TURN.PLAYER;
@@ -8229,6 +8536,88 @@ function dukeTurnAI(){
   logMsg('🦉 Talons in the dark.','boss');
 }
 
+function lieutenantBaseMult(e){
+  const lt=e?.lieutenant||{};
+  let mult=1;
+  if(e?.id==='lt_seraph') mult += (lt.velocityStacks||0)*0.10;
+  if(e?.id==='lt_ashwing' && (G.player?.stats?.hp||0)<=Math.floor((G.player?.stats?.maxHp||1)*0.5)) mult*=1.25;
+  if(e?.id==='lt_skarn' && lt.deathCircle) mult*=(1 + (lt.deathCircleStacks||0)*0.08);
+  return mult;
+}
+function lieutenantStrike(mult=1,label='hits!'){
+  const r=dealDamage('player',edmg(mult));
+  spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
+  logMsg(`👑 ${G.enemy.name} ${label}`,'boss');
+  return r;
+}
+function lieutenantApplyKharChain(r){
+  const lt=G.enemy.lieutenant||{};
+  lt.lastHitConnected=!!(r && !r.wasDodged && (r.dmgDealt||0)>0);
+  G.enemy.lieutenant=lt;
+}
+function lieutenantTurnAI(){
+  const e=G.enemy; const lt=e.lieutenant||(e.lieutenant={});
+  lt.turn=(lt.turn||0)+1;
+  if(lt.dodgeBuffTurns>0){ lt.dodgeBuffTurns--; if(lt.dodgeBuffTurns<=0 && lt.dodgeBuffAmt){ e.stats.dodge=Math.max(0,(e.stats.dodge||0)-lt.dodgeBuffAmt); lt.dodgeBuffAmt=0; } }
+  if(e.id==='lt_seraph') lt.velocityStacks=Math.min(8,(lt.velocityStacks||0)+1);
+  if(e.id==='lt_marshal' && lt.turn%2===0){ e.stats.def=(e.stats.def||0)+1; logMsg('🛡 Iron Patrol: +1 DEF.','boss'); }
+  if(e.id==='lt_skarn' && lt.turn%3===0){ const h=Math.floor((e.stats.maxHp||1)*0.10); e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+h); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${h}`,'fn-heal'); logMsg('☠ Feast on the Fallen restores Skarn.','boss'); }
+  if(e.id==='lt_skarn' && lt.deathCircle) lt.deathCircleStacks=Math.min(8,(lt.deathCircleStacks||0)+1);
+
+  const base=lieutenantBaseMult(e);
+  const pHpPct=(G.player.stats.hp||1)/Math.max(1,G.player.stats.maxHp||1);
+
+  if(e.id==='lt_khar'){
+    let mult=base;
+    if(lt.lastHitConnected) mult*=1.40;
+    if(pHpPct<0.40){ const r=lieutenantStrike(2.10*mult,'uses Execution Clamp!'); lieutenantApplyKharChain(r); return; }
+    if(Math.random()<0.28){ setStatusMax(G.playerStatus,'rooted',1); logMsg('⛓ Shatter Grip roots you!','boss'); return; }
+    if(Math.random()<0.22){ setStatusMax(G.playerStatus,'feared',2); logMsg('😨 Dread Stare applies Fear!','boss'); return; }
+    const r=lieutenantStrike(1.60*mult,'lands Bonecrusher Strike!'); lieutenantApplyKharChain(r); return;
+  }
+  if(e.id==='lt_seraph'){
+    if((e.stats.hp/e.stats.maxHp)<0.55 && Math.random()<0.28 && lt.dodgeBuffTurns<=0){
+      lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('💨 Wind Feint: Seraph gains +15 dodge.','boss'); return;
+    }
+    if(Math.random()<0.26){ lt.markTurns=1; logMsg('🎯 Predator Mark! Next hit deals +20%.','boss'); return; }
+    const marked=lt.markTurns>0?1.20:1;
+    if(lt.markTurns>0) lt.markTurns=0;
+    if(Math.random()<0.5){ lieutenantStrike(0.88*base*marked,'slashes with Razor Dive!'); lieutenantStrike(0.88*base*marked,'follows through with Razor Dive!'); }
+    else{ lieutenantStrike(1.55*base*marked,'drops in with Skyfall Strike!'); }
+    return;
+  }
+  if(e.id==='lt_marshal'){
+    if(Math.random()<0.25){ e.stats.def+=1; e.stats.spd+=1; logMsg('📯 Patrol Command boosts DEF and SPD!','boss'); return; }
+    if(Math.random()<0.25){ if(chance(40)){ G.playerStatus.stunned=(G.playerStatus.stunned||0)+1; logMsg('🦵 Crush Serpent stuns you!','boss'); } else { applyPlayerSlow(2,6,2); logMsg('🦵 Crush Serpent slows you!','boss'); } return; }
+    if(Math.random()<0.45){ lieutenantStrike(0.90*base,'sweeps with Ground Sweep!'); lieutenantStrike(0.90*base,'completes the Ground Sweep!'); }
+    else lieutenantStrike(1.45*base,'drives an Iron Kick!');
+    return;
+  }
+  if(e.id==='lt_koro'){
+    if(lt.futureSight>0){ lt.futureSight=0; lieutenantStrike(1.55*base,'unleashes a foreseen Tidal Strike!'); return; }
+    if(Math.random()<0.26){ G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+15; logMsg('🌫 Mist Curse lowers your ACC!','boss'); return; }
+    if(Math.random()<0.26){ lt.futureSight=1; logMsg('🔮 Future Sight: next strike empowered.','boss'); return; }
+    if(Math.random()<0.22 && lt.dodgeBuffTurns<=0){ lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('👻 Ghost Step raises Koro\'s dodge.','boss'); return; }
+    lieutenantStrike(1.25*base,'casts Tidal Strike!');
+    return;
+  }
+  if(e.id==='lt_skarn'){
+    if(!lt.deathCircle && Math.random()<0.28){ lt.deathCircle=true; lt.deathCircleStacks=0; logMsg('☠ Death Circle begins to spiral.','boss'); return; }
+    if(Math.random()<0.30){ applyAilment('player','poison',2); logMsg('☣ Rotting Curse applies Poison.','boss'); return; }
+    if(Math.random()<0.26){ const r=lieutenantStrike(1.10*base,'uses Bone Harvest!'); const heal=Math.max(1,Math.floor((r.dmgDealt||0)*0.5)); e.stats.hp=Math.min(e.stats.maxHp,e.stats.hp+heal); setHpBar('enemy',e.stats.hp,e.stats.maxHp); spawnFloat('enemy',`+${heal}`,'fn-heal'); return; }
+    lieutenantStrike(1.05*base,'pecks with Carrion Peck.');
+    return;
+  }
+  if(e.id==='lt_ashwing'){
+    if(Math.random()<0.25 && lt.dodgeBuffTurns<=0){ lt.dodgeBuffTurns=1; lt.dodgeBuffAmt=15; e.stats.dodge=Math.min(95,(e.stats.dodge||0)+15); logMsg('🌪 Smoke Spiral increases Ashwing\'s dodge.','boss'); return; }
+    if(Math.random()<0.24){ G.playerStatus.accDebuff=(G.playerStatus.accDebuff||0)+12; logMsg('🌫 Ash Cloud reduces your accuracy!','boss'); return; }
+    if(Math.random()<0.5){ lieutenantStrike(0.92*base,'lunges with Carrion Rush!'); lieutenantStrike(0.92*base,'strikes again with Carrion Rush!'); }
+    else lieutenantStrike(1.65*base,'dives with Burning Dive!');
+    return;
+  }
+  lieutenantStrike(1.2*base,'attacks!');
+}
+
 
 async function enemyTurn() {
   const e=G.enemy; G.animLock=true; G.turn='enemy'; G.turnPhase=TURN.ENEMY; G.phase='ENEMY';
@@ -8237,6 +8626,13 @@ async function enemyTurn() {
   startEnemyTurn(e);
   if(G.enemy?.aiType==='boss_duke'){
     dukeTurnAI();
+    G.animLock=false;
+    if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+    afterEnemyTurn();
+    return;
+  }
+  if(/^boss_lt_/.test(String(G.enemy?.aiType||''))){
+    lieutenantTurnAI();
     G.animLock=false;
     if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
     afterEnemyTurn();
@@ -9088,8 +9484,26 @@ function renderRewardChoiceOptions(config){
 function openRewardChoiceModal(config={}){
   const modal=document.getElementById('reward-choice-modal');
   if(!modal) return Promise.resolve(null);
+  const inner=document.getElementById('reward-choice-inner');
+  const banner=document.getElementById('reward-choice-banner');
+  const flavor=document.getElementById('reward-choice-flavor');
+  const source=String(config.source||'default').trim();
+  const headerClass=String(config.headerClass||'').trim();
+  const frameStyle=String(config.frameStyle||'standard').trim();
+  modal.setAttribute('data-perk-source', source);
+  modal.setAttribute('data-frame-style', frameStyle);
+  if(inner){
+    inner.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
+    if(headerClass) inner.classList.add(headerClass);
+  }
+  if(banner) banner.textContent=config.bannerText||'Reward';
   document.getElementById('reward-choice-title').textContent=config.title||'Choose Reward';
   document.getElementById('reward-choice-sub').textContent=config.subtitle||'';
+  if(flavor){
+    const f=String(config.flavor||'').trim();
+    flavor.textContent=f;
+    flavor.style.display=f?'block':'none';
+  }
   const cancel=document.getElementById('reward-choice-cancel');
   if(cancel) cancel.style.display=config.mustChoose?'none':'inline-block';
   G.rewardChoiceState=config;
@@ -9100,17 +9514,25 @@ function openRewardChoiceModal(config={}){
 }
 function closeRewardChoiceModal(){
   const modal=document.getElementById('reward-choice-modal');
+  const inner=document.getElementById('reward-choice-inner');
   const cfg=G.rewardChoiceState||{};
   if(cfg.mustChoose) return;
   if(modal) modal.classList.remove('open');
+  if(modal){ modal.removeAttribute('data-perk-source'); modal.removeAttribute('data-frame-style'); }
+  if(inner) inner.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
   if(typeof cfg._resolve==='function') cfg._resolve(null);
   G.rewardChoiceState=null;
 }
 function applyRewardChoice(choice){
   const cfg=G.rewardChoiceState||{};
+  const modal=document.getElementById('reward-choice-modal');
+  const inner=document.getElementById('reward-choice-inner');
   if(typeof cfg.onSelect==='function') cfg.onSelect(choice);
   if(typeof choice?.apply==='function') choice.apply(choice);
-  document.getElementById('reward-choice-modal')?.classList.remove('open');
+  modal?.classList.remove('open');
+  modal?.removeAttribute('data-perk-source');
+  modal?.removeAttribute('data-frame-style');
+  inner?.classList.remove('perk-source-stage10','perk-source-stage20','perk-source-endless','perk-source-default');
   if(typeof cfg._resolve==='function') cfg._resolve(choice);
   G.rewardChoiceState=null;
 }
@@ -9511,6 +9933,7 @@ function showVictory(){
   }
   showRunStats();
   const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
+  const mainMenuBtn=document.getElementById('gameover-main-menu-btn');
   if(victoryMenuBtn) victoryMenuBtn.style.display='inline-block';
   const ui=ensureUIState();
   const isEndlessRun = (ui.gameMode==='endless') && !!G.endlessMode;
@@ -9520,15 +9943,27 @@ function showVictory(){
     advanceStage();
     return;
   }
+  const dukeVictory = !!(G.enemy && (String(G.enemy.id||'').toLowerCase()==='duke_blakiston' || /blakiston/i.test(String(G.enemy.name||''))));
+  if(dukeVictory && victoryMenuBtn){
+    G._pendingStage20Narrative=true;
+    victoryMenuBtn.innerHTML='Continue';
+    if(mainMenuBtn) mainMenuBtn.style.display='none';
+  }else{
+    G._pendingStage20Narrative=false;
+    if(victoryMenuBtn) victoryMenuBtn.innerHTML='↩ Return to Menu';
+    if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
+  }
   renderUnlockPopupsOnGameover();
   const endEvt={won:true, bird:G.player?.birdKey||'unknown', stageReached:G.stage||20, deathCause:'victory', endless:false};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
   clearTimeout(G._victoryReturnTimer);
-  G._victoryReturnTimer=setTimeout(()=>{
-    try{ showScreen('screen-select'); initSelectionSafe(); }catch(_){ }
-  }, 5200);
+  if(!dukeVictory){
+    G._victoryReturnTimer=setTimeout(()=>{
+      try{ showScreen('screen-select'); initSelectionSafe(); }catch(_){ }
+    }, 5200);
+  }
 }
 function showDefeat(){
   G.phase='REWARD';
@@ -9547,7 +9982,9 @@ function showDefeat(){
   const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
   const victoryMenuBtn=document.getElementById('victory-return-menu-btn');
+  const mainMenuBtn=document.getElementById('gameover-main-menu-btn');
   if(victoryMenuBtn) victoryMenuBtn.style.display='none';
+  if(mainMenuBtn) mainMenuBtn.style.display='inline-block';
   const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
