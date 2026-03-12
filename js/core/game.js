@@ -2543,6 +2543,25 @@ function runModuleHook(hook, payload){
 }
 globalThis.registerGameModule = registerGameModule;
 
+let _warnedMissingAbilityPassiveUpgradePack = false;
+function initDataPacks(){
+  const pack = globalThis.ABILITY_PASSIVE_UPGRADE_PACK;
+  if(pack && typeof pack === 'object'){
+    G.dataPacks = G.dataPacks || {};
+    G.dataPacks.abilityPassiveUpgrade = Object.freeze({
+      STATUS_GLOSSARY: pack.STATUS_GLOSSARY || Object.freeze({}),
+      ABILITY_DEFS: pack.ABILITY_DEFS || Object.freeze({}),
+    });
+    return;
+  }
+  G.dataPacks = G.dataPacks || {};
+  G.dataPacks.abilityPassiveUpgrade = null;
+  if(!_warnedMissingAbilityPassiveUpgradePack){
+    _warnedMissingAbilityPassiveUpgradePack = true;
+    console.warn('[DataPack] ABILITY_PASSIVE_UPGRADE_PACK missing; metadata overlays disabled.');
+  }
+}
+
 let G = {
   player: null, enemy: null, stage: 1, turn: 'player', turnPhase:TURN.PLAYER,
   playerStatus:{}, enemyStatus:{},
@@ -9294,15 +9313,24 @@ function buildRefGuide() {
     return card(b.name, `${b.tagline||''} · Class: ${(b.class||'').toUpperCase()}`,u,b.class||'bird');
   }).join('');
 
-  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)).map(([id,t])=>{
+  const packAbilityDefs = G.dataPacks?.abilityPassiveUpgrade?.ABILITY_DEFS || {};
+  const abilities=Object.entries(ABILITY_TEMPLATES||{}).filter(([id,t])=>{
+    const metaDef = packAbilityDefs[id] || {};
+    return isMatch(t.name)||isMatch(t.shortDesc)||isMatch(t.desc)||isMatch(metaDef.role)||isMatch(metaDef.notes);
+  }).map(([id,t])=>{
     const c=G.codex?.abilities?.[id]||{seen:false,used:false};
     const u=!!c.seen;
     if(!u&&!showLocked) return '';
+    const packDef = packAbilityDefs[id] || null;
     const meta=`${t.rarity||'common'} · ${t.codexType||'attack'}`;
     const base=(t.shortDesc||t.desc||'No description yet.');
+    const roleLine=packDef?.role?`<br><strong style="color:var(--gold-light)">Role:</strong> ${packDef.role}`:'';
+    const notesLine=packDef?.notes?`<br><strong style="color:var(--gold-light)">Pack Notes:</strong> ${packDef.notes}`:'';
+    const tagsLine=(Array.isArray(packDef?.tags)&&packDef.tags.length)?`<br><strong style="color:var(--gold-light)">Tags:</strong> ${packDef.tags.join(', ')}`:'';
     const path=formatAbilityLevelPathway(t);
-    const desc=path?`${base}<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:base;
-    return card(t.name, desc,u,meta);
+    const levelPathLine=path?`<br><br><strong style="color:var(--gold-light)">Level Path:</strong><br>${path.replace(/\n/g,'<br>')}`:'';
+    const desc=`${base}${roleLine}${notesLine}${tagsLine}${levelPathLine}`;
+    return card(packDef?.name||t.name, desc,u,meta);
   }).join('');
 
   const enemies=(ENEMIES||[]).filter(e=>isMatch(e.name)).map(e=>{
@@ -9313,11 +9341,12 @@ function buildRefGuide() {
     return card(e.name, `HP ${e.stats?.maxHp||e.hp||0} · ATK ${e.stats?.atk||e.atk||0} · AI: ${ai}`,u,ai);
   }).join('');
 
-  const statusIds=[...new Set([...Object.keys(AILMENTS||{}), ...Object.keys(G.codex?.statuses||{})])];
+  const packStatusGlossary = G.dataPacks?.abilityPassiveUpgrade?.STATUS_GLOSSARY || {};
+  const statusIds=[...new Set([...Object.keys(AILMENTS||{}), ...Object.keys(packStatusGlossary), ...Object.keys(G.codex?.statuses||{})])];
   const statuses=statusIds.filter(id=>isMatch(id)).map(id=>{
     const u=!!G.codex?.statuses?.[id]?.seen;
     if(!u&&!showLocked) return '';
-    const d=(AILMENTS[id]?.desc)||'Status effect.';
+    const d=(packStatusGlossary[id]||AILMENTS[id]?.desc)||'Status effect.';
     return card(id[0].toUpperCase()+id.slice(1),d,u,'status');
   }).join('');
 
