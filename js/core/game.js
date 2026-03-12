@@ -2430,12 +2430,78 @@ function classMatches(raw, expected){
 const MAGIC_CLASSES = new Set(['mage','bard','summoner','caster','support','trickster']);
 
 const PERK_DEFS={
-  swiftFlurry:{id:'swiftFlurry',name:'Swift Flurry',type:'PERK',desc:'+1 SPD',tags:['SPD'],effect:{statMods:{spd:1}}},
-  hardenedPlumage:{id:'hardenedPlumage',name:'Hardened Plumage',type:'PERK',desc:'+1 DEF',tags:['DEF'],effect:{statMods:{def:1}}},
-  arcFeather:{id:'arcFeather',name:'Arc Feather',type:'PERK',desc:'+1 MATK',tags:['MATK'],effect:{statMods:{matk:1}}},
-  sharpEye:{id:'sharpEye',name:'Sharp Eye',type:'PERK',desc:'+5% ACC',tags:['ACC'],effect:{statMods:{acc:5}}},
-  thickDown:{id:'thickDown',name:'Thick Down',type:'PERK',desc:'+6 Max HP',tags:['HP'],effect:{statMods:{maxHp:6,hp:6}}},
+  keenSight:{id:'keenSight',name:'Keen Sight',type:'PERK',tier:'grey',pools:['attack'],desc:'Attacks gain +6 ACC.',tags:['ACC','ATTACK'],effect:{statMods:{acc:6}}},
+  earlyStrike:{id:'earlyStrike',name:'Early Strike',type:'PERK',tier:'grey',pools:['attack'],desc:'Gain +2 ATK.',tags:['ATK','OPENING'],effect:{statMods:{atk:2}}},
+  battleInstinct:{id:'battleInstinct',name:'Battle Instinct',type:'PERK',tier:'green',pools:['attack'],desc:'Gain +1 ATK and +1 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:1,spd:1}}},
+  bloodSmell:{id:'bloodSmell',name:'Blood Smell',type:'PERK',tier:'blue',pools:['attack','status'],desc:'Gain +2 ATK against wounded prey.',tags:['ATK','BLEED'],effect:{statMods:{atk:2}}},
+  cleanStrike:{id:'cleanStrike',name:'Clean Strike',type:'PERK',tier:'green',pools:['attack'],desc:'Gain +8 ACC and +1 ATK.',tags:['ACC','ATK'],effect:{statMods:{acc:8,atk:1}}},
+  swiftPredator:{id:'swiftPredator',name:'Swift Predator',type:'PERK',tier:'blue',pools:['attack'],desc:'Gain +3 ATK.',tags:['ATK'],effect:{statMods:{atk:3}}},
+  rhythmStrike:{id:'rhythmStrike',name:'Rhythm Strike',type:'PERK',tier:'blue',pools:['attack'],desc:'Gain +2 ATK and +1 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:2,spd:1}}},
+  huntersPatience:{id:'huntersPatience',name:'Hunter\'s Patience',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +12 ACC and +2 ATK.',tags:['ACC','ATK'],effect:{statMods:{acc:12,atk:2}}},
+  predatorsEdge:{id:'predatorsEdge',name:'Predator\'s Edge',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +4 ATK.',tags:['ATK'],effect:{statMods:{atk:4}}},
+  galeMomentum:{id:'galeMomentum',name:'Gale Momentum',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +2 ATK and +2 SPD.',tags:['ATK','SPD'],effect:{statMods:{atk:2,spd:2}}},
+  echoStrike:{id:'echoStrike',name:'Echo Strike',type:'PERK',tier:'purple',pools:['attack'],desc:'Gain +3 ATK and +8 ACC.',tags:['ATK','ACC'],effect:{statMods:{atk:3,acc:8}}},
+  apexHunter:{id:'apexHunter',name:'Apex Hunter',type:'PERK',tier:'gold',pools:['attack'],desc:'Gain +6 ATK and +10 ACC.',tags:['ATK','ACC'],effect:{statMods:{atk:6,acc:10}}},
+
+  spellFocus:{id:'spellFocus',name:'Spell Focus',type:'PERK',tier:'grey',pools:['spell'],desc:'Gain +2 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:2}}},
+  venomSense:{id:'venomSense',name:'Venom Sense',type:'PERK',tier:'green',pools:['spell','status'],desc:'Gain +2 M.ATK and +4 ACC.',tags:['MATK','STATUS'],effect:{statMods:{matk:2,acc:4}}},
+  arcPulse:{id:'arcPulse',name:'Arc Pulse',type:'PERK',tier:'blue',pools:['spell'],desc:'Gain +3 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:3}}},
+  toxicFlow:{id:'toxicFlow',name:'Toxic Flow',type:'PERK',tier:'purple',pools:['spell','status'],desc:'Gain +3 M.ATK and +1 SPD.',tags:['MATK','STATUS'],effect:{statMods:{matk:3,spd:1}}},
+  arcOverload:{id:'arcOverload',name:'Arc Overload',type:'PERK',tier:'gold',pools:['spell'],desc:'Gain +6 M.ATK.',tags:['MATK','SPELL'],effect:{statMods:{matk:6}}},
+
+  wingGuard:{id:'wingGuard',name:'Wing Guard',type:'PERK',tier:'grey',pools:['survival'],desc:'Gain +2 DEF.',tags:['DEF','SURVIVAL'],effect:{statMods:{def:2}}},
+  windReader:{id:'windReader',name:'Wind Reader',type:'PERK',tier:'green',pools:['survival'],desc:'Gain +3 DODGE.',tags:['DODGE','SURVIVAL'],effect:{statMods:{dodge:3}}},
+  relentlessTalons:{id:'relentlessTalons',name:'Relentless Talons',type:'PERK',tier:'blue',pools:['survival'],desc:'Gain +1 DEF and +8 HP.',tags:['DEF','HP'],effect:{statMods:{def:1,maxHp:8,hp:8}}},
+  skyBattery:{id:'skyBattery',name:'Sky Battery',type:'PERK',tier:'purple',pools:['survival'],desc:'Gain +2 DEF and +12 HP.',tags:['DEF','HP'],effect:{statMods:{def:2,maxHp:12,hp:12}}},
+
+  featherstep:{id:'featherstep',name:'Featherstep',type:'PERK',tier:'grey',pools:['tempo'],desc:'Gain +2 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:2}}},
+  momentumWing:{id:'momentumWing',name:'Momentum Wing',type:'PERK',tier:'green',pools:['tempo'],desc:'Gain +2 SPD and +2 ACC.',tags:['SPD','ACC'],effect:{statMods:{spd:2,acc:2}}},
+  featherReflex:{id:'featherReflex',name:'Feather Reflex',type:'PERK',tier:'blue',pools:['tempo'],desc:'Gain +4 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:4}}},
+  skyDuelist:{id:'skyDuelist',name:'Sky Duelist',type:'PERK',tier:'blue',pools:['tempo'],desc:'Gain +3 SPD and +2 DODGE.',tags:['SPD','DODGE'],effect:{statMods:{spd:3,dodge:2}}},
+  predatorRush:{id:'predatorRush',name:'Predator Rush',type:'PERK',tier:'purple',pools:['tempo'],desc:'Gain +5 SPD.',tags:['SPD','TEMPO'],effect:{statMods:{spd:5}}},
+  energyEcho:{id:'energyEcho',name:'Energy Echo',type:'PERK',tier:'purple',pools:['tempo'],desc:'Gain +3 SPD and +6 ACC.',tags:['SPD','ACC'],effect:{statMods:{spd:3,acc:6}}},
+
+  bloodTracker:{id:'bloodTracker',name:'Blood Tracker',type:'PERK',tier:'green',pools:['status'],desc:'Gain +8 ACC and +1 SPD.',tags:['BLEED','ACC'],effect:{statMods:{acc:8,spd:1}}},
+  bloodEngine:{id:'bloodEngine',name:'Blood Engine',type:'PERK',tier:'blue',pools:['status'],desc:'Gain +2 ATK and +2 M.ATK.',tags:['BLEED','ATK','MATK'],effect:{statMods:{atk:2,matk:2}}},
+  bloodstorm:{id:'bloodstorm',name:'Bloodstorm',type:'PERK',tier:'gold',pools:['status'],desc:'Gain +4 ATK, +4 M.ATK, +2 SPD.',tags:['BLEED','ATK','MATK','SPD'],effect:{statMods:{atk:4,matk:4,spd:2}}},
 };
+
+const ALL_PERK_POOLS=['attack','spell','survival','tempo','status'];
+const PERK_SOURCE_TIER_RULES = {
+  'story-boss-10': {
+    allowedTiers:['grey','green','blue'],
+    weights:{grey:50,green:35,blue:15,purple:0,gold:0}
+  },
+  'story-boss-20': {
+    allowedTiers:['green','blue','purple'],
+    weights:{grey:0,green:45,blue:35,purple:20,gold:0}
+  },
+  'endless-milestone': {
+    allowedTiers:['green','blue','purple','gold'],
+    weights:{grey:0,green:35,blue:35,purple:22,gold:8}
+  },
+  'default': {
+    allowedTiers:['grey','green','blue','purple','gold'],
+    weights:{grey:40,green:30,blue:18,purple:10,gold:2}
+  }
+};
+const PERK_POOL_BIAS = {
+  striker:{primary:['attack','tempo'],secondary:['status']},
+  trickster:{primary:['tempo','status'],secondary:['spell','attack']},
+  mage:{primary:['spell','status'],secondary:['survival','tempo']},
+  tank:{primary:['survival','attack'],secondary:['status']},
+  defender:{primary:['survival','attack'],secondary:['status']},
+  bruiser:{primary:['attack','survival'],secondary:['status']},
+  predator:{primary:['attack','status'],secondary:['tempo']},
+  support:{primary:['survival','spell'],secondary:['tempo','status']},
+  summoner:{primary:['spell','tempo'],secondary:['status','survival']},
+  vanguard:{primary:['attack','survival'],secondary:['status']},
+  skirmisher:{primary:['attack','tempo'],secondary:['status','spell']},
+  tyrant:{primary:['attack','status'],secondary:['survival','spell']}
+};
+const DEFAULT_PERK_POOL_BIAS={primary:['attack','survival'],secondary:['tempo','status','spell']};
+const PERK_DRAFT_DEBUG=false;
+
 const MASTERY_DEFS={
   pinpointBasic:{id:'pinpointBasic',name:'Pinpoint Basic',type:'MASTERY',skillTag:'BASIC',desc:'+10% accuracy',tags:['BASIC','ACC'],effect:{accBonus:10}},
   openingBasic:{id:'openingBasic',name:'Opening Basic',type:'MASTERY',skillTag:'BASIC',desc:'First use each battle +25% damage',tags:['BASIC','OPENING'],effect:{openingUseDamageMult:0.25}},
@@ -2468,17 +2534,143 @@ function getPerkCount(){ return (Array.isArray(G.runPerks)?G.runPerks:[]).length
 function hasPerkSource(source, stage){
   return (G.runPerks||[]).some(p=>p?.source===source && (stage===undefined || p?.stage===stage));
 }
-function getAvailablePerkOptions(maxChoices=3){
-  const birdKey=G.player?.birdKey;
-  const defs=Object.values(PERK_DEFS||{});
-  const available=defs.filter(def=>{
+function getPerkSourceTierRule(source='default'){
+  const key=String(source||'default').toLowerCase();
+  return PERK_SOURCE_TIER_RULES[key]||PERK_SOURCE_TIER_RULES.default;
+}
+function weightedPick(defs, getWeight){
+  if(!Array.isArray(defs)||!defs.length) return null;
+  const total=defs.reduce((a,d)=>a+Math.max(0,Number(getWeight?getWeight(d):1)||0),0);
+  if(total<=0) return defs[Math.floor(Math.random()*defs.length)];
+  let r=Math.random()*total;
+  for(const d of defs){ r-=Math.max(0,Number(getWeight?getWeight(d):1)||0); if(r<=0) return d; }
+  return defs[defs.length-1];
+}
+function getBirdMechanicalClass(birdKey){
+  const bird=BIRDS?.[birdKey]||{};
+  const raw=String(bird?.newClass||bird?.mechanicalClass||bird?.class||bird?.oldClass||'').toLowerCase().trim();
+  if(!raw) return 'striker';
+  if(raw==='caster') return 'mage';
+  return raw;
+}
+function getBirdPerkBias(birdKey){
+  const cls=getBirdMechanicalClass(birdKey);
+  const bias=PERK_POOL_BIAS[cls]||DEFAULT_PERK_POOL_BIAS;
+  return {classKey:cls,primary:[...(bias.primary||[])],secondary:[...(bias.secondary||[])]};
+}
+function getDynamicPerkPoolBias(birdKey){
+  const p=(G.player&&G.player.birdKey===birdKey)?G.player:null;
+  const s=p?.stats||{};
+  const bonusPools=[];
+  if((s.matk||0)>(s.atk||0)) bonusPools.push('spell');
+  const perkIds=new Set((G.runPerks||[]).filter(x=>!x?.birdKey||x.birdKey===birdKey).map(x=>x.perkId));
+  const bleedPerk=[...perkIds].some(id=>/blood|bleed|venom|toxic/i.test(id||''));
+  const bleedMastery=(G.runMasteries||[]).some(m=>(!m?.birdKey||m.birdKey===birdKey)&&/blood|venom|poison|bleed/i.test(String(m?.masteryId||'')));
+  const bleedReward=(G.collectedRewards||[]).some(r=>/blood|bleed|venom|poison|toxic/i.test(String(r?.name||'')+' '+String(r?.desc||'')));
+  if(bleedPerk||bleedMastery||bleedReward) bonusPools.push('status');
+  if((s.spd||0)>=16 || (s.dodge||0)>=20) bonusPools.push('tempo');
+  const hasGuardHealKit=(p?.abilities||[]).some(ab=>/guard|shield|defend|heal|recover|ward|barrier/i.test(String(ab?.name||'')+' '+String(ab?.desc||'')));
+  if((s.def||0)>=14 || hasGuardHealKit) bonusPools.push('survival');
+  return {bonusPools:[...new Set(bonusPools)]};
+}
+function getValidPerkDefsForBird(birdKey, source='default'){
+  return Object.values(PERK_DEFS||{}).filter(def=>{
     if(!def?.id) return false;
     const owned=getBirdPerks(birdKey).filter(x=>x===def.id).length;
     const cap=Number.isFinite(def?.stackCap)?def.stackCap:(def?.stackable?Infinity:1);
-    return owned < cap;
+    if(owned>=cap) return false;
+    if(!Array.isArray(def?.pools)||!def.pools.length) return false;
+    if(source&&def?.sources&&!def.sources.includes(source)) return false;
+    return true;
   });
-  const shuffled=[...available].sort(()=>Math.random()-0.5);
-  return shuffled.slice(0, Math.max(1, Math.min(maxChoices, shuffled.length)));
+}
+function getValidPerkDefsForSource(activeBirdKey, source='default'){
+  const rule=getPerkSourceTierRule(source);
+  const allowed=new Set(rule.allowedTiers||PERK_SOURCE_TIER_RULES.default.allowedTiers);
+  return getValidPerkDefsForBird(activeBirdKey,source).filter(def=>allowed.has(def?.tier));
+}
+function filterPerksByPool(perks, poolName){
+  if(!poolName) return [];
+  return (perks||[]).filter(def=>Array.isArray(def?.pools)&&def.pools.includes(poolName));
+}
+function rollPerkTierForSource(source, candidatePerks=[]){
+  const rule=getPerkSourceTierRule(source);
+  const byTier={};
+  (candidatePerks||[]).forEach(def=>{ if(def?.tier){ byTier[def.tier]=(byTier[def.tier]||0)+1; } });
+  const tiers=(rule.allowedTiers||[]).filter(t=>(byTier[t]||0)>0);
+  if(!tiers.length) return null;
+  const picked=weightedPick(tiers, t=>Number(rule.weights?.[t]||0));
+  return picked||tiers[Math.floor(Math.random()*tiers.length)];
+}
+function chooseRandomPerkFromPoolAndTier(poolName, tier, perks, excludedIds=new Set()){
+  const poolPerks=filterPerksByPool(perks,poolName).filter(def=>!excludedIds.has(def.id) && (!tier || def.tier===tier));
+  return weightedPick(poolPerks);
+}
+function getPerkRewardOptions(activeBirdKey, count=3, source='default'){
+  const maxChoices=Math.max(1,Math.min(3,Number(count)||3));
+  const valid=getValidPerkDefsForSource(activeBirdKey,source);
+  if(!valid.length) return [];
+  const rule=getPerkSourceTierRule(source);
+  const allowedTiers=rule.allowedTiers||PERK_SOURCE_TIER_RULES.default.allowedTiers;
+  const {classKey,primary,secondary}=getBirdPerkBias(activeBirdKey);
+  const dynamic=getDynamicPerkPoolBias(activeBirdKey);
+  const chosen=[];
+  const excludedIds=new Set();
+  const pickFromPools=(pools=[], slot='')=>{
+    const remaining=valid.filter(def=>!excludedIds.has(def.id));
+    const rolledTier=rollPerkTierForSource(source, remaining);
+    if((PERK_DRAFT_DEBUG||G?.debugPerkDraft) && typeof console!=='undefined'){
+      console.debug('[perk-draft:slot]',{slot,source,pools,rolledTier,allowedTiers});
+    }
+    for(const pool of pools){
+      const pick=chooseRandomPerkFromPoolAndTier(pool, rolledTier, valid, excludedIds);
+      if(pick){ chosen.push(pick); excludedIds.add(pick.id); return pick; }
+    }
+    for(const pool of pools){
+      const poolAnyTier=chooseRandomPerkFromPoolAndTier(pool, null, valid, excludedIds);
+      if(poolAnyTier){ chosen.push(poolAnyTier); excludedIds.add(poolAnyTier.id); return poolAnyTier; }
+    }
+    const sameTierAnyPool=weightedPick(valid.filter(def=>!excludedIds.has(def.id) && (!rolledTier || def.tier===rolledTier)));
+    if(sameTierAnyPool){ chosen.push(sameTierAnyPool); excludedIds.add(sameTierAnyPool.id); return sameTierAnyPool; }
+    const fallback=weightedPick(valid.filter(def=>!excludedIds.has(def.id)));
+    if(fallback){ chosen.push(fallback); excludedIds.add(fallback.id); return fallback; }
+    return null;
+  };
+
+  pickFromPools([primary[0], ...primary.slice(1), ...secondary, ...ALL_PERK_POOLS],'primary-1');
+  if(maxChoices>1) pickFromPools([primary[1], primary[0], ...secondary, ...ALL_PERK_POOLS],'primary-2');
+  if(maxChoices>2){
+    const wildcardPools=[...dynamic.bonusPools, ...secondary, ...primary, ...ALL_PERK_POOLS];
+    pickFromPools(wildcardPools,'wildcard');
+  }
+  while(chosen.length<maxChoices){
+    const rem=weightedPick(valid.filter(def=>!excludedIds.has(def.id)));
+    if(!rem) break;
+    chosen.push(rem); excludedIds.add(rem.id);
+  }
+  if(chosen.length>=3){
+    const tiers=chosen.map(p=>p.tier);
+    const sameTier=tiers.every(t=>t===tiers[0]);
+    const remaining=valid.filter(def=>!excludedIds.has(def.id));
+    const otherTierExists=remaining.some(def=>def.tier!==tiers[0]);
+    if(sameTier && otherTierExists){
+      const idx=Math.floor(Math.random()*chosen.length);
+      const original=chosen[idx];
+      excludedIds.delete(original.id);
+      const rerollPool=(idx===0?primary[0]:idx===1?(primary[1]||primary[0]):(dynamic.bonusPools[0]||secondary[0]||primary[0]));
+      const rerollCandidate=weightedPick(valid.filter(def=>!excludedIds.has(def.id)&&def.tier!==tiers[0]&&(!rerollPool||def.pools?.includes(rerollPool))))
+        || weightedPick(valid.filter(def=>!excludedIds.has(def.id)&&def.tier!==tiers[0]));
+      if(rerollCandidate){ chosen[idx]=rerollCandidate; excludedIds.add(rerollCandidate.id); }
+      else excludedIds.add(original.id);
+    }
+  }
+  if((PERK_DRAFT_DEBUG||G?.debugPerkDraft) && typeof console!=='undefined'){
+    console.debug('[perk-draft]',{birdKey:activeBirdKey,classKey,primary,secondary,dynamic:dynamic.bonusPools,source,allowedTiers,chosen:chosen.map(x=>`${x.id}:${x.tier}`)});
+  }
+  return chosen;
+}
+function getAvailablePerkOptions(maxChoices=3, source='generic'){
+  return getPerkRewardOptions(G.player?.birdKey, maxChoices, source);
 }
 function getPerkRewardSourceForStage(clearedStage, isBoss){
   if(!isBoss) return null;
@@ -2499,7 +2691,7 @@ async function triggerPerkReward(source, ctx={}){
   if(source==='story-boss-20' && getPerkCount()>=2 && hasPerkSource('story-boss-20')) return false;
   if(source==='endless-milestone' && hasPerkSource('endless-milestone', ctx?.stage)) return false;
 
-  const opts=getAvailablePerkOptions(3);
+  const opts=getPerkRewardOptions(G.player?.birdKey,3,source);
   if(!opts.length) return false;
   const title = source==='story-boss-20' ? 'Final Perk Before Endless' : 'Choose a Perk';
   const subtitle = source==='endless-milestone'
