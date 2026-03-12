@@ -2428,6 +2428,45 @@ function classMatches(raw, expected){
 }
 
 const MAGIC_CLASSES = new Set(['mage','bard','summoner','caster','support','trickster']);
+
+const PERK_DEFS={
+  swiftFlurry:{id:'swiftFlurry',name:'Swift Flurry',type:'PERK',desc:'+1 SPD',tags:['SPD'],effect:{statMods:{spd:1}}},
+  hardenedPlumage:{id:'hardenedPlumage',name:'Hardened Plumage',type:'PERK',desc:'+1 DEF',tags:['DEF'],effect:{statMods:{def:1}}},
+  arcFeather:{id:'arcFeather',name:'Arc Feather',type:'PERK',desc:'+1 MATK',tags:['MATK'],effect:{statMods:{matk:1}}},
+  sharpEye:{id:'sharpEye',name:'Sharp Eye',type:'PERK',desc:'+5% ACC',tags:['ACC'],effect:{statMods:{acc:5}}},
+  thickDown:{id:'thickDown',name:'Thick Down',type:'PERK',desc:'+6 Max HP',tags:['HP'],effect:{statMods:{maxHp:6,hp:6}}},
+};
+const MASTERY_DEFS={
+  pinpointBasic:{id:'pinpointBasic',name:'Pinpoint Basic',type:'MASTERY',skillTag:'BASIC',desc:'+10% accuracy',tags:['BASIC','ACC'],effect:{accBonus:10}},
+  openingBasic:{id:'openingBasic',name:'Opening Basic',type:'MASTERY',skillTag:'BASIC',desc:'First use each battle +25% damage',tags:['BASIC','OPENING'],effect:{openingUseDamageMult:0.25}},
+  bloodBasic:{id:'bloodBasic',name:'Blood Basic',type:'MASTERY',skillTag:'BASIC',desc:'Crits apply Bleed(1)',tags:['BASIC','BLEED'],effect:{critAppliesBleed:1}},
+  executionHeavy:{id:'executionHeavy',name:'Execution Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'+25% dmg vs <50% HP',tags:['HEAVY','EXECUTE'],effect:{damageVsLowHpMult:0.25}},
+  piercingHeavy:{id:'piercingHeavy',name:'Piercing Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'Ignore 15% DEF',tags:['HEAVY','PIERCE'],effect:{pierceBonus:0.15}},
+  brutalHeavy:{id:'brutalHeavy',name:'Brutal Heavy',type:'MASTERY',skillTag:'HEAVY',desc:'+10% crit chance',tags:['HEAVY','CRIT'],effect:{critBonus:10}},
+  venomSpell:{id:'venomSpell',name:'Venom Spell',type:'MASTERY',skillTag:'SPELL',desc:'Apply Poison(1) on hit',tags:['SPELL','POISON'],effect:{spellPoisonOnHit:1}},
+  dreadSpell:{id:'dreadSpell',name:'Dread Spell',type:'MASTERY',skillTag:'SPELL',desc:'First cast each battle applies Fear(1)',tags:['SPELL','FEAR'],effect:{firstCastFear:1}},
+  arcSpell:{id:'arcSpell',name:'Arc Spell',type:'MASTERY',skillTag:'SPELL',desc:'+15% magic damage',tags:['SPELL','DAMAGE'],effect:{spellDamageMult:0.15}},
+  reserveGuard:{id:'reserveGuard',name:'Reserve Guard',type:'MASTERY',skillTag:'GUARD',desc:'25% chance refund 1 EN',tags:['GUARD','ENERGY'],effect:{energyRefundChance:25}},
+  reboundGuard:{id:'reboundGuard',name:'Rebound Guard',type:'MASTERY',skillTag:'GUARD',desc:'Next attack +15% damage',tags:['GUARD','BUFF'],effect:{nextAttackDamageMult:0.15}},
+  clarityUtility:{id:'clarityUtility',name:'Clarity Utility',type:'MASTERY',skillTag:'UTILITY',desc:'Remove Fear on use',tags:['UTILITY','CLEANSE'],effect:{cleanseFearOnUse:true}},
+  razorPeck:{id:'razorPeck',name:'Razor Peck',type:'MASTERY',skillId:'peck',desc:'+20% damage vs Bleeding enemies',tags:['BASIC','BLEED'],effect:{damageVsBleedMult:0.20}},
+  galeEdge:{id:'galeEdge',name:'Gale Edge',type:'MASTERY',skillId:'windSlash',desc:'+15% dmg and +10 ACC',tags:['SPELL','ACC'],effect:{spellDamageMult:0.15,accBonus:10}},
+  crushingClamp:{id:'crushingClamp',name:'Crushing Clamp',type:'MASTERY',skillId:'shoebillClamp',desc:'+20% execute damage vs low HP',tags:['HEAVY','EXECUTE'],effect:{damageVsLowHpMult:0.20}},
+};
+function getRunPerks(){ return Array.isArray(G.runPerks)?G.runPerks:[]; }
+function getRunMasteries(){ return Array.isArray(G.runMasteries)?G.runMasteries:[]; }
+function getBirdPerks(birdKey){ const k=birdKey||G.player?.birdKey||''; if(!k) return []; if(!G.birdPerks||typeof G.birdPerks!=='object') G.birdPerks={}; if(!Array.isArray(G.birdPerks[k])) G.birdPerks[k]=[]; return G.birdPerks[k]; }
+function hasPerk(perkId,birdKey){ return getBirdPerks(birdKey).includes(perkId); }
+function grantPerk(perkDef,birdKey,source='generic'){ const def=(typeof perkDef==='string')?PERK_DEFS[perkDef]:perkDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k||hasPerk(def.id,k)) return false; getBirdPerks(k).push(def.id); if(!Array.isArray(G.runPerks)) G.runPerks=[]; G.runPerks.push({perkId:def.id,source,birdKey:k}); applyBirdPerksToStats(k); return true; }
+function getSkillMasteries(birdKey,skillId){ const k=birdKey||G.player?.birdKey||''; if(!k||!skillId) return []; if(!G.skillMasteries||typeof G.skillMasteries!=='object') G.skillMasteries={}; if(!G.skillMasteries[k]||typeof G.skillMasteries[k]!=='object') G.skillMasteries[k]={}; if(!Array.isArray(G.skillMasteries[k][skillId])) G.skillMasteries[k][skillId]=[]; return G.skillMasteries[k][skillId]; }
+function hasMastery(birdKey,skillId,masteryId){ return getSkillMasteries(birdKey,skillId).includes(masteryId); }
+function grantMastery(birdKey,skillId,masteryDef,source='endless-skill-cap'){ const def=(typeof masteryDef==='string')?MASTERY_DEFS[masteryDef]:masteryDef; const k=birdKey||G.player?.birdKey||''; if(!def||!def.id||!k||!skillId) return false; const owned=getSkillMasteries(k,skillId); if(owned.includes(def.id)&&!def.stackable) return false; owned.push(def.id); if(!Array.isArray(G.runMasteries)) G.runMasteries=[]; G.runMasteries.push({birdKey:k,skillId,masteryId:def.id,source}); recomputePerkAndMasteryEffects(); return true; }
+function getAbilityMasteryTags(ab,tmpl){ const t=tmpl||ABILITY_TEMPLATES?.[ab?.id]||ab||{}; const kind=String(t.btnType||t.type||'').toLowerCase(); const tags=[]; if(t.isBasic||/mainattack|peck/i.test(t.id||ab?.id||'')) tags.push('BASIC'); if(kind==='spell') tags.push('SPELL'); if(kind==='utility') tags.push('UTILITY'); if(kind==='physical'||kind==='ranged') tags.push((Number(ab?.energyCost??t.energyCost??0)>=2)?'HEAVY':'BASIC'); const d=String(t.desc||'').toLowerCase(); if(/stun|fear|confuse|slow|paraly/.test(d)) tags.push('CONTROL'); if(/guard|shield|defend|counter|brace/.test(d)||t.id==='crowDefend') tags.push('GUARD'); return [...new Set(tags)]; }
+function getAvailableMasteriesForSkill(birdKey,skillId){ const ab=(G.player?.abilities||[]).find(x=>x.id===skillId)||{id:skillId}; const tmpl=ABILITY_TEMPLATES?.[skillId]||ab; const tags=getAbilityMasteryTags(ab,tmpl); const owned=new Set(getSkillMasteries(birdKey,skillId)); return Object.values(MASTERY_DEFS).filter(m=>{ if(m.skillId&&m.skillId!==skillId) return false; if(!m.skillId&&m.skillTag&&!tags.includes(String(m.skillTag).toUpperCase())) return false; if(owned.has(m.id)&&!m.stackable) return false; return true; }); }
+function applyBirdPerksToStats(birdKey){ if(!G.player||G.player.birdKey!==(birdKey||G.player.birdKey)) return; G.player._appliedPerkIds=G.player._appliedPerkIds||{}; getBirdPerks(G.player.birdKey).forEach(pid=>{ if(G.player._appliedPerkIds[pid]) return; const sm=PERK_DEFS[pid]?.effect?.statMods||{}; Object.entries(sm).forEach(([k,v])=>{ G.player.stats[k]=(G.player.stats[k]||0)+Number(v||0); }); G.player._appliedPerkIds[pid]=true; }); }
+function applySkillMasteriesToAbility(birdKey,skillId,abilityData){ const ids=getSkillMasteries(birdKey,skillId||abilityData?.id); abilityData._masteries=[...ids]; return abilityData; }
+function recomputePerkAndMasteryEffects(){ applyBirdPerksToStats(G.player?.birdKey); (G.player?.abilities||[]).forEach(ab=>applySkillMasteriesToAbility(G.player?.birdKey,ab.id,ab)); }
+function getAbilityMasteryRuntime(ab){ if(!ab) return {}; if(!ab._masteries) applySkillMasteriesToAbility(G.player?.birdKey,ab.id,ab); const out={accBonus:0,critBonus:0,pierceBonus:0,spellDamageMult:0,openingUseDamageMult:0,damageVsLowHpMult:0,damageVsBleedMult:0,critAppliesBleed:0,spellPoisonOnHit:0,firstCastFear:0}; (ab._masteries||[]).forEach(id=>{ const e=MASTERY_DEFS[id]?.effect||{}; Object.keys(out).forEach(k=>out[k]+=Number(e[k]||0)); }); return out; }
 // removeMimicEverywhere(); // moved to after G init
 const ABILITY_MAIN_ATTACK = {
   id:'mainAttack',
@@ -2717,6 +2756,12 @@ let G = {
     expandedBird:null,
     combatDropdownOpen:{player:true,enemy:true},
   },
+  rewardChoiceState:null,
+  masteryChoiceState:null,
+  runPerks:[],
+  birdPerks:{},
+  runMasteries:[],
+  skillMasteries:{},
 };
 
 const DEFAULT_UI_STATE = Object.freeze({
@@ -3010,6 +3055,10 @@ function saveRun() {
       runUpgradesPurchased: [...(G.runUpgradesPurchased||new Set())],
       codex: JSON.parse(JSON.stringify(G.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}})),
       ui: JSON.parse(JSON.stringify(ensureUIState())),
+      runPerks: JSON.parse(JSON.stringify(G.runPerks||[])),
+      birdPerks: JSON.parse(JSON.stringify(G.birdPerks||{})),
+      runMasteries: JSON.parse(JSON.stringify(G.runMasteries||[])),
+      skillMasteries: JSON.parse(JSON.stringify(G.skillMasteries||{})),
       inBattle: onBattleScreen && !!G.enemy && !G.battleOver,
       battle: (onBattleScreen && G.enemy && !G.battleOver) ? {
         enemy: JSON.parse(JSON.stringify(G.enemy)),
@@ -3052,6 +3101,10 @@ function continueRun() {
   if(!Array.isArray(G.player.endlessRewards)) G.player.endlessRewards=[];
   G.runUpgradesPurchased=new Set(save.runUpgradesPurchased||[]);
   G.codex=save.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
+  G.runPerks=Array.isArray(save.runPerks)?save.runPerks:[];
+  G.birdPerks=save.birdPerks&&typeof save.birdPerks==='object'?save.birdPerks:{};
+  G.runMasteries=Array.isArray(save.runMasteries)?save.runMasteries:[];
+  G.skillMasteries=save.skillMasteries&&typeof save.skillMasteries==='object'?save.skillMasteries:{};
   // Re-attach passive reference (fns can't be serialized)
   const bd=BIRDS[G.player.birdKey];
   if(bd) G.player.passive=bd.passive||null;
@@ -3059,6 +3112,7 @@ function continueRun() {
   removeMimicEverywhere();
   normalizeAbilityCooldownsForPlayer(G.player);
   enforceAbilityCosts(G.player);
+  recomputePerkAndMasteryEffects();
   // Migration: ensure mdodge and card stats exist
   if(G.player.stats.mdodge===undefined) G.player.stats.mdodge = G.player.stats.dodge||20;
   if(G.player.cardDodge===undefined) G.player.cardDodge=0;
@@ -3635,6 +3689,13 @@ function startGame() {
   G.runUpgradesPurchased = new Set();
   G.codex = {abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
   G.shinyObjects = 0;
+  G.rewardChoiceState=null;
+  G.masteryChoiceState=null;
+  G.runPerks=[];
+  G.birdPerks={};
+  G.runMasteries=[];
+  G.skillMasteries={};
+  recomputePerkAndMasteryEffects();
   saveRun();
   G.phase='PLAYER';
   const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
@@ -3681,6 +3742,7 @@ function resetForNewBattle(){
   G._incomingAttackKind=null;
   G._firstAttackUsed=false;
   G._firstSpellUsed=false;
+  G.playerStatus.masteryUsed={};
   G._spellCastCount=0;
   if(G.player){
     G.player._mimicStored=null;
@@ -3770,6 +3832,7 @@ function loadStage() {
   if(!G.enemy.aiType) G.enemy.aiType=mapAiStyleToType(G.enemy.aiStyle);
   codexMark('enemies', G.enemy.id||G.enemy.name, 'seen');
   enforceAbilityCosts(G.player);
+  recomputePerkAndMasteryEffects();
   applyBiomeModifiers();
   // Remove stat bonuses before resetting flags (avoid accumulating across battles)
   resetForNewBattle();
@@ -4798,10 +4861,12 @@ function normalizeAbilityCooldownsForPlayer(p){
 function getPlayerPiercePctForAbility(ab){
   const cls=(G.player?.class || BIRDS[G.player?.birdKey]?.class || '').toLowerCase();
   const isAttack=(ab?.btnType==='attack'||ab?.type==='attack'||/strike|shot|peck|slash|talon|arrow|pierce/i.test(ab?.name||''));
+  let out=ab?.piercePct||0;
   if(cls==='ranger'&&isAttack){
-    return Math.max(ab?.piercePct||0,0.25);
+    out=Math.max(out,0.25);
   }
-  return ab?.piercePct||0;
+  out += (getAbilityMasteryRuntime(ab).pierceBonus||0);
+  return out;
 }
 
 function applyRangerPassiveOnTurnStart(){
@@ -5417,10 +5482,13 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
       if((G.player?.relCarrionLedger||false) && (G.enemyStatus?.bleed?.stacks||0)>0) G.enemy.stats.hp=Math.max(0,G.enemy.stats.hp-1);
       if((G.player?.augHuntersMarkPct||0)>0) G.playerStatus.huntersMarkBonusPct=G.player.augHuntersMarkPct;
     }
+    const m=getAbilityMasteryRuntime(srcAbility||G._activePlayerAbility||null);
     if(_atkKind==='spell' && dmg>0){
       if(G.player?.augSpellPoison) applyAilment('enemy','poison',1);
       if(G.player?.augSpellCritPoison && isCrit) applyAilment('enemy','poison',1);
       if(G.player?.augFirstSpellFear && !G._firstSpellUsed) applyAilment('enemy','feared',1);
+      if((m.spellPoisonOnHit||0)>0) applyAilment('enemy','poison',m.spellPoisonOnHit);
+      if((m.firstCastFear||0)>0 && !G._firstSpellUsed) applyAilment('enemy','feared',m.firstCastFear);
     }
     if(G.enemy?.id==='duke_blakiston' && (G.enemyStatus.wardens||0)>0){
       G.enemyStatus.wardens-=1;
@@ -5445,12 +5513,14 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     const canBleedHit = (abType==='physical' || abType==='ranged');
     const bleedFromCrit = isCrit ? ((G.player?.critBleed||0) + (G.player?.passiveBleedOnCrit||0)) : 0;
     if(canBleedHit && bleedFromCrit>0) applyAilment('enemy','bleed',bleedFromCrit);
+    if(canBleedHit && isCrit && (m.critAppliesBleed||0)>0) applyAilment('enemy','bleed',m.critAppliesBleed);
     registerHit();
   }
   return {dmgDealt:dmg,wasDodged:false,wasBlocked,isCrit};
 }
 
 function pdmg(mult=1,ab=null) {
+  const m=getAbilityMasteryRuntime(ab);
   let b=G.player.stats.atk;
   if (G.warcryActive) b=Math.floor(b*(1+G.warcryATK/100));
   if (G.sitAndWaitActive) b=Math.floor(b*1.25);
@@ -5459,6 +5529,10 @@ function pdmg(mult=1,ab=null) {
   if (G.playerStatus.flamingoATK&&G.playerStatus.flamingoATK.turns>0) b=Math.floor(b*1.20);
   const __adm=(G.actionDamageHitsRemaining&&G.actionDamageHitsRemaining>0)?(G.actionDamageMult||1):1;
   let base=Math.floor(roll(Math.floor(b*.8),Math.floor(b*1.2))*mult*__adm);
+  if((m.spellDamageMult||0)>0 && String(ab?.btnType||ab?.type||'').toLowerCase()==='spell') base=Math.floor(base*(1+m.spellDamageMult));
+  if((m.damageVsLowHpMult||0)>0 && (G.enemy?.stats?.hp||0)<=Math.floor((G.enemy?.stats?.maxHp||1)*0.5)) base=Math.floor(base*(1+m.damageVsLowHpMult));
+  if((m.damageVsBleedMult||0)>0 && (G.enemyStatus?.bleed?.stacks||0)>0) base=Math.floor(base*(1+m.damageVsBleedMult));
+  if((m.openingUseDamageMult||0)>0){ G.playerStatus.masteryUsed=G.playerStatus.masteryUsed||{}; const k=ab?.id||'main'; if(!G.playerStatus.masteryUsed[k]){ base=Math.floor(base*(1+m.openingUseDamageMult)); G.playerStatus.masteryUsed[k]=1; } }
   if((G.actionDamageHitsRemaining||0)>0){ G.actionDamageHitsRemaining=Math.max(0,G.actionDamageHitsRemaining-1); if(G.actionDamageHitsRemaining===0) G.actionDamageMult=1; }
   if (G.playerStatus.weaken&&G.playerStatus.weaken>0) base=Math.floor(base*.75);
   // Pierce DEF: reduce enemy effective DEF before damage calc (store on G for dealDamage to read)
@@ -5510,6 +5584,7 @@ function getPlayerMissChance(ab) {
   if (G.battleHymnActive) accBonus+=G.battleHymnACC;
   if (G.humMissBonus>0) accBonus+=G.humMissBonus;
   const tookiePenalty = G.tookieActive && G.playerStatus.tookie ? G.playerStatus.tookie.missPen : 0;
+  const m=getAbilityMasteryRuntime(ab);
   const bClass=(BIRDS[G.player.birdKey]&&BIRDS[G.player.birdKey].class)||'';
   const bSize=(G.player&&G.player.size)||'medium';
   const classAdj=(tmpl.type==='physical'&&classMatches(bClass,'assassin'))?-2:(tmpl.type==='ranged'&&classMatches(bClass,'ranger'))?-2:(tmpl.type==='spell'&&MAGIC_CLASSES.has(String(bClass||'').toLowerCase()))?-1:0;
@@ -5523,7 +5598,7 @@ function getPlayerMissChance(ab) {
   if(isSpell) extra+=(G.player?.augSpellAcc||0);
   if((G.player?.augPostDefAcc||0)>0 && G.playerStatus?.postDefAccNext){ extra += G.player.augPostDefAcc; delete G.playerStatus.postDefAccNext; }
   if(G.player?.relHawkLedger && isEndlessRunActive()){ const eb=G.endlessBattle||0; if(eb>=10) extra+=8; if(eb>=20) extra+=8; if(eb>=30) extra+=8; }
-  return Math.max(floor, reduced - accBonus + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
+  return Math.max(floor, reduced - accBonus - (m.accBonus||0) + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
 }
 
 function getPlayerAccuracy() {
@@ -5639,6 +5714,7 @@ function getPlayerCritChance(ab) {
     base += (G.player?.firstAttackCritBonus||0);
   }
   if(isAttack) base += (G.player?.augAttackCrit||0);
+  base += (getAbilityMasteryRuntime(ab).critBonus||0);
   return Math.min(100,base);
 }
 
@@ -6260,10 +6336,13 @@ const ACTIONS = {
       if((G.player?.relCarrionLedger||false) && (G.enemyStatus?.bleed?.stacks||0)>0) G.enemy.stats.hp=Math.max(0,G.enemy.stats.hp-1);
       if((G.player?.augHuntersMarkPct||0)>0) G.playerStatus.huntersMarkBonusPct=G.player.augHuntersMarkPct;
     }
+    const m=getAbilityMasteryRuntime(srcAbility||G._activePlayerAbility||null);
     if(_atkKind==='spell' && dmg>0){
       if(G.player?.augSpellPoison) applyAilment('enemy','poison',1);
       if(G.player?.augSpellCritPoison && isCrit) applyAilment('enemy','poison',1);
       if(G.player?.augFirstSpellFear && !G._firstSpellUsed) applyAilment('enemy','feared',1);
+      if((m.spellPoisonOnHit||0)>0) applyAilment('enemy','poison',m.spellPoisonOnHit);
+      if((m.firstCastFear||0)>0 && !G._firstSpellUsed) applyAilment('enemy','feared',m.firstCastFear);
     }
     await doAttack('player','enemy',{dmgDealt:dmg,wasDodged:false,wasBlocked:false,isCrit:false});
     setHpBar('enemy',G.enemy.stats.hp,G.enemy.stats.maxHp);
@@ -8652,14 +8731,16 @@ function buildSkillGrid() {
   const grid=document.getElementById('lu-skill-grid'); grid.innerHTML='';
   G.player.abilities.filter(a=>a&&a.id&&a.id!=='skipTurn'&&a.id!=='sittingDuck').forEach(ab=>{
     const tmpl=ABILITY_TEMPLATES[ab.id];
-    if(!tmpl||ab.level>=4)return;
-    const nextLv=ab.level+1;
-    const nextDesc=tmpl.levels[Math.min(nextLv-1,tmpl.levels.length-1)].desc;
+    if(!tmpl) return;
+    const capped=(ab.level>=4);
+    if(capped && !G.endlessMode) return;
+    const nextLv=Math.min((ab.level||1)+1,4);
+    const nextDesc=capped?'Capped skill: this upgrade becomes a Mastery choice in Endless.':tmpl.levels[Math.min(nextLv-1,tmpl.levels.length-1)].desc;
     const c=document.createElement('div');
     c.className='skill-upgrade-card';
     c.innerHTML=`
       <div class="su-name">${ab.name}</div>
-      <div class="su-lv">Lv.${ab.level} → Lv.${nextLv}</div>
+      <div class="su-lv">${capped?`Lv.${ab.level} (CAP) → Mastery`:`Lv.${ab.level} → Lv.${nextLv}`}</div>
       <div class="su-effect">${nextDesc}</div>`;
     c.onclick=()=>{
       document.querySelectorAll('#lu-skill-grid .skill-upgrade-card').forEach(x=>x.classList.remove('selected'));
@@ -8696,44 +8777,76 @@ function deriveAbilityAilments(ab, tmpl){
   }
   const cap=ailmentSlotsForLevel(tmpl, ab.level||1);
   let out=ailIds.slice(0,cap);
-  if((ab.level||1)>=4 && ab.modAilmentChoice && !out.includes(ab.modAilmentChoice) && out.length<cap){
-    out.push(ab.modAilmentChoice);
-  }
   return out.slice(0,cap);
 }
-function openAbilityModificationChoice(ab, tmpl){
-  const pool=['poison','burning','weaken','paralyzed','feared','confused','slow','bleed'];
-  const existing=new Set(deriveAbilityAilments({...ab,modAilmentChoice:null}, tmpl));
-  const options=pool.filter(a=>!existing.has(a));
-  options.sort(()=>Math.random()-0.5);
-  const picks=options.slice(0,3);
-  if(!picks.length) return Promise.resolve(null);
-  const modal=document.getElementById('ability-mod-modal');
-  const sub=document.getElementById('ability-mod-sub');
-  const list=document.getElementById('ability-mod-options');
-  if(!modal||!list) return Promise.resolve(picks[0]);
-  if(sub) sub.textContent=`${ab.name} reached Lv.4 — choose 1 ailment to add.`;
-  return new Promise(resolve=>{
-    list.innerHTML='';
-    picks.forEach(id=>{
-      const btn=document.createElement('button');
-      btn.className='abandon-confirm-btn';
-      btn.style.width='100%';
-      btn.textContent=id.charAt(0).toUpperCase()+id.slice(1);
-      btn.onclick=()=>{ modal.classList.remove('open'); resolve(id); };
-      list.appendChild(btn);
-    });
-    globalThis._abilityModCancelResolver=()=>resolve(null);
-    modal.classList.add('open');
+
+function renderRewardChoiceOptions(config){
+  const host=document.getElementById('reward-choice-options');
+  if(!host) return;
+  host.innerHTML='';
+  (config.options||[]).forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='reward-card tier-blue';
+    btn.style.textAlign='left';
+    btn.innerHTML=`<div class="reward-name">${opt.name||opt.id}</div><div class="reward-tier-label">${opt.type||config.kind||'REWARD'}</div><div class="reward-desc">${opt.desc||''}</div><div style="margin-top:6px">${(opt.tags||[]).map(t=>`<span class="enemy-ab-tag" style="margin-right:4px">${t}</span>`).join('')}</div>`;
+    btn.onclick=()=>applyRewardChoice(opt);
+    host.appendChild(btn);
   });
 }
-function closeAbilityModModal(){
-  const modal=document.getElementById('ability-mod-modal');
+function openRewardChoiceModal(config={}){
+  const modal=document.getElementById('reward-choice-modal');
+  if(!modal) return Promise.resolve(null);
+  document.getElementById('reward-choice-title').textContent=config.title||'Choose Reward';
+  document.getElementById('reward-choice-sub').textContent=config.subtitle||'';
+  const cancel=document.getElementById('reward-choice-cancel');
+  if(cancel) cancel.style.display=config.mustChoose?'none':'inline-block';
+  G.rewardChoiceState=config;
+  renderRewardChoiceOptions(config);
+  modal.classList.add('open');
+  const prevLock=G.animLock; G.animLock=true;
+  return new Promise(resolve=>{ G.rewardChoiceState._resolve=(choice)=>{ G.animLock=prevLock; resolve(choice||null); }; });
+}
+function closeRewardChoiceModal(){
+  const modal=document.getElementById('reward-choice-modal');
+  const cfg=G.rewardChoiceState||{};
+  if(cfg.mustChoose) return;
   if(modal) modal.classList.remove('open');
-  if(typeof globalThis._abilityModCancelResolver==='function'){
-    globalThis._abilityModCancelResolver();
-    globalThis._abilityModCancelResolver=null;
-  }
+  if(typeof cfg._resolve==='function') cfg._resolve(null);
+  G.rewardChoiceState=null;
+}
+function applyRewardChoice(choice){
+  const cfg=G.rewardChoiceState||{};
+  if(typeof cfg.onSelect==='function') cfg.onSelect(choice);
+  if(typeof choice?.apply==='function') choice.apply(choice);
+  document.getElementById('reward-choice-modal')?.classList.remove('open');
+  if(typeof cfg._resolve==='function') cfg._resolve(choice);
+  G.rewardChoiceState=null;
+}
+function shouldOpenMasteryChoice(birdKey, skillId){
+  const ab=(G.player?.abilities||[]).find(a=>a.id===skillId);
+  return !!(G.endlessMode && ab && (ab.level||1)>=4);
+}
+async function openMasteryChoice(skillId,birdKey){
+  const options=getAvailableMasteriesForSkill(birdKey,skillId);
+  const picks=[...options].sort(()=>Math.random()-0.5).slice(0,3);
+  if(!picks.length) return null;
+  G.masteryChoiceState={birdKey,skillId};
+  return await openRewardChoiceModal({
+    kind:'mastery',
+    title:'♾ Endless Mastery',
+    subtitle:`${ABILITY_TEMPLATES?.[skillId]?.name||skillId} is capped. Choose a mastery:`,
+    mustChoose:true,
+    options:picks.map(m=>({id:m.id,name:m.name,type:'MASTERY',desc:m.desc,tags:m.tags||[],payload:m})),
+    onSelect:resolveMasteryChoice,
+  });
+}
+function resolveMasteryChoice(choice){
+  const state=G.masteryChoiceState||{};
+  const def=MASTERY_DEFS[choice?.id]||choice?.payload;
+  if(!def||!state.skillId||!state.birdKey) return false;
+  const ok=grantMastery(state.birdKey,state.skillId,def,'endless-skill-cap');
+  G.masteryChoiceState=null;
+  return ok;
 }
 function refreshPlayerAbilityAilments(){
   (G.player?.abilities||[]).forEach(ab=>{
@@ -8747,16 +8860,18 @@ async function confirmSkillUpgrade() {
   const ab=G.player.abilities.find(a=>a.id===_luSelectedSkillId);
   if(!ab){return;}
   const prevLevel=ab.level||1;
-  ab.level=Math.min(ab.level+1,4);
   const tmpl=ABILITY_TEMPLATES[_luSelectedSkillId];
-  if(tmpl){
-    if(prevLevel<4 && ab.level===4 && (tmpl.type==='physical'||tmpl.type==='ranged') && ailmentSlotsForLevel(tmpl,4)>ailmentSlotsForLevel(tmpl,3)){
-      const choice=await openAbilityModificationChoice(ab, tmpl);
-      if(choice) ab.modAilmentChoice=choice;
+  if(shouldOpenMasteryChoice(G.player?.birdKey,_luSelectedSkillId)){
+    const choice=await openMasteryChoice(_luSelectedSkillId,G.player?.birdKey);
+    if(!choice) logMsg('No mastery options available. Upgrade was safely skipped.','system');
+    else logMsg(`🌟 ${ab.name} gained a mastery!`,'exp-gain');
+  }else{
+    ab.level=Math.min(ab.level+1,4);
+    if(tmpl){
+      ab.ailmentIds=deriveAbilityAilments(ab, tmpl);
     }
-    ab.ailmentIds=deriveAbilityAilments(ab, tmpl);
+    logMsg(`🌟 ${ab.name} upgraded to Lv.${ab.level}!`,'exp-gain');
   }
-  logMsg(`🌟 ${ab.name} upgraded to Lv.${ab.level}!`,'exp-gain');
   refreshPlayerAbilityAilments();
   normalizeAbilityCooldownsForPlayer(G.player);
   enforceAbilityCosts(G.player);
@@ -9933,11 +10048,15 @@ async function shopBuySelected() {
     const a=G.player.abilities.find(x=>x.id===abId);
     if(a){
       const prevLevel=a.level||1;
-      a.level=Math.min(4,(a.level||1)+1);
-      const tmpl=ABILITY_TEMPLATES[a.id];
-      if(tmpl && prevLevel<4 && a.level===4 && (tmpl.type==='physical'||tmpl.type==='ranged') && ailmentSlotsForLevel(tmpl,4)>ailmentSlotsForLevel(tmpl,3)){
-        const choice=await openAbilityModificationChoice(a, tmpl);
-        if(choice) a.modAilmentChoice=choice;
+      if(shouldOpenMasteryChoice(G.player?.birdKey,a.id)){
+        const mChoice=await openMasteryChoice(a.id,G.player?.birdKey);
+        if(!mChoice){
+          logMsg('No mastery options available. Refunded as +1 ATK/+1 MATK.','system');
+          G.player.stats.atk+=1; G.player.stats.matk=(G.player.stats.matk||0)+1;
+        }
+      }else{
+        a.level=Math.min(4,(a.level||1)+1);
+        const tmpl=ABILITY_TEMPLATES[a.id];
       }
     }
   } else {

@@ -330,14 +330,14 @@
 </div>
 </div>
 </div>
-<!-- ABILITY MODIFICATION MODAL -->
-<div class="abandon-modal" id="ability-mod-modal" onclick="if(event.target===this)closeAbilityModModal()">
-<div class="abandon-inner" style="max-width:560px;text-align:left;">
-<h3>✨ Ability Modification</h3>
-<p id="ability-mod-sub" style="color:var(--text-dim);margin-bottom:10px;font-size:.9rem;">Choose one ailment to add at Lv.4.</p>
-<div id="ability-mod-options" style="display:grid;grid-template-columns:1fr;gap:8px;"></div>
+<!-- REWARD CHOICE MODAL -->
+<div class="abandon-modal" id="reward-choice-modal" onclick="if(event.target===this)closeRewardChoiceModal()">
+<div class="abandon-inner" style="max-width:760px;text-align:left;">
+<h3 id="reward-choice-title">Choose a Reward</h3>
+<p id="reward-choice-sub" style="color:var(--text-dim);margin-bottom:10px;font-size:.9rem;"></p>
+<div id="reward-choice-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;"></div>
 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
-<button class="abandon-cancel-btn" onclick="closeAbilityModModal()">Cancel</button>
+<button class="abandon-cancel-btn" id="reward-choice-cancel" onclick="closeRewardChoiceModal()">Cancel</button>
 </div>
 </div>
 </div>
