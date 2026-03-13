@@ -143,14 +143,14 @@ const ABILITY_TEMPLATES = {
   rapidPeck:{
     id:'rapidPeck', name:'Rapid Peck', isBasic:true, type:'physical', btnType:'physical',
     desc:'Multi-hit assassin basic. Expensive, high roll potential, chain stops on miss.',
-    baseMissChance:8, baseDmgMult:0.5, pierceDef:20,
+    baseMissChance:8, baseDmgMult:0.5, pierceDef:0,
     energyByLevel:[2,2,2,3],
     energyCost:2,
     levels:[
-      {lv:1, desc:'2-3 hits, 8% miss each. 50% dmg, Pierce 20% DEF'},
-      {lv:2, desc:'2-4 hits, 8% miss each. 58% dmg, Pierce 25% DEF — Avian Poison 15%', newAilment:'poison', ailChance:15},
-      {lv:3, desc:'3-4 hits, 8% miss each. 66% dmg, Pierce 30% DEF — Avian Poison 20%', ailChance:20},
-      {lv:4, desc:'3-5 hits, 8% miss each. 74% dmg, Pierce 35% DEF — Avian Poison 25%', ailChance:25},
+      {lv:1, desc:'2-3 hits, 8% miss each. 50% dmg'},
+      {lv:2, desc:'2-4 hits, 8% miss each. 58% dmg — Avian Poison 15%', newAilment:'poison', ailChance:15},
+      {lv:3, desc:'3-4 hits, 8% miss each. 66% dmg — Avian Poison 20%', ailChance:20},
+      {lv:4, desc:'3-5 hits, 8% miss each. 74% dmg — Avian Poison 25%', ailChance:25},
     ]
   },
 
@@ -1236,7 +1236,7 @@ function applyBiomeModifiers(){
 // ============================================================
 //  REWARD POOLS — tiered
 // ============================================================
-const REWARD_WEIGHTS = { grey:50, green:30, blue:15, purple:4, gold:1 };
+const REWARD_WEIGHTS = { grey:50, green:30, blue:16, purple:4, gold:0 };
 function rollRarity(){
   const total=Object.values(REWARD_WEIGHTS).reduce((a,b)=>a+b,0);
   let r=Math.random()*total;
@@ -1432,11 +1432,59 @@ const REWARD_TIERS = {
   gold:{label:'Legendary', color:'gold'},
 };
 
+const CLASS_ROLE_BY_CLASS = {
+  assassin:'striker',
+  ranger:'striker',
+  tank:'tank',
+  knight:'bruiser',
+  mage:'mage',
+  summoner:'trickster',
+  bard:'support',
+};
+
+const CLASS_PERK_DEFS = {
+  striker:[
+    {id:'piercingTempo',name:'Piercing Tempo',desc:'Attacks gain +10% penetration.',apply:p=>{p.perkPiercePct=(p.perkPiercePct||0)+0.10;}},
+    {id:'openingRush',name:'Opening Rush',desc:'First attack each battle deals +15% damage.',apply:p=>{p.perkOpeningRush=true;}},
+    {id:'predatorRhythm',name:'Predator Rhythm',desc:'Second attack each turn gains +10% crit chance.',apply:p=>{p.perkSecondAttackCrit=true;}},
+  ],
+  tank:[
+    {id:'ironCore',name:'Iron Core',desc:'First hit each battle deals 15% less damage to you.',apply:p=>{p.perkIronCore=true;}},
+    {id:'holdTheLine',name:'Hold the Line',desc:'After Guard, next attack deals +10% damage.',apply:p=>{p.perkHoldTheLine=true;}},
+    {id:'heavyFrame',name:'Heavy Frame',desc:'+1 DEF and +4 Max HP.',apply:p=>{p.stats.def+=1;p.stats.maxHp+=4;p.stats.hp=Math.min(p.stats.maxHp,p.stats.hp+4);}},
+  ],
+  mage:[
+    {id:'arcFocus',name:'Arc Focus',desc:'Spells gain +8% accuracy.',apply:p=>{p.perkSpellAcc=(p.perkSpellAcc||0)+8;}},
+    {id:'venomLore',name:'Venom Lore',desc:'Poison you apply deals +1 damage per tick.',apply:p=>{p.perkPoisonTickBonus=(p.perkPoisonTickBonus||0)+1;}},
+    {id:'dreadVerse',name:'Dread Verse',desc:'First spell each battle applies Fear(1).',apply:p=>{p.perkFirstSpellFear=true;}},
+  ],
+  trickster:[
+    {id:'slipstream',name:'Slipstream',desc:'Dodging grants +1 SPD next turn.',apply:p=>{p.perkSlipstream=true;}},
+    {id:'falseOpening',name:'False Opening',desc:'Debuffed enemies have -6% dodge.',apply:p=>{p.perkVsDebuffedAcc=(p.perkVsDebuffedAcc||0)+6;}},
+    {id:'quickTheft',name:'Quick Theft',desc:'First utility skill each battle refunds 1 EN.',apply:p=>{p.perkUtilityRefund=true;}},
+  ],
+  bruiser:[
+    {id:'crushingForce',name:'Crushing Force',desc:'Heavy attacks gain +10% penetration.',apply:p=>{p.perkHeavyPierce=(p.perkHeavyPierce||0)+0.10;}},
+    {id:'warBody',name:'War Body',desc:'Below 50% HP, deal +10% damage.',apply:p=>{p.perkWarBody=true;}},
+    {id:'ironMomentum',name:'Iron Momentum',desc:'After heavy attack, gain +1 DEF for 1 turn.',apply:p=>{p.perkIronMomentum=true;}},
+  ],
+  predator:[
+    {id:'markedForDeath',name:'Marked for Death',desc:'+15% damage to Feared enemies.',apply:p=>{p.perkVsFearPct=(p.perkVsFearPct||0)+0.15;}},
+    {id:'patientHunter',name:'Patient Hunter',desc:'First attack vs full HP target deals +15% damage.',apply:p=>{p.perkFirstVsFull=true;}},
+    {id:'executionLine',name:'Execution Line',desc:'+20% damage to enemies below 40% HP.',apply:p=>{p.perkExecutePct=(p.perkExecutePct||0)+0.20;}},
+  ],
+  support:[
+    {id:'songline',name:'Songline',desc:'Buffs you apply last 1 extra turn.',apply:p=>{p.perkBuffDuration=(p.perkBuffDuration||0)+1;}},
+    {id:'restorativeRhythm',name:'Restorative Rhythm',desc:'Healing skills restore +3 HP.',apply:p=>{p.perkHealFlat=(p.perkHealFlat||0)+3;}},
+    {id:'graceUnderFlight',name:'Grace Under Flight',desc:'After utility skill, gain +8% accuracy next turn.',apply:p=>{p.perkUtilityAcc=true;}},
+  ],
+};
+
 // Drop rate weights (non-boss) — [grey,green,blue,purple,gold]
-const NORMAL_WEIGHTS = [42,34,16,7,1];
+const NORMAL_WEIGHTS = [42,34,17,7,0];
 
 // Boss drop weights (fallback; boss rewards are mostly handled by generateBossRewards)
-const BOSS_WEIGHTS   = [1,3,35,50,11];
+const BOSS_WEIGHTS   = [2,4,42,52,0];
 
 const ALL_REWARDS = [
   {id:'g_hp10', tier:'grey', icon:'💊', name:'Stitched Wing', desc:'Max HP +6 (heal +6)', tags:['sustain','hp'], apply:p=>{ p.stats.maxHp+=6; p.stats.hp=Math.min(p.stats.hp+6,p.stats.maxHp); }},
@@ -2607,6 +2655,9 @@ let G = {
   shinyObjects:0,
   _pendingStorkShop:false,
   _pendingShopMode:null,
+  runClassPerks:[],
+  classPerksByBird:{},
+  _classPerkChoicesGranted:0,
   autoQueuedAbilityId:null,
   abilityCooldowns:{},
   _actionTapLockUntil:0,
@@ -3518,6 +3569,9 @@ function startGame() {
   G.runUpgradesPurchased = new Set();
   G.codex = {abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
   G.shinyObjects = 0;
+  G.runClassPerks = [];
+  G.classPerksByBird = {};
+  G._classPerkChoicesGranted = 0;
   saveRun();
   G.phase='PLAYER';
   const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
@@ -3560,6 +3614,9 @@ function resetForNewBattle(){
   G.actionQueue=[]; G.actionBusy=false;
   G.comboCount=0; G.comboReady=false;
   G._goldReplaceMode=false;
+  G._perkIronCoreUsed=false;
+  G._perkFirstVsFullUsed=false;
+  G._perkUtilityRefundUsed=false;
   G.turnCount=0;
   G._incomingAttackKind=null;
   G._firstAttackUsed=false;
@@ -4679,12 +4736,57 @@ function normalizeAbilityCooldownsForPlayer(p){
 }
 
 function getPlayerPiercePctForAbility(ab){
-  const cls=(G.player?.class || BIRDS[G.player?.birdKey]?.class || '').toLowerCase();
-  const isAttack=(ab?.btnType==='attack'||ab?.type==='attack'||/strike|shot|peck|slash|talon|arrow|pierce/i.test(ab?.name||''));
-  if(cls==='ranger'&&isAttack){
-    return Math.max(ab?.piercePct||0,0.25);
-  }
-  return ab?.piercePct||0;
+  const base=ab?.piercePct||0;
+  const t=ABILITY_TEMPLATES?.[ab?.id]||ab||{};
+  const txt=`${t.name||''} ${t.desc||''}`.toLowerCase();
+  const isHeavy=txt.includes('heavy')||txt.includes('smash')||txt.includes('slam')||txt.includes('crusher');
+  let perk=(G.player?.perkPiercePct||0);
+  if(isHeavy) perk+=(G.player?.perkHeavyPierce||0);
+  return Math.max(0, base+perk);
+}
+
+function getPlayerClassRole(player=G.player){
+  const cls=(player?.class || BIRDS[player?.birdKey]?.class || '').toLowerCase();
+  return CLASS_ROLE_BY_CLASS[cls]||'striker';
+}
+function getOwnedPerkIds(){
+  return new Set([...(G.runClassPerks||[]), ...((G.classPerksByBird||{})[G.player?.birdKey]||[])]);
+}
+function applyClassPerk(perkId){
+  const role=getPlayerClassRole();
+  const perk=(CLASS_PERK_DEFS[role]||[]).find(p=>p.id===perkId);
+  if(!perk || getOwnedPerkIds().has(perkId)) return false;
+  if(!Array.isArray(G.runClassPerks)) G.runClassPerks=[];
+  if(!G.classPerksByBird || typeof G.classPerksByBird!=='object') G.classPerksByBird={};
+  if(!Array.isArray(G.classPerksByBird[G.player.birdKey])) G.classPerksByBird[G.player.birdKey]=[];
+  G.runClassPerks.push(perkId);
+  G.classPerksByBird[G.player.birdKey].push(perkId);
+  perk.apply?.(G.player);
+  logMsg(`🧬 Class Perk: ${perk.name}`,'exp-gain');
+  saveRun();
+  return true;
+}
+function maybeOfferClassPerkChoice(){
+  const isStory=(G.ui?.gameMode||'story')==='story';
+  const role=getPlayerClassRole();
+  const owned=getOwnedPerkIds();
+  const pool=(CLASS_PERK_DEFS[role]||[]).filter(p=>!owned.has(p.id));
+  if(!pool.length) return false;
+  const dueEarly=isStory && G._classPerkChoicesGranted<1 && G.stage>=4;
+  const dueEndless=!isStory && G._classPerkChoicesGranted<2 && (G.endlessBattle||0)>=8;
+  if(!dueEarly && !dueEndless) return false;
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;';
+  const cards=pool.slice(0,3).map(p=>`<button data-perk="${p.id}" style="text-align:left;background:rgba(28,22,12,.96);border:1px solid rgba(201,168,76,.35);color:var(--text);border-radius:10px;padding:12px;cursor:pointer;"><div style="font-family:Cinzel,serif;color:var(--gold-light)">${p.name}</div><div style="font-size:.82rem;color:var(--text-dim)">${p.desc}</div></button>`).join('');
+  overlay.innerHTML=`<div style="width:min(760px,94vw);background:rgba(16,12,8,.98);border:1px solid var(--gold);border-radius:14px;padding:16px;"><div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:10px;">Choose a ${role.toUpperCase()} Class Perk</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">${cards}</div></div>`;
+  overlay.querySelectorAll('button[data-perk]').forEach(btn=>btn.addEventListener('click',()=>{
+    applyClassPerk(btn.getAttribute('data-perk'));
+    G._classPerkChoicesGranted=(G._classPerkChoicesGranted||0)+1;
+    overlay.remove();
+  }));
+  document.body.appendChild(overlay);
+  return true;
 }
 
 function applyRangerPassiveOnTurnStart(){
@@ -5125,6 +5227,9 @@ function applyPlayerSlow(spdPenalty,dodgePenalty,turns){
 
 function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
   let dmg=Math.max(1,amount);
+  const activeAb=srcAbility||G._activePlayerAbility||null;
+  const activeType=String(activeAb?.btnType||activeAb?.type||ABILITY_TEMPLATES?.[activeAb?.id]?.btnType||ABILITY_TEMPLATES?.[activeAb?.id]?.type||'').toLowerCase();
+  if(target==='enemy' && !isMagic && !isCrit && G.player?.perkSecondAttackCrit && (G.playerActionsThisTurn||0)===2 && chance(10)) isCrit=true;
   const critMult=(G.player.goldCritMult||1.5) + (isCrit?(G.player?.critDamageBonusPct||0):0);
   if (isCrit) dmg=Math.floor(dmg*critMult);
   if(target==='enemy'){
@@ -5151,6 +5256,18 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(isAttack && (G.player?.augAttackVsBleedPct||0)>0 && G.enemyStatus?.bleed?.stacks>0) dmg=Math.floor(dmg*(1+G.player.augAttackVsBleedPct));
     if(isAttack && (G.player?.augFirstAttackBattlePct||0)>0 && !G._firstAttackUsed) dmg=Math.floor(dmg*(1+G.player.augFirstAttackBattlePct));
     if(isAttack && (G.player?.augAttackExecutePct||0)>0 && G.enemy.stats.hp<=Math.floor((G.enemy.stats.maxHp||1)*0.5)) dmg=Math.floor(dmg*(1+G.player.augAttackExecutePct));
+    if((G.player?.perkWarBody||false) && (G.player.stats.hp||1)<=Math.floor((G.player.stats.maxHp||1)*0.5)) dmg=Math.floor(dmg*1.10);
+    if((G.player?.perkOpeningRush||false) && isAttack && !G._firstAttackUsed) dmg=Math.floor(dmg*1.15);
+    if((G.player?.perkVsFearPct||0)>0 && (G.enemyStatus?.feared||0)>0) dmg=Math.floor(dmg*(1+G.player.perkVsFearPct));
+    if((G.player?.perkExecutePct||0)>0 && (G.enemy.stats.hp||1)<=Math.floor((G.enemy.stats.maxHp||1)*0.4)) dmg=Math.floor(dmg*(1+G.player.perkExecutePct));
+    if((G.player?.perkFirstVsFull||false) && !G._perkFirstVsFullUsed && (G.enemy.stats.hp||0)>=(G.enemy.stats.maxHp||1)){
+      dmg=Math.floor(dmg*1.15);
+      G._perkFirstVsFullUsed=true;
+    }
+    if((G.playerStatus?.holdTheLineBoost||0)>0 && isAttack){
+      dmg=Math.floor(dmg*1.10);
+      delete G.playerStatus.holdTheLineBoost;
+    }
     if(isAttack && (G.player?.augThirdAttackPct||0)>0){
       G.player._augAtkCounter=(G.player._augAtkCounter||0)+1;
       if((G.player._augAtkCounter%3)===0) dmg=Math.floor(dmg*(1+G.player.augThirdAttackPct));
@@ -5205,6 +5322,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     const hitChance=calcHitChance(effectiveAcc,playerDodge,0.72);
     if (Math.random()>=hitChance){
       const _pbd=BIRDS[G.player.birdKey]; if(_pbd&&_pbd.passive&&_pbd.passive.onDodge)_pbd.passive.onDodge(G.player);
+      if(G.player?.perkSlipstream){
+        G.playerStatus.perkSlipstream=1;
+      }
       return {dmgDealt:0,wasDodged:true,wasBlocked:false,isCrit};
     }
     const bypassDeflect=!!G._incomingBypassesDeflect;
@@ -5353,6 +5473,10 @@ function pdmg(mult=1,ab=null) {
     // Kiwi Probe Master: high HP bonus
     if(G.player.birdKey==='kiwi'&&G.enemy.stats.hp/G.enemy.stats.maxHp>0.75) base=Math.floor(base*1.10);
   } else {
+    if((G.player?.perkIronCore||false) && !G._perkIronCoreUsed){
+      dmg=Math.floor(dmg*0.85);
+      G._perkIronCoreUsed=true;
+    }
     G._currentPiercePct=0;
   }
   return base;
@@ -5404,6 +5528,13 @@ function getPlayerMissChance(ab) {
   const isSpell=(kind==='spell');
   if(isAttack) extra+=(G.player?.augAttackAcc||0);
   if(isSpell) extra+=(G.player?.augSpellAcc||0);
+  if(isSpell) extra+=(G.player?.perkSpellAcc||0);
+  if((G.playerStatus?.perkUtilityAcc||0)>0){ extra+=8; delete G.playerStatus.perkUtilityAcc; }
+  if((G.player?.perkVsDebuffedAcc||0)>0){
+    const es=G.enemyStatus||{};
+    const debuffed=!!(es.poison||es.bleed||es.burning||es.weaken||es.feared||es.confused||es.paralyzed||es.slow||es.accDebuff>0);
+    if(debuffed) extra += G.player.perkVsDebuffedAcc;
+  }
   if((G.player?.augPostDefAcc||0)>0 && G.playerStatus?.postDefAccNext){ extra += G.player.augPostDefAcc; delete G.playerStatus.postDefAccNext; }
   if(G.player?.relHawkLedger && isEndlessRunActive()){ const eb=G.endlessBattle||0; if(eb>=10) extra+=8; if(eb>=20) extra+=8; if(eb>=30) extra+=8; }
   return Math.max(floor, reduced - accBonus + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
@@ -5536,8 +5667,9 @@ async function tickDoTs(who) {
   const stats=who==='player'?G.player.stats:G.enemy.stats;
   // Poison
   if (status.poison&&status.poison.stacks>0&&status.poison.turns>0) {
-    const tickMult = who==='player' ? (G.player?.poisonTickMult||1) : 1;
-    const flatBonus = who==='player' ? ((G.player?.poisonFlatBonus||0)+(G.player?.relVenomLedger?1:0)) : 0;
+    const ownerBonus = who==='enemy';
+    const tickMult = ownerBonus ? (G.player?.poisonTickMult||1) : 1;
+    const flatBonus = ownerBonus ? ((G.player?.poisonFlatBonus||0)+(G.player?.perkPoisonTickBonus||0)+(G.player?.relVenomLedger?1:0)) : 0;
     const dmg=Math.max(1, Math.floor(status.poison.stacks * tickMult)+flatBonus);
     stats.hp-=dmg;
     spawnFloat(who,`☣ -${dmg}`,'fn-poison');
@@ -6921,6 +7053,17 @@ async function playerAction(ab,fromQueue=false) {
   codexMark('abilities',ab.id,'used');
   if(G.enemy?.id==='duke_blakiston') dukeTrackDecree(ab.id);
   G._activePlayerAbility=ab;
+  const _abKindNow=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
+  if(_abKindNow==='utility' && G.player?.perkUtilityRefund && !G._perkUtilityRefundUsed){
+    gainEnergy(G.player,1);
+    G._perkUtilityRefundUsed=true;
+  }
+  if((_abKindNow==='utility' || _abKindNow==='buff' || _abKindNow==='defend') && G.player?.perkUtilityAcc){
+    G.playerStatus.perkUtilityAcc=1;
+  }
+  if(G.player?.perkHoldTheLine && /guard|defend|shield|crowdefend/i.test(ab.id||'')){
+    G.playerStatus.holdTheLineBoost=1;
+  }
   G.playerActionsThisTurn=(G.playerActionsThisTurn||0)+1;
   renderEnergyOrbs();
   G.turnPhase=TURN.RESOLVING;
@@ -6938,6 +7081,9 @@ async function playerAction(ab,fromQueue=false) {
   await ACTIONS[ab.id](ab);
   if(chargedDouble && !G.battleOver && G.enemy.stats.hp>0){await ACTIONS[ab.id](ab);}
   const _abKind=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
+  if((_abKind==='physical'||_abKind==='ranged') && G.player?.perkIronMomentum && /heavy|slam|crusher|smash/i.test((ab.name||ab.id||'').toLowerCase())){
+    addStatus(G.playerStatus,'defending',1,999);
+  }
   if(_abKind==='physical'||_abKind==='ranged') G._firstAttackUsed=true;
   if(_abKind==='spell'){ G._firstSpellUsed=true; G._spellCastCount=(G._spellCastCount||0)+1; }
   G._lastPlayerAbility = ab.id;
@@ -6970,6 +7116,14 @@ function startPlayerTurn(player){
   if(isEndlessRunActive() && player.relFeatheredClock && ((G.endlessBattle||0)%3===0)) player.energy += 1;
   G.playerActionsThisTurn=0;
   G.playerTurnFlags={energyGainedThisTurn:0,onHitTriggered:false,firstAttackResolved:false};
+  if(G.playerStatus.perkSlipstream){
+    G.player.stats.spd=(G.player.stats.spd||1)+1;
+    G.playerStatus.perkSlipstream=0;
+    G.playerStatus.perkSlipstreamDecay=1;
+  }else if(G.playerStatus.perkSlipstreamDecay){
+    G.player.stats.spd=Math.max(1,(G.player.stats.spd||1)-1);
+    delete G.playerStatus.perkSlipstreamDecay;
+  }
   if(player.mutSuddenFlight) player._mutSuddenFlightUsed=false;
   G.turn='player';
   G.turnPhase=TURN.PLAYER;
@@ -7744,9 +7898,15 @@ async function enemyTurn() {
   G.enemyTurnCount=(G.enemyTurnCount||0)+1;
   startEnemyTurn(e);
   if(G.enemy?.aiType==='boss_duke'){
-    dukeTurnAI();
+    let dukeActions=0;
+    while((e.energy||0)>0 && dukeActions<MAX_ENEMY_ACTIONS_PER_TURN){
+      dukeTurnAI();
+      e.energy=Math.max(0,(e.energy||0)-1);
+      dukeActions++;
+      if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+      await delay(220);
+    }
     G.animLock=false;
-    if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
     afterEnemyTurn();
     return;
   }
@@ -8080,17 +8240,27 @@ function postCombat() {
       }
     }
 
-    // Shiny reward
-    const enemySize = (G.enemy.size || 'medium').toLowerCase();
-    const sizeShiny =
-      enemySize === 'tiny' ? 1 :
-      enemySize === 'small' ? 2 :
-      enemySize === 'medium' ? 3 :
-      enemySize === 'large' ? 4 :
-      enemySize === 'xl' ? 5 : 3;
-
-    const bossShiny = G.enemy.isBoss ? 10 : 0;
-    const stageBonusShiny = Math.floor(Math.max(1, G.stage) / 10);
+    // Shiny reward economy rebalance
+    const isStoryMode=(G.ui?.gameMode||'story')==='story';
+    const stage=Math.max(1,G.stage||1);
+    const endlessBattle=Math.max(0,G.endlessBattle||0);
+    let shinyGain=0;
+    if(G.enemy.isBoss){
+      if(isStoryMode){
+        if(stage>=20) shinyGain=roll(40,60);
+        else if(stage>=10) shinyGain=roll(25,35);
+        else shinyGain=roll(20,30);
+      } else {
+        shinyGain=roll(30,45);
+      }
+    } else {
+      if(isStoryMode){
+        shinyGain = (stage<10) ? roll(8,14) : roll(12,18);
+      } else {
+        const infl=Math.min(6,Math.floor(endlessBattle/12));
+        shinyGain = roll(10,16) + infl;
+      }
+    }
 
     // SAFE: bs defaults prevent crashes
     const perfectBonus = (bs.dmgTaken <= 0) ? 2 : 0;
@@ -8102,11 +8272,10 @@ function postCombat() {
       G.player.stats.hp = Math.min(G.player.stats.hp, G.player.stats.maxHp);
       logMsg('🔥 Molting Ritual: +1 ATK, -3 Max HP.', 'system');
     }
-    const shinyGain = sizeShiny + bossShiny + stageBonusShiny + perfectBonus + fastWinBonus;
+    shinyGain += perfectBonus + fastWinBonus;
     G.shinyObjects += shinyGain;
 
     const bonusParts = [];
-    if (stageBonusShiny > 0) bonusParts.push(`stage +${stageBonusShiny}`);
     if (perfectBonus > 0) bonusParts.push('perfect +2');
     if (fastWinBonus > 0) bonusParts.push('fast +1');
     const bonusTxt = bonusParts.length ? ` (${bonusParts.join(', ')})` : '';
@@ -8132,10 +8301,9 @@ function postCombat() {
         mdef:(_postStats.mdef||0)-(_preStats.mdef||0)
       };
 
-      // Level-up heal depends on bird size
-      const sizeHeal = { tiny: 0.60, small: 0.50, medium: 0.35, large: 0.25, xl: 0.15 };
-      const healPct = sizeHeal[G.player.size] || 0.35;
-      const lvHeal = Math.max(1, Math.floor(G.player.stats.maxHp * healPct));
+      // Level-up heal: 50% of currently missing HP
+      const missingHp = Math.max(0, G.player.stats.maxHp - G.player.stats.hp);
+      const lvHeal = Math.max(1, Math.floor(missingHp * 0.50));
       G.player.stats.hp = Math.min(G.player.stats.hp + lvHeal, G.player.stats.maxHp);
 
       leveled = true;
@@ -8225,7 +8393,7 @@ function showRewardScreen(hasLevelUp) {
 function confirmReward() {
   if(!G._pendingReward) return;
   if(document.getElementById('gold-replace-ui')) return;
-  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=3){
+  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=getGoldCardLimit()){
     showGoldReplaceUI(G._pendingReward);
     return;
   }
@@ -8290,8 +8458,9 @@ function showGoldReplaceUI(newReward){
   const ui=document.createElement('div');
   ui.id='gold-replace-ui';
   ui.style.cssText='background:rgba(20,15,5,.97);border:1px solid var(--gold);border-radius:12px;padding:16px;margin-top:12px;text-align:center;';
+  const cap=getGoldCardLimit();
   ui.innerHTML=`<div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:8px;font-size:.85rem;letter-spacing:.08em">⚠ LEGENDARY LIMIT — Replace a Gold Card</div>
-    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold 3 Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
+    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold ${cap} Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
     <div id="gold-replace-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     <button onclick="document.getElementById('gold-replace-ui').remove();G._goldReplaceMode=false;" style="margin-top:10px;background:rgba(40,35,25,.8);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;">✕ Cancel</button>`;
   const list=ui.querySelector('#gold-replace-list');
@@ -8351,23 +8520,22 @@ function generateBossRewards() {
     const rw=pool[Math.floor(Math.random()*pool.length)];
     used.add(rw.id); return rw;
   }
-  function pick(forced,optional){
+  function pick(forced){
     const r=pickTier(forced)||pickTier('purple')||pickTier('blue');
     if(r) out.push(r);
-    if(optional&&out.length<3&&chance(optional*100)){const r2=pickTier('gold');if(r2)out.push(r2);}
   }
   
-  // Stage 40 endless boss: 3 gold
+  // Stage 40 endless boss: 3 high-tier non-gold
   if(endlessBattle>0&&endlessBattle%20===0){
-    for(let i=0;i<3;i++){const r=pickTier('gold');if(r)out.push(r);}
+    for(let i=0;i<3;i++){const r=pickTier('purple')||pickTier('blue');if(r)out.push(r);}
   }
-  // Stage 10/20 main bosses: 1 purple guaranteed + 25% gold
+  // Stage 10/20 main bosses: 1 purple guaranteed
   else if(stage%10===0){
-    pick('purple', 0.20);
+    pick('purple');
   }
-  // Default boss: purple + possible gold
+  // Default boss: purple baseline
   else {
-    pick('purple', 0.12);
+    pick('purple');
   }
   
   if(isEndlessRunActive()){
@@ -8380,8 +8548,8 @@ function generateBossRewards() {
   // Fill remaining 3 slots
   while(out.length<3){
     let tier;
-    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
-    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
+    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple'],[50,50]);}
+    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple'],[50,50]);}
     else{tier=rollTier(true);}
     const r=pickTier(tier);
     if(r) out.push(r);
@@ -8399,6 +8567,10 @@ function rollWeighted(tiers,weights){
 
 // Gold card limit: max 3, prompt replacement if at limit
 function getGoldCardCount(){return(G.collectedRewards||[]).filter(r=>r.tier==='gold').length;}
+function getGoldCardLimit(){
+  if((G.ui?.gameMode||'story')==='story' && (G.stage||1)<20) return 1;
+  return 3;
+}
 
 // ============================================================
 //  LEVEL-UP SCREEN — select then confirm
@@ -8675,19 +8847,11 @@ function advanceStage() {
     logMsg('🔓 Legendary birds unlocked: Shoebill Stork & Harpy Eagle!','boss');
   }
   saveRun();
+  if(maybeOfferClassPerkChoice()) return;
 
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
-  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
-  if(signatureDue){
-    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
-    AvianEvents.emit('signature:event', sigEvt);
-    runModuleHook('onSignatureEvent', sigEvt);
-    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
-    setTimeout(()=>showGroveEvent(), 350);
-    return;
-  }
   if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
@@ -8815,57 +8979,29 @@ async function resolveGrove(idx){
     // ── SNAKE: size-dependent ────────────────────────────────────
     case 'snake':{
       chosen.className='grove-tree revealed outcome-snake';
-      if(isSmall){
-        // Bad for tiny/small: venom bite −25% current HP
-        const dmg = Math.max(1, Math.floor(hp * 0.25));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Venom Bite!</span>`;
-        msg = `🐍 Snake venom seeps in. −${dmg} HP (−25% current)`;
-        flavor = 'Too small to resist the fangs…';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.poison();
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      } else {
-        // Good for medium/XL: crush the snake, +50% missing HP
-        const heal = Math.max(1, Math.floor(missing * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍💪</span><span class="grove-outcome-label">Snake Crushed!</span>`;
-        msg = `💪 You crush the snake underfoot! +${heal} HP restored`;
-        flavor = 'Your strength turned the tables.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.20));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🐍💚</span><span class="grove-outcome-label">Serpent Remedy!</span>`;
+      msg = `🐍 Ancient serpent salve! +${heal} HP (20% max)`;
+      flavor = 'The grove mends your flock equally.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
     // ── EGG: size-dependent ──────────────────────────────────────
     case 'egg':{
       chosen.className='grove-tree revealed outcome-egg';
-      if(isSmall){
-        // Good for tiny/small: raid the nest +50% current HP
-        const heal = Math.max(1, Math.floor(hp * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Raided!</span>`;
-        msg = `🥚 You slip inside and feast on eggs! +${heal} HP`;
-        flavor = 'Small enough to sneak past the thorns.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      } else {
-        // Bad for medium/XL: thorn trap −40% missing HP
-        const dmg = Math.max(1, Math.floor(missing * 0.40));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🌿</span><span class="grove-outcome-label">Thorns Shred!</span>`;
-        msg = `🌿 Hidden thorns tear through your feathers! −${dmg} HP`;
-        flavor = 'Too large to fit without getting shredded.';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.hit(1.0);
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.10));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🥚✨</span><span class="grove-outcome-label">Golden Egg!</span>`;
+      msg = `🥚 Nourishing yolk shared by all birds! +${heal} HP (10% max)`;
+      flavor = 'No thorns, no traps — only renewal.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
   }
@@ -8887,7 +9023,7 @@ function showGroveNestRewards(){
   const grid = document.getElementById('grove-reward-grid');
   grid.innerHTML='';
 
-  // Grove nest rewards: mostly blue/purple, with 5% chance each for a grey and a gold slot.
+  // Grove nest rewards: mostly blue/purple, with small grey chance and no gold rewards.
   const used = new Set();
   const picks=[];
   const pick=(tier)=>{
@@ -8897,13 +9033,12 @@ function showGroveNestRewards(){
     used.add(r.id); return r;
   };
   const rollNestTier=()=>{
-    if(chance(5)) return 'gold';
     if(chance(5)) return 'grey';
     return chance(56)?'blue':'purple';
   };
   while(picks.length<3){
     const tier=rollNestTier();
-    const rw=pick(tier)||pick('blue')||pick('purple')||pick('grey')||pick('gold');
+    const rw=pick(tier)||pick('blue')||pick('purple')||pick('grey');
     if(!rw) break;
     picks.push(rw);
   }
@@ -8979,6 +9114,8 @@ function showVictory(){
     :`${G.player.name} conquered all 20 stages and ascended to legend! 🔓 New birds unlocked!`;
   const abilityList=(G.player.abilities||[]).map(a=>`${ABILITY_TEMPLATES[a.id]?.name||a.id} Lv${a.level||1}`).join(' · ');
   document.getElementById('gameover-msg').textContent=endMsg;
+  const flyAgainBtn=document.getElementById('fly-again-btn');
+  if(flyAgainBtn) flyAgainBtn.style.display=(G.ui?.gameMode==='story')?'none':'inline-block';
   const unlockIds=['unlock_hummingbird','unlock_shoebill','unlock_secretary','unlock_magpie','unlock_kookaburra','unlock_peregrine','unlock_harpy','unlock_ostrich','unlock_kiwi','unlock_lyrebird','unlock_toucan','unlock_penguin','unlock_emu','unlock_swan','unlock_flamingo','unlock_seagull','unlock_albatross','unlock_duke_blakiston'];
   const unlockedNow=unlockIds.filter(id=>isUnlocked(id)).map(id=>id.replace('unlock_','').replace(/_/g,' '));
   const runUnlocks=document.getElementById('run-unlocks');
@@ -8998,6 +9135,7 @@ function showVictory(){
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
+  if((G.ui?.gameMode||'story')==='story') startStoryCinematic();
 }
 function showDefeat(){
   G.phase='REWARD';
@@ -9015,6 +9153,9 @@ function showDefeat(){
   document.getElementById('gameover-title').textContent='💀 Fallen';
   const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
+  const flyAgainBtn=document.getElementById('fly-again-btn');
+  if(flyAgainBtn) flyAgainBtn.style.display='inline-block';
+  hideStoryCinematic();
   const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
@@ -9041,6 +9182,55 @@ function showRunStats(){
     <div class="vstat"><div class="vstat-val">${G.player.stats.atk}</div><div class="vstat-lbl">Final ATK</div></div>
     <div class="vstat"><div class="vstat-val">${G.player.stats.hp}/${G.player.stats.maxHp}</div><div class="vstat-lbl">HP Left</div></div>`;
   el.style.display='grid';
+}
+
+let _storyCineTimer=null;
+let _storyCineSpeed=1;
+let _storyCineSkip=false;
+function hideStoryCinematic(){
+  if(_storyCineTimer){ clearTimeout(_storyCineTimer); _storyCineTimer=null; }
+  const wrap=document.getElementById('story-cinematic');
+  if(wrap) wrap.style.display='none';
+}
+function startStoryCinematic(){
+  const wrap=document.getElementById('story-cinematic');
+  const textEl=document.getElementById('story-cinematic-text');
+  const slower=document.getElementById('story-slower-btn');
+  const faster=document.getElementById('story-faster-btn');
+  const skip=document.getElementById('story-skip-btn');
+  if(!wrap||!textEl||!slower||!faster||!skip) return;
+
+  const lines=[
+    'The marsh goes still. Feathers settle. The old court is silent.',
+    `${G.player?.name||'Your bird'} rises above the blackwater and broken reeds.`,
+    'A new song carries across the canopy — the sky remembers your ascent.'
+  ].join('\n\n');
+
+  _storyCineSpeed=1;
+  _storyCineSkip=false;
+  let i=0;
+  textEl.textContent='';
+  textEl.scrollTop=0;
+  wrap.style.display='block';
+
+  slower.onclick=()=>{ _storyCineSpeed=Math.max(0.5, Math.round((_storyCineSpeed-0.25)*100)/100); };
+  faster.onclick=()=>{ _storyCineSpeed=Math.min(3, Math.round((_storyCineSpeed+0.25)*100)/100); };
+  skip.onclick=()=>{ _storyCineSkip=true; };
+
+  const tick=()=>{
+    if(_storyCineSkip){
+      textEl.textContent=lines;
+      textEl.scrollTop=textEl.scrollHeight;
+      _storyCineTimer=null;
+      return;
+    }
+    i=Math.min(lines.length, i+1);
+    textEl.textContent=lines.slice(0,i);
+    textEl.scrollTop=textEl.scrollHeight;
+    if(i>=lines.length){ _storyCineTimer=null; return; }
+    _storyCineTimer=setTimeout(tick, Math.max(10, Math.floor(30/_storyCineSpeed)));
+  };
+  tick();
 }
 
 // ============================================================
@@ -9447,14 +9637,14 @@ function pickUniqueRewardByTier(tier,used){
 }
 function makeUtilityOffer(kind='regular'){
   const utilsRegular=[
-    {id:'shop_util_heal20',tier:'green',icon:'🍖',name:'Field Rations',desc:'Heal 20% HP',apply:p=>{const h=Math.max(1,Math.floor(p.stats.maxHp*0.20));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
-    {id:'shop_util_cleanse',tier:'green',icon:'🧼',name:'Spring Cleanse',desc:'Cleanse active debuffs and restore 10% HP',apply:p=>{G.playerStatus={};const h=Math.max(1,Math.floor(p.stats.maxHp*0.10));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_heal_missing20',tier:'green',icon:'🍖',name:'Field Rations',desc:'Restore 20% of missing HP',costOverride:22,apply:p=>{const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.20));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_cleanse_missing35',tier:'green',icon:'🧼',name:'Spring Cleanse',desc:'Cleanse active debuffs and restore 35% of missing HP',costOverride:36,apply:p=>{G.playerStatus={};const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.35));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
     {id:'shop_util_refresh',tier:'blue',icon:'🪙',name:'Coupon Wing',desc:'Next shop refresh is free',apply:p=>{G._freeShopRefresh=(G._freeShopRefresh||0)+1;}},
     {id:'shop_util_energy',tier:'green',icon:'🔋',name:'Spark Draft',desc:'Gain +1 max energy this run (max +3)',apply:p=>{p.energyBonus=Math.min(3,(p.energyBonus||0)+1);p.energyMax=Math.max(1,(p.energyMax||3)+1);}},
     {id:'shop_util_focus',tier:'green',icon:'🎯',name:'Hunter Focus',desc:'ACC +5 and Crit +3%',apply:p=>{p.stats.acc=Math.min(100,(p.stats.acc||80)+5);p.stats.critChance=(p.stats.critChance||5)+3;}},
   ];
   const utilsBoss=[
-    {id:'shop_util_heal40',tier:'blue',icon:'🩹',name:'Boss First Aid',desc:'Heal 40% HP and cleanse debuffs',apply:p=>{G.playerStatus={};const h=Math.max(1,Math.floor(p.stats.maxHp*0.40));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_heal_boss_missing35',tier:'blue',icon:'🩹',name:'Boss First Aid',desc:'Cleanse and restore 35% of missing HP',costOverride:36,apply:p=>{G.playerStatus={};const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.35));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
     {id:'shop_util_discount',tier:'purple',icon:'🛍️',name:'Royal Voucher',desc:'Your next purchase costs 2 less shiny',apply:p=>{G._nextShopDiscount=Math.max(G._nextShopDiscount||0,2);}},
     {id:'shop_util_refresh2',tier:'blue',icon:'🎟️',name:'Double Refresh Pass',desc:'Gain 2 free shop refreshes',apply:p=>{G._freeShopRefresh=(G._freeShopRefresh||0)+2;}},
     {id:'shop_util_bossward',tier:'purple',icon:'🛡️',name:'Boss Ward',desc:'MDEF +3 and cleanse one debuff now',apply:p=>{p.stats.mdef=(p.stats.mdef||0)+3;const bad=['weaken','paralyzed','slow','burning','poison','bleed','feared','lullabied'];const hit=bad.find(k=>G.playerStatus[k]);if(hit) delete G.playerStatus[hit];}},
@@ -9512,11 +9702,12 @@ function generateShopItems() {
   _shopItems=[];
   const used=new Set();
   const mode=G._shopMode||'boss';
+  const goldCapReached = getGoldCardCount()>=getGoldCardLimit();
   if(mode==='grey'){
     // Regular shop: 1 ability item, 2 upgrade cards, 1 utility
     _shopItems.push(makeAbilityOffer(false));
     for(let i=0;i<2;i++){
-      const tier=rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
+      const tier=goldCapReached?rollShopTier({grey:52,green:30,blue:16,purple:2}):rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
       const pick=pickUniqueRewardByTier(tier,used)||pickUniqueRewardByTier('green',used)||pickUniqueRewardByTier('grey',used);
       if(pick) _shopItems.push(pick);
     }
@@ -9525,7 +9716,7 @@ function generateShopItems() {
     // Boss shop: 1 high-quality ability item, 3 high-tier cards, 1 utility
     _shopItems.push(makeAbilityOffer(true));
     for(let i=0;i<3;i++){
-      const tier=rollShopTier({blue:50,purple:38,gold:12});
+      const tier=goldCapReached?rollShopTier({blue:56,purple:44}):rollShopTier({blue:50,purple:38,gold:12});
       const pick=pickUniqueRewardByTier(tier,used)||pickUniqueRewardByTier('purple',used)||pickUniqueRewardByTier('blue',used);
       if(pick) _shopItems.push(pick);
     }
@@ -9533,7 +9724,7 @@ function generateShopItems() {
   }
   renderShopItems();
 }
-const SHOP_COSTS={grey:2,green:2,blue:4,purple:6,gold:12};
+const SHOP_COSTS={grey:24,green:36,blue:58,purple:78,gold:105};
 
 const SHOP_BANNED_IDS = new Set(['skipTurn','sittingDuck','endTurn','mimic']);
 function canOfferAbilityInShop(p, tmpl){
@@ -9558,11 +9749,15 @@ function shopResetVisitState(){
   SHOP_STATE.purchaseMadeThisVisit = false;
   SHOP_STATE.selectedIndex = null;
   _shopSelectedIdx = null;
+  G._shopRefreshCount = 0;
 }
 function shopLockVisitState(){
   SHOP_STATE.purchaseMadeThisVisit = true;
   SHOP_STATE.selectedIndex = null;
   _shopSelectedIdx = null;
+}
+function getShopRefreshCost(){
+  return 10 + 6*Math.max(0,G._shopRefreshCount||0);
 }
 function shopTooltipNode(){
   let tt=document.getElementById('shop-ability-tooltip');
@@ -9620,10 +9815,15 @@ function renderShopItems() {
   SHOP_STATE.selectedIndex=null;
   _shopSelectedIdx=null;
   const buyBtn=document.getElementById('shop-buy-btn'); if(buyBtn) buyBtn.disabled=true;
-  const refreshBtn=document.getElementById('shop-refresh-btn'); if(refreshBtn) refreshBtn.disabled=!!SHOP_STATE.purchaseMadeThisVisit;
+  const refreshBtn=document.getElementById('shop-refresh-btn');
+  if(refreshBtn){
+    refreshBtn.disabled=!!SHOP_STATE.purchaseMadeThisVisit;
+    const rCost=(G._freeShopRefresh||0)>0?0:getShopRefreshCost();
+    refreshBtn.textContent=`🔄 Refresh (${rCost}🌟)`;
+  }
 
   _shopItems.forEach((item,idx)=>{
-    let baseCost=SHOP_COSTS[item.tier]||1;
+    let baseCost=(typeof item.costOverride==='number')?item.costOverride:(SHOP_COSTS[item.tier]||1);
     if(G.player?.mutLongWar) baseCost=Math.ceil(baseCost*1.15);
     const cost=Math.max(0,baseCost-Math.max(0,G._nextShopDiscount||0));
     const canAfford=G.shinyObjects>=cost;
@@ -9735,7 +9935,7 @@ async function shopBuySelected() {
   if(selected===null||selected>=_shopItems.length) return false;
   const item=_shopItems[selected];
 
-  let baseCost=SHOP_COSTS[item.tier]||1;
+  let baseCost=(typeof item.costOverride==='number')?item.costOverride:(SHOP_COSTS[item.tier]||1);
   if(G.player?.mutLongWar) baseCost=Math.ceil(baseCost*1.15);
   const discount=Math.max(0,G._nextShopDiscount||0);
   const cost=Math.max(0,baseCost-discount);
@@ -9823,8 +10023,12 @@ function shopRefresh() {
     return false;
   }
   if((G._freeShopRefresh||0)>0){G._freeShopRefresh--; }
-  else if(G.shinyObjects>=3){G.shinyObjects-=3;}
-  else { logMsg('Need 3 shiny objects to refresh!','miss'); return false; }
+  else {
+    const rc=getShopRefreshCost();
+    if(G.shinyObjects<rc){ logMsg(`Need ${rc} shiny objects to refresh!`,'miss'); return false; }
+    G.shinyObjects-=rc;
+  }
+  G._shopRefreshCount=(G._shopRefreshCount||0)+1;
   const log=document.getElementById('shop-purchase-log');
   if(log) log.textContent='🔄 Shop refreshed!';
   generateShopItems();

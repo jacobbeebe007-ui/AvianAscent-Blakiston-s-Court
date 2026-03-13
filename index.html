@@ -223,7 +223,15 @@
 <p id="gameover-msg" style="color:var(--text-dim);font-size:1.1rem;margin-bottom:16px"></p>
 <div class="victory-stats" id="run-stats" style="display:none"></div>
 <div id="run-unlocks"></div>
-<button class="start-btn" onclick="location.reload()">Fly Again</button>
+<button class="start-btn" id="fly-again-btn" onclick="location.reload()">Fly Again</button>
+<div id="story-cinematic" style="display:none;max-width:760px;margin:16px auto 8px;padding:12px;border:1px solid rgba(201,168,76,.35);border-radius:12px;background:rgba(18,14,8,.88);text-align:left;">
+<div id="story-cinematic-text" style="min-height:92px;max-height:170px;overflow:auto;white-space:pre-wrap;line-height:1.45;color:var(--text-dim);font-size:.9rem;"></div>
+<div class="story-controls" style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+<button class="nest-btn" id="story-slower-btn" type="button">Slower</button>
+<button class="nest-btn" id="story-faster-btn" type="button">Faster</button>
+<button class="nest-btn" id="story-skip-btn" type="button" style="color:var(--gold-light);border-color:rgba(201,168,76,.6)">Skip</button>
+</div>
+</div>
 <button class="start-btn" onclick="goMainMenu()" style="margin-top:12px;background:linear-gradient(135deg,#2a3040,#3a4050,#2a3040);color:var(--text-dim);font-size:.9rem;">🏠 Main Menu</button>
 </div>
 </div>
@@ -247,10 +255,10 @@
 <div class="shop-items-grid" id="shop-items-grid"></div>
 <div class="shop-btn-row">
 <button class="shop-buy-btn" data-shop-action="buy" disabled="" id="shop-buy-btn">✓ Buy Selected</button>
-<button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (3🌟)</button>
+<button class="shop-refresh-btn" data-shop-action="refresh" id="shop-refresh-btn">🔄 Refresh (10🌟)</button>
 <button class="shop-exit-btn" data-shop-action="exit" id="shop-exit-btn">Continue ›</button>
 </div>
-<p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 2🌟 · Blue 4🌟 · Purple 6🌟 · Gold 12🌟 · Refresh 3🌟</p>
+<p style="text-align:center;font-size:.72rem;color:var(--text-dim);margin-top:10px">Grey 24🌟 · Green 36🌟 · Blue 58🌟 · Purple 78🌟 · Gold 105🌟 · Refresh starts 10🌟</p>
 </div>
 </div>
 <!-- WHISPERING GROVE -->

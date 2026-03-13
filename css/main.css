@@ -1342,6 +1342,7 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 .ascent-panel-portrait,.ascent-face{min-height:112px !important; overflow:visible !important;}
 .avatar-wrap{height:148px !important; min-width:160px !important; overflow:visible !important;}
 #player-avatar-wrap,#enemy-avatar-wrap,#player-avatar,#enemy-avatar{overflow:visible !important;}
+#enemy-avatar{transform:scaleX(-1);}
 
 /* Generic sprites by location */
 .bird-portrait .sprite4.tiny{width:64px !important;height:64px !important;}
