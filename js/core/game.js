@@ -1146,15 +1146,20 @@ function makeEnemy(name, emoji, hp, atk, def, spd, style, isBoss=false, bossTitl
   const abilities = opts.abilities||[];
   const mdef = opts.mdef||8;
   const matk = opts.matk||6;
+  const baseEn = Number.isFinite(opts.baseEn)
+    ? opts.baseEn
+    : (isBoss ? 6 : (size==='xl'?5:size==='large'?4:size==='medium'?4:3));
   const portraitKey = opts.portraitKey||null;
-  return {name, emoji, portraitKey, hp, maxHp:hp, atk, def, spd, acc, dodge, size, aiStyle:style, aiPersonality:(opts.aiPersonality||inferAIPersonalityFromStyle(style,name)), isBoss, bossTitle, abilities,
-    stats:{hp,maxHp:hp,atk,def,spd,acc,dodge,mdef,matk}};
+  const enemyTier = opts.enemyTier || (isBoss ? (/final boss/i.test(String(bossTitle||'')) ? 'boss' : 'lieutenant') : 'normal');
+  return {name, emoji, portraitKey, hp, maxHp:hp, atk, def, spd, acc, dodge, size, aiStyle:style, aiPersonality:(opts.aiPersonality||inferAIPersonalityFromStyle(style,name)), isBoss, bossTitle, enemyTier, abilities,
+    stats:{hp,maxHp:hp,atk,def,spd,acc,dodge,mdef,matk,en:baseEn}};
 }
 
 function makeDukeBlakiston(){
   return {
     id:'duke_blakiston', name:'Duke Blakiston', portraitKey:'duke_blakiston', isBoss:true, size:'xl', aiType:'boss_duke', aiPersonality:'tyrant',
-    stats:{maxHp:360,hp:360,atk:16,matk:16,def:9,mdef:9,spd:7,acc:85,dodge:8},
+    enemyTier:'boss',
+    stats:{maxHp:360,hp:360,atk:16,matk:16,def:9,mdef:9,spd:7,acc:85,dodge:8,en:6},
     duke:{phase:1,nightfallTurns:0,decreeKey:null,decreeStacks:0,riverCd:0,summonCd:0,verdictCd:0}
   };
 }
@@ -1164,7 +1169,10 @@ const ENEMY_ABILITY_POOL = {
   eWeaken:  {name:'Screech', desc:'Applies Chicken Pox (reduced damage/dodge).', dmg:'0 direct', dodgeable:true, fn(e,p,G){
     const _bd=BIRDS[G.player.birdKey];if(_bd&&_bd.passive&&_bd.passive.immuneWeaken){spawnFloat('player','🛡 Immune!','fn-status');return;}
     G.playerStatus.weaken=Math.max(G.playerStatus.weaken||0,2+((G.biomeMod?.dread||0)>0?1:0));logMsg(`🐔 ${e.name} weakens you!`,'enemy-action');}},
-  eStun:    {name:'Body Slam', desc:'Chance to stun for 1 turn.', dmg:'~90-130% ATK', fn(e,p,G){
+  eStun:    {name:'Body Slam', desc:'Physical slam that scales with ATK + chance to stun.', dmg:'Base + ATK scaling', fn(e,p,G){
+    const slam=calcEnemyAbilityDamage(e,{stat:'atk',base:6,scaling:0.95,variance:0.2});
+    const rr=dealDamage('player',slam);
+    spawnFloat('player',`-${rr.dmgDealt}`,'fn-dmg');
     const _bd=BIRDS[G.player.birdKey];if(_bd&&_bd.passive&&(_bd.passive.immuneStun||G.player.immuneParalyze)){spawnFloat('player','🛡 Immune!','fn-status');logMsg(`${e.name}'s stun bounced off!`,'miss');return;}
     if(chance(25)){G.playerStatus.stunned=(G.playerStatus.stunned||0)+1;logMsg(`😵 ${e.name} stuns you!`,'enemy-action');}else{logMsg(`${e.name}'s stun missed.`,'miss');}}},
   eFear:    {name:'Shriek', desc:'Applies Fear; lowers hit reliability.', dmg:'0 direct', dodgeable:true, fn(e,p,G){
@@ -3624,6 +3632,7 @@ function makeEndlessEnemy(stage) {
   const src = (pool.length?pool:ENEMIES)[Math.floor(Math.random()*(pool.length?pool.length:ENEMIES.length))];
   const clone = JSON.parse(JSON.stringify(src));
   clone.isBoss = isBoss;
+  clone.enemyTier = isBoss ? (clone.enemyTier||'boss') : (clone.enemyTier||'normal');
   if (isBoss) {
     clone.bossTitle = stage > 20 ? '💀 Endless Titan' : (clone.bossTitle||'⚡ Stage Boss');
     if(stage>20) clone.name = 'Corrupted ' + clone.name;
@@ -3712,9 +3721,9 @@ function loadStage() {
         if(pool.length>0){
           const src=pool[Math.floor(Math.random()*pool.length)];
           ed={name:src.name,emoji:src.emoji,birdKey:src.birdKey,portraitKey:src.birdKey,hp:src.hp,maxHp:src.hp,atk:src.atk,def:src.def,spd:src.spd,
-            acc:src.acc,dodge:src.dodge,size:src.size,aiStyle:src.aiStyle,aiPersonality:(src.aiPersonality||inferAIPersonalityFromStyle(src.aiStyle,src.name)),isBoss:false,bossTitle:'',
+            acc:src.acc,dodge:src.dodge,size:src.size,aiStyle:src.aiStyle,aiPersonality:(src.aiPersonality||inferAIPersonalityFromStyle(src.aiStyle,src.name)),isBoss:false,bossTitle:'',enemyTier:'elite',
             abilities:src.abilities,stats:{hp:src.hp,maxHp:src.hp,atk:src.atk,def:src.def,spd:src.spd,
-            acc:src.acc,dodge:src.dodge,mdef:8,matk:6}};
+            acc:src.acc,dodge:src.dodge,mdef:8,matk:6,en:(src.size==='xl'?5:src.size==='large'?4:src.size==='medium'?4:3)}};
         }
       }
       // Fallback / normal enemy
@@ -3729,14 +3738,16 @@ function loadStage() {
     }
 
   }
-  const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
+  const scaled=ed.isBoss
+    ? buildScaledBoss(ed, G.stage, {isEndless:(G.endlessMode && G.stage>20), diffMult})
+    : buildScaledEnemy(ed, G.stage, {isEndless:(G.endlessMode && G.stage>20), diffMult});
   ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
-  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
   ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
   ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
   ed.mdef=scaled.mdef; ed.matk=scaled.matk;
-  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
-  const baseEnemyEnergy = ed.isBoss ? 6 : (ed.size==='xl'?5:ed.size==='large'?4:ed.size==='medium'?4:3);
+  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
+  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk, en:(scaled.en||0)};
+  const baseEnemyEnergy = Math.max(1, scaled.en||ed.stats.en||3);
   ed.energyMax=baseEnemyEnergy;
   ed.energy=baseEnemyEnergy;
   ed.energyRegen=0;
@@ -5139,71 +5150,103 @@ function checkGrowthStage(p){
   if(prev!==next) applyGrowthStageTransition(p, prev, next);
   else p.growthStage = next;
 }
-function enemyScaleFactor(base, stage, diffMult, bossKills){
-  const s=Math.max(1,stage);
-  const isBoss=(s%10===0);
-  const bossIndex=Math.floor((s-1)/10);
+const ENEMY_TIER_MULTIPLIERS = {
+  normal:{hp:1.0,atk:1.0,def:1.0},
+  elite:{hp:1.4,atk:1.15,def:1.2},
+  boss:{hp:2.0,atk:1.3,def:1.3},
+  lieutenant:{hp:1.7,atk:1.2,def:1.2},
+};
 
-  // Smoother early curve + dedicated endless curve (endless systems are NOT used in story mode)
-  const endlessDepth=Math.max(0,s-20);
-  const growthBase=Math.pow(1.038,s-1);
-  const endlessCurve=endlessDepth<=0?1:(endlessDepth<=20?Math.pow(1.030,endlessDepth):Math.pow(1.030,20)*Math.pow(1.022,endlessDepth-20));
-  const growth=growthBase*endlessCurve;
-  const hpStageMult=Math.pow(growth,1.12);
-  const atkStageMult=Math.pow(growth,0.88);
-  const defStageMult=Math.pow(growth,0.82);
+function getEnemyBaseStats(base){
+  const s=base?.stats||{};
+  const hp=(base.hp??s.maxHp??s.hp??1);
+  const size=base?.size||'medium';
+  const en=(s.en??base.en??(base.isBoss?6:(size==='xl'?5:size==='large'?4:size==='medium'?4:3)));
+  return {
+    hp:Math.max(1,Math.floor(hp)),
+    atk:Math.max(1,Math.floor(base.atk??s.atk??1)),
+    def:Math.max(0,Math.floor(base.def??s.def??0)),
+    matk:Math.max(1,Math.floor(base.matk??s.matk??6)),
+    mdef:Math.max(0,Math.floor(base.mdef??s.mdef??8)),
+    spd:Math.max(1,Math.floor(base.spd??s.spd??1)),
+    acc:Math.max(60,Math.floor(base.acc??s.acc??70)),
+    dodge:Math.max(0,Math.floor(base.dodge??s.dodge??5)),
+    mdodge:Math.max(0,Math.floor(base.mdodge??s.mdodge??(base.dodge??s.dodge??3))),
+    en:Math.max(1,Math.floor(en)),
+  };
+}
 
-  let hp=(base.hp||base.stats?.hp||1)*hpStageMult;
-  let atk=(base.atk||base.stats?.atk||1)*atkStageMult;
-  let def=(base.def||base.stats?.def||0)*defStageMult;
-  let matk=(base.matk||base.stats?.matk||6)*atkStageMult;
-  let mdef=(base.mdef||base.stats?.mdef||8)*defStageMult;
-  let spd=(base.spd||base.stats?.spd||1)+Math.floor((s-1)/8);
+function resolveEnemyTier(enemyBase, forceTier=''){
+  if(forceTier) return forceTier;
+  if(enemyBase?.enemyTier) return enemyBase.enemyTier;
+  if(enemyBase?.isLieutenant) return 'lieutenant';
+  if(enemyBase?.isElite) return 'elite';
+  if(enemyBase?.isBoss) return 'boss';
+  return 'normal';
+}
 
-  if(isBoss){
-    const bossHPmult=1.55+0.10*bossIndex;
-    const bossDMGmult=1.18+0.05*bossIndex;
-    const bossDEFmult=1.12+0.03*bossIndex;
-    hp*=bossHPmult;
-    atk*=bossDMGmult; matk*=bossDMGmult;
-    def*=bossDEFmult; mdef*=bossDEFmult;
+function buildScaledEnemy(enemyBase, stage, opts={}){
+  const s=Math.max(1, Math.floor(stage||1));
+  const isEndless=!!opts.isEndless;
+  const diffMult=Number.isFinite(opts.diffMult)?opts.diffMult:1;
+  const tier=resolveEnemyTier(enemyBase, opts.tier);
+  const mult=ENEMY_TIER_MULTIPLIERS[tier]||ENEMY_TIER_MULTIPLIERS.normal;
+  const base=getEnemyBaseStats(enemyBase);
+
+  let hp=base.hp*(1+s*0.05);
+  let atk=base.atk*(1+s*0.035);
+  let matk=base.matk*(1+s*0.035);
+  let def=base.def+Math.floor(s/5);
+  let mdef=base.mdef+Math.floor(s/6);
+  let spd=base.spd+Math.floor(s/10);
+
+  hp*=mult.hp;
+  atk*=mult.atk;
+  matk*=mult.atk;
+  def*=mult.def;
+  mdef*=mult.def;
+
+  if(isEndless && s>20){
+    const milestone=Math.max(0,Math.floor((s-20)/10));
+    hp*=1+milestone*0.22;
+    atk*=1+milestone*0.12;
+    matk*=1+milestone*0.12;
+    def+=milestone;
+    mdef+=milestone;
+    spd+=Math.floor(milestone/2);
   }
 
-  hp*=1+bossKills*0.08;
-  atk*=1+bossKills*0.03;
-  def*=1+bossKills*0.03;
-  matk*=1+bossKills*0.03;
-  mdef*=1+bossKills*0.03;
+  hp*=diffMult;
+  atk*=diffMult;
+  matk*=diffMult;
+  def*=diffMult;
+  mdef*=diffMult;
 
-  const diff=G.difficulty||'juvenile';
-  if(diff==='predator'){
-    hp*=1.16; atk*=1.10; matk*=1.10; def*=1.06; mdef*=1.06;
-  } else if(diff==='murder'){
-    hp*=1.34; atk*=1.18; matk*=1.18; def*=1.10; mdef*=1.10;
-  } else {
-    hp*=diffMult; atk*=diffMult; matk*=diffMult; def*=diffMult; mdef*=diffMult;
-  }
+  const acc=Math.max(60,Math.min(94,Math.floor(base.acc+Math.floor((s-1)/5)+(tier==='boss'?2:0))));
+  const dodge=Math.max(0,Math.min(42,Math.floor(base.dodge+Math.floor((s-1)/8)+(tier==='boss'?2:0))));
+  const mdodge=Math.max(0,Math.min(32,Math.floor(base.mdodge+Math.floor((s-1)/10)+(tier==='boss'?1:0))));
 
-  const accTarget=Math.min(90,70+Math.floor((s-1)/5));
-  const dodgeTarget=Math.min(40,5+Math.floor((s-1)/7));
-  const mdodgeTarget=Math.min(30,3+Math.floor((s-1)/9));
-  const accRaw=Math.max((base.acc??base.stats?.acc??70),accTarget)+(isBoss?2:0);
-  const dodgeRaw=Math.max((base.dodge??base.stats?.dodge??5),dodgeTarget)+(isBoss?2:0);
-  const mdodgeBase=(base.mdodge??base.stats?.mdodge??base.dodge??base.stats?.dodge??3);
-  const mdodgeRaw=Math.max(mdodgeBase,mdodgeTarget)+(isBoss?1:0);
+  hp=Math.max(1,Math.round(hp));
+  atk=Math.max(1,Math.round(atk));
+  matk=Math.max(1,Math.round(matk));
+  def=Math.max(0,Math.round(def));
+  mdef=Math.max(0,Math.round(mdef));
+  spd=Math.max(1,Math.round(spd));
 
-  const acc=Math.max(60,Math.min(94,Math.floor(accRaw)));
-  const dodge=Math.max(0,Math.min(42,Math.floor(dodgeRaw)));
-  const mdodge=Math.max(0,Math.min(32,Math.floor(mdodgeRaw)));
+  return {hp,maxHp:hp,atk,def,matk,mdef,spd,acc,dodge,mdodge,en:base.en,tier};
+}
 
-  hp=Math.max(1,Math.floor(hp));
-  atk=Math.max(1,Math.floor(atk));
-  matk=Math.max(1,Math.floor(matk));
-  def=Math.max(0,Math.floor(def));
-  mdef=Math.max(0,Math.floor(mdef));
-  spd=Math.max(1,Math.floor(spd));
+function buildScaledBoss(enemyBase, stage, opts={}){
+  const forcedTier=opts.tier||resolveEnemyTier(enemyBase);
+  return buildScaledEnemy(enemyBase, stage, {...opts,tier:forcedTier});
+}
 
-  return {hp,maxHp:hp,atk,def,matk,mdef,spd,acc,dodge,mdodge};
+function enemyScaleFactor(base, stage, diffMult){
+  const isEndless=(G.endlessMode && stage>20);
+  const opts={isEndless,diffMult};
+  return (base?.isBoss)
+    ? buildScaledBoss(base,stage,opts)
+    : buildScaledEnemy(base,stage,opts);
 }
 
 function getBaseMdodge(p) {
@@ -5456,6 +5499,7 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
       dmg=Math.max(1,Math.floor(dmg*calcDefenseMultiplier(G.enemy.stats.mdef||0)));
     }
     if(G.comboReady&&!isCrit){isCrit=true;dmg=Math.max(1,Math.floor(dmg*(G.player.goldCritMult||1.5)));consumeCombo();logMsg('🔥 Combo Crit!','crit');}
+    dmg=applyBossBurstBuffer(dmg);
     G.enemy.stats.hp-=dmg;
     const _atkKind=String(srcAbility?.btnType||srcAbility?.type||G._activePlayerAbility?.btnType||G._activePlayerAbility?.type||'').toLowerCase();
     if((_atkKind==='physical'||_atkKind==='ranged') && dmg>0){
@@ -5540,6 +5584,25 @@ function pdmg(mult=1,ab=null) {
 // Check and consume combo crit — call before dealDamage for physical attacks
 function checkComboCrit() {
   return consumeCombo(); // returns true if combo was ready (free crit)
+}
+
+function calcEnemyAbilityDamage(enemy,{stat='atk',base=0,scaling=1,variance=0.15}={}){
+  const s=Math.max(1,Math.floor(enemy?.stats?.[stat]||enemy?.[stat]||1));
+  const core=base+(s*scaling);
+  const lo=Math.max(1,Math.floor(core*(1-variance)));
+  const hi=Math.max(lo,Math.floor(core*(1+variance)));
+  return roll(lo,hi);
+}
+
+function applyBossBurstBuffer(rawDamage){
+  const dmg=Math.max(0,Math.floor(rawDamage||0));
+  const e=G.enemy;
+  if(!e?.isBoss) return dmg;
+  const maxHp=Math.max(1,Math.floor(e?.stats?.maxHp||e?.maxHp||1));
+  const cap=Math.floor(maxHp*0.40);
+  if(dmg<=cap) return dmg;
+  const excess=dmg-cap;
+  return cap+Math.floor(excess*0.70);
 }
 
 function edmg(mult=1) {
@@ -7778,7 +7841,7 @@ function projectedEnemyActionDamage(a,e){
   if(!a) return 0;
   if(a.type==='strike') return Math.floor((e.stats.atk||8)*1.0);
   if(a.type==='heavy') return Math.floor((e.stats.atk||8)*1.6);
-  if(a.type==='ability') return ['eStun'].includes(a.abilityId)?Math.floor((e.stats.atk||8)*1.1):0;
+  if(a.type==='ability') return ['eStun'].includes(a.abilityId)?Math.floor(6+((e.stats.atk||8)*0.95)):0;
   return 0;
 }
 function getEnemyOpeningBias(enemy,turnNumber){
