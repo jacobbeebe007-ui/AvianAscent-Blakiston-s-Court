@@ -142,15 +142,15 @@ const ABILITY_TEMPLATES = {
   // ---- SPARROW ----
   rapidPeck:{
     id:'rapidPeck', name:'Rapid Peck', isBasic:true, type:'physical', btnType:'physical',
-    desc:'Multi-hit assassin basic. Expensive, high roll potential, chain stops on miss.',
-    baseMissChance:8, baseDmgMult:0.5, pierceDef:20,
-    energyByLevel:[2,2,2,3],
-    energyCost:2,
+    desc:'Fast striker flurry. 3 reliable pecks with tempo pressure.',
+    baseMissChance:8, baseDmgMult:0.55, pierceDef:0,
+    energyByLevel:[1,1,1,1],
+    energyCost:1,
     levels:[
-      {lv:1, desc:'2-3 hits, 8% miss each. 50% dmg, Pierce 20% DEF'},
-      {lv:2, desc:'2-4 hits, 8% miss each. 58% dmg, Pierce 25% DEF — Avian Poison 15%', newAilment:'poison', ailChance:15},
-      {lv:3, desc:'3-4 hits, 8% miss each. 66% dmg, Pierce 30% DEF — Avian Poison 20%', ailChance:20},
-      {lv:4, desc:'3-5 hits, 8% miss each. 74% dmg, Pierce 35% DEF — Avian Poison 25%', ailChance:25},
+      {lv:1, desc:'3 hits, 8% miss each. 55% dmg per hit'},
+      {lv:2, desc:'3 hits, 8% miss each. 55% dmg per hit'},
+      {lv:3, desc:'3 hits, 8% miss each. 55% dmg per hit'},
+      {lv:4, desc:'3 hits, 8% miss each. 55% dmg per hit'},
     ]
   },
 
@@ -724,7 +724,7 @@ const BIRDS = {
     unlockHint:'Defeat Stage 20 with Hummingbird.',
     stats:{hp:32,maxHp:32,atk:8,def:3,spd:10,dodge:28,acc:88,critChance:10,mdef:8,matk:8},
     statBars:{HP:32/50,ATK:8/15,SPD:10/10,Dodge:.56,ACC:.88}, color:'#6a8ac8',
-    startAbilities:['diveGouge','swoop','evade'],
+    startAbilities:['rapidPeck','swoop','evade'],
     passive:{id:'terminalVelocity',name:'Terminal Velocity',desc:'Each turn without taking damage stacks +2% Crit Chance (max +20%). Taking damage resets it.',
       onBattleStart(p){p._velocityStacks=0;},
       onTurnEnd(p){if(!p._tookDmgThisTurn){p._velocityStacks=Math.min(p._velocityStacks+2,20);}p._tookDmgThisTurn=false;},
@@ -774,7 +774,7 @@ const BIRDS = {
     size:'medium', class:'knight',
     stats:{hp:35,maxHp:35,atk:6,def:4,spd:5,dodge:15,acc:90,mdef:10,matk:6},
     statBars:{HP:35/50,ATK:6/15,SPD:5/10,Dodge:.3,ACC:.9}, color:'#c0c8d8',
-    startAbilities:['rapidPeck','murderMurmuration','dreadCall','battleFocus'],
+    startAbilities:['mockingPeck','murderMurmuration','dreadCall','battleFocus'],
     passive:{id:'ironWill',name:'Iron Will',desc:'Each successful block = +1 DEF permanently (max +8). Immune to Weaken.',
       immuneWeaken:true,
       onBlock(p){if(!p._ironWillBonus)p._ironWillBonus=0;if(p._ironWillBonus<8){p._ironWillBonus++;p.stats.def++;}}},
@@ -859,7 +859,7 @@ const BIRDS = {
     unlockHint:'Defeat Stage 10 with Robin.',
     stats:{hp:42,maxHp:42,atk:7,def:4,spd:8,dodge:32,acc:84,mdef:9,matk:12,critChance:8},
     color:'#2a2a2a',
-    startAbilities:['rapidPeck','stealShine','featherFlick','dart'],
+    startAbilities:['glintJab','stealShine','featherFlick','dart'],
     passive:{id:'murderCall',name:'Murder Call',desc:'Mob attacks gain +10% hit vs low-HP foes. Each kill raises summon cap (max +3).',
       onBattleStart(p){p._murderBonusCap=0;}},
   },
@@ -895,7 +895,7 @@ const BIRDS = {
     unlockHint:'Enter: "Ahh Ahh Eee Eee Tookie Tookie"',
     stats:{hp:45,maxHp:45,atk:7,def:5,spd:4,dodge:12,acc:75,mdef:8,matk:10},
     statBars:{HP:45/50,ATK:7/15,SPD:4/10,Dodge:.24,ACC:.75}, color:'#60c840',
-    startAbilities:['rapidPeck','fruitBomb','taunt','preen'],
+    startAbilities:['serratedBill','fruitBomb','taunt','preen'],
     passive:{id:'fruitful',name:'Fruitful',desc:'Whenever you heal, gain +1% ACC (max +12%).',
       onHeal(p,amt){if(!p._fruitfulBonus)p._fruitfulBonus=0;if(p._fruitfulBonus<12){const gain=Math.max(1,Math.floor(amt/8));const actual=Math.min(gain,12-p._fruitfulBonus);p._fruitfulBonus+=actual;p.stats.acc=Math.min(p.stats.acc+actual,100);}}},
   },
@@ -919,7 +919,7 @@ const BIRDS = {
     unlockHint:'Reach Endless Stage 30 with any Ranger.',
     stats:{hp:48,maxHp:48,atk:8,def:4,spd:6,dodge:18,acc:80,mdef:12,matk:8},
     color:'#e8609a',
-    startAbilities:['rapidPeck','mudLash','preen','graceStep'],
+    startAbilities:['swoopCut','mudLash','preen','graceStep'],
     passive:{id:'stanceBalance',name:'Balance Master',
       desc:'Alternate attack and utility abilities each turn to gain +20% ATK (2t) or +20% dodge (2t).',
       onBattleStart(p){p._lastAbType=null;},
@@ -945,7 +945,7 @@ const BIRDS = {
     unlockHint:'Defeat Stage 10 with Crow.',
     stats:{hp:48,maxHp:48,atk:9,def:6,spd:5,dodge:10,acc:80,critChance:8,mdef:10,matk:6},
     statBars:{HP:48/50,ATK:9/15,SPD:5/10,Dodge:.2,ACC:.8}, color:'#e0a060',
-    startAbilities:['rapidPeck','stickLance','battleRhythm','guard'],
+    startAbilities:['raptorKick','stickLance','battleRhythm','guard'],
     passive:{id:'serpentStomp',name:'Serpent Stomp',desc:'Every physical attack has a 20% chance to Paralyze the enemy. Immune to Poison.',
       immunePoison:true,
       onPhysicalHit(p,G){if(chance(20)&&!G.enemyStatus.paralyzed){G.enemyStatus.paralyzed=1;spawnFloat('enemy','⚡ Para!','fn-status');}}},
@@ -969,7 +969,7 @@ const BIRDS = {
     unlockHint:'Reach level 21 in Endless mode with any Mage.',
     stats:{hp:36,maxHp:36,atk:6,def:3,spd:8,dodge:24,acc:84,mdef:9,matk:14,critChance:8},
     color:'#b0c8d8',
-    startAbilities:['rapidPeck','diveSnatch','windSlash','mobSwarm'],
+    startAbilities:['fruitSpit','diveSnatch','windSlash','mobSwarm'],
     passive:{id:'scavengeFlock',name:'Scavenge Flock',desc:'Summoned mobs steal 5% enemy ATK as SPD bonus (stacks). Immune to Fear.',
       immuneFear:true,
       onBattleStart(p){p._scavengeStacks=0;}},
@@ -981,7 +981,7 @@ const BIRDS = {
     size:'xl', class:'tank',
     stats:{hp:55,maxHp:55,atk:9,def:7,spd:2,dodge:5,acc:70,mdef:12,matk:4},
     statBars:{HP:55/50,ATK:9/15,SPD:2/10,Dodge:.1,ACC:.7}, color:'#e8c96a',
-    startAbilities:['rapidPeck','honkTerror','guard','heavyTalon'],
+    startAbilities:['gooseHonk','honkTerror','guard','heavyTalon'],
     passive:{id:'bruisedHide',name:'Bruised Hide',desc:'Every 20 HP taken = +1 ATK until battle ends. Takes 20% reduced physical damage.',
       physicalResist:0.20,
       onDamage(p,dmg){if(!p._bruiseAcc)p._bruiseAcc=0;p._bruiseAcc+=dmg;while(p._bruiseAcc>=20){p._bruiseAcc-=20;G.player.stats.atk++;spawnFloat('player','💢+ATK','fn-status');}}},
@@ -993,7 +993,7 @@ const BIRDS = {
     unlockHint:'Defeat Stage 10 with Goose.',
     stats:{hp:70,maxHp:70,atk:10,def:10,spd:2,dodge:5,acc:72,critChance:5,mdef:16,matk:6},
     statBars:{HP:70/50,ATK:10/15,SPD:2/10,Dodge:.1,ACC:.72}, color:'#5a7090',
-    startAbilities:['rapidPeck','shoebillClamp','sitAndWait','fishSnatcher'],
+    startAbilities:['bracePeck','shoebillClamp','sitAndWait','fishSnatcher'],
     passive:{id:'prehistoricStare',name:'Prehistoric Stare',desc:'Enemies have 15% chance to skip attack from dread (30% when feared). Immune to Fear & Stun.',
       immuneFear:true, immuneStun:true,
       onEnemyAttackCheck(p,G){const fearBonus=G.enemyStatus.feared>0?15:0;return chance(15+fearBonus);}},
@@ -1018,7 +1018,7 @@ const BIRDS = {
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:60,maxHp:60,atk:11,def:7,spd:4,dodge:10,acc:78,mdef:10,matk:6},
     color:'#e8e4d8',
-    startAbilities:['rapidPeck','skyStrike','focusSight','windSlash'],
+    startAbilities:['huntersJab','skyStrike','focusSight','windSlash'],
     passive:{id:'lastStand',name:'Last Stand',
       desc:'First time per battle you would die, survive at 1 HP and gain +5 ATK for 3 turns. Immune to Paralysis.',
       immuneParalyze:true,
@@ -1032,7 +1032,7 @@ const BIRDS = {
     unlockHint:'Reach Endless Stage 30 with any Tank.',
     stats:{hp:65,maxHp:65,atk:9,def:9,spd:3,dodge:12,acc:75,mdef:14,matk:5},
     color:'#3a5878',
-    startAbilities:['rapidPeck','iceGuard','bodySlam','rallyCall'],
+    startAbilities:['icebreakerHonk','iceGuard','bodySlam','rallyCall'],
     passive:{id:'blubberCoat',name:'Blubber Coat',desc:'Reduces all magic damage by 25–40% (scales with missing HP). Waddle applies Lullaby (15% skip/turn) on attack.',
       get _baseMagicReduce(){return 0.25;},
       onMagicHit(p,dmg){const hpPct=p.stats.hp/p.stats.maxHp;return Math.floor(dmg*(1-(0.25+(1-hpPct)*0.15)));},
@@ -1122,6 +1122,33 @@ runPassiveIntegrityAudit();
 // ============================================================
 //  ENEMIES — 20 stages (boss every 10)
 // ============================================================
+function inferAIPersonalityFromStyle(style='tactical', name=''){
+  const n=String(name||'').toLowerCase();
+  if(/duke blakiston/.test(n)) return 'tyrant';
+  if(/seraph/.test(n)) return 'duelist';
+  if(/khar/.test(n)) return 'executioner';
+  if(/marshal stride/.test(n)) return 'defender';
+  if(/mistmother koro/.test(n)) return 'seer';
+  if(/gravecaller skarn/.test(n)) return 'reaper';
+  if(/ashwing pyre/.test(n)) return 'scavenger';
+  const s=String(style||'').toLowerCase();
+  if(['berserker','aggressive'].includes(s)) return 'aggressive';
+  if(['cautious','defensive'].includes(s)) return 'defender';
+  if(['trickster'].includes(s)) return 'control';
+  if(['predator'].includes(s)) return 'executioner';
+  return 'tactical';
+}
+
+function inferEnemyClassFromStyle(style='tactical'){
+  const s=String(style||'').toLowerCase();
+  if(['berserker'].includes(s)) return 'bruiser';
+  if(['aggressive'].includes(s)) return 'striker';
+  if(['cautious','defensive'].includes(s)) return 'tank';
+  if(['trickster'].includes(s)) return 'trickster';
+  if(['predator'].includes(s)) return 'predator';
+  return 'support';
+}
+
 function makeEnemy(name, emoji, hp, atk, def, spd, style, isBoss=false, bossTitle='', opts={}) {
   const acc = opts.acc||72;
   const dodge = opts.dodge||5;
@@ -1129,15 +1156,24 @@ function makeEnemy(name, emoji, hp, atk, def, spd, style, isBoss=false, bossTitl
   const abilities = opts.abilities||[];
   const mdef = opts.mdef||8;
   const matk = opts.matk||6;
+  const baseEn = Number.isFinite(opts.baseEn)
+    ? opts.baseEn
+    : (isBoss ? 6 : (size==='xl'?5:size==='large'?4:size==='medium'?4:3));
+  const enemyClass = opts.enemyClass || inferEnemyClassFromStyle(style);
+  const cc = Number.isFinite(opts.cc) ? opts.cc : (Number.isFinite(opts.critChance) ? (opts.critChance/100) : 0.05);
+  const cd = Number.isFinite(opts.cd) ? opts.cd : (Number.isFinite(opts.critMult) ? opts.critMult : 1.5);
   const portraitKey = opts.portraitKey||null;
-  return {name, emoji, portraitKey, hp, maxHp:hp, atk, def, spd, acc, dodge, size, aiStyle:style, isBoss, bossTitle, abilities,
-    stats:{hp,maxHp:hp,atk,def,spd,acc,dodge,mdef,matk}};
+  const enemyTier = opts.enemyTier || (isBoss ? (/final boss/i.test(String(bossTitle||'')) ? 'boss' : 'lieutenant') : 'normal');
+  return {name, emoji, portraitKey, hp, maxHp:hp, atk, def, spd, acc, dodge, size, enemyClass, aiStyle:style, aiPersonality:(opts.aiPersonality||inferAIPersonalityFromStyle(style,name)), isBoss, bossTitle, enemyTier, abilities,
+    stats:{hp,maxHp:hp,atk,def,spd,acc,dodge,mdef,matk,en:baseEn,cc,cd,critChance:Math.round(cc*100),critMult:cd}};
 }
 
 function makeDukeBlakiston(){
   return {
-    id:'duke_blakiston', name:'Duke Blakiston', portraitKey:'duke_blakiston', isBoss:true, size:'xl', aiType:'boss_duke',
-    stats:{maxHp:360,hp:360,atk:16,matk:16,def:9,mdef:9,spd:7,acc:85,dodge:8},
+    id:'duke_blakiston', name:'Duke Blakiston', portraitKey:'duke_blakiston', isBoss:true, size:'xl', aiType:'boss_duke', aiPersonality:'tyrant',
+    enemyClass:'predator',
+    enemyTier:'boss',
+    stats:{maxHp:360,hp:360,atk:16,matk:16,def:9,mdef:9,spd:7,acc:85,dodge:8,en:6,cc:0.12,cd:1.7,critChance:12,critMult:1.7},
     duke:{phase:1,nightfallTurns:0,decreeKey:null,decreeStacks:0,riverCd:0,summonCd:0,verdictCd:0}
   };
 }
@@ -1147,7 +1183,11 @@ const ENEMY_ABILITY_POOL = {
   eWeaken:  {name:'Screech', desc:'Applies Chicken Pox (reduced damage/dodge).', dmg:'0 direct', dodgeable:true, fn(e,p,G){
     const _bd=BIRDS[G.player.birdKey];if(_bd&&_bd.passive&&_bd.passive.immuneWeaken){spawnFloat('player','🛡 Immune!','fn-status');return;}
     G.playerStatus.weaken=Math.max(G.playerStatus.weaken||0,2+((G.biomeMod?.dread||0)>0?1:0));logMsg(`🐔 ${e.name} weakens you!`,'enemy-action');}},
-  eStun:    {name:'Body Slam', desc:'Chance to stun for 1 turn.', dmg:'~90-130% ATK', fn(e,p,G){
+  eStun:    {name:'Body Slam', desc:'Physical slam that scales with ATK + chance to stun.', dmg:'Base + ATK scaling', fn(e,p,G){
+    const slam=calcEnemyAbilityDamage(e,{stat:'atk',base:6,scaling:0.95,variance:0.2});
+    const spike=rollEnemyCritDamage(slam);
+    const rr=dealDamage('player',spike.amount);
+    spawnFloat('player',`-${rr.dmgDealt}`,'fn-dmg');
     const _bd=BIRDS[G.player.birdKey];if(_bd&&_bd.passive&&(_bd.passive.immuneStun||G.player.immuneParalyze)){spawnFloat('player','🛡 Immune!','fn-status');logMsg(`${e.name}'s stun bounced off!`,'miss');return;}
     if(chance(25)){G.playerStatus.stunned=(G.playerStatus.stunned||0)+1;logMsg(`😵 ${e.name} stuns you!`,'enemy-action');}else{logMsg(`${e.name}'s stun missed.`,'miss');}}},
   eFear:    {name:'Shriek', desc:'Applies Fear; lowers hit reliability.', dmg:'0 direct', dodgeable:true, fn(e,p,G){
@@ -1236,7 +1276,7 @@ function applyBiomeModifiers(){
 // ============================================================
 //  REWARD POOLS — tiered
 // ============================================================
-const REWARD_WEIGHTS = { grey:50, green:30, blue:15, purple:4, gold:1 };
+const REWARD_WEIGHTS = { grey:50, green:30, blue:16, purple:4, gold:0 };
 function rollRarity(){
   const total=Object.values(REWARD_WEIGHTS).reduce((a,b)=>a+b,0);
   let r=Math.random()*total;
@@ -1245,50 +1285,70 @@ function rollRarity(){
 }
 
 const UPGRADE_CARDS_REWORK = [
-  {id:'g_feather_guard',tier:'grey',icon:'🛡️',name:'Feather Guard',desc:'+1 DEF',tags:['defense'],apply:p=>{p.stats.def+=1;}},
-  {id:'g_keen_beak',tier:'grey',icon:'🗡️',name:'Keen Beak',desc:'+1 ATK',tags:['offense'],apply:p=>{p.stats.atk+=1;}},
-  {id:'g_spell_feather',tier:'grey',icon:'✨',name:'Spell Feather',desc:'+1 MATK',tags:['offense'],apply:p=>{p.stats.matk=(p.stats.matk||0)+1;}},
-  {id:'g_warding_down',tier:'grey',icon:'🔷',name:'Warding Down',desc:'+1 MDEF',tags:['defense'],apply:p=>{p.stats.mdef=(p.stats.mdef||0)+1;}},
-  {id:'g_fleet_step',tier:'grey',icon:'💨',name:'Fleet Step',desc:'+1 SPD',tags:['utility'],apply:p=>{p.stats.spd=(p.stats.spd||0)+1;}},
-  {id:'g_focused_eye',tier:'grey',icon:'🎯',name:'Focused Eye',desc:'+5% Hit Chance',tags:['utility'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+5;}},
-  {id:'g_quick_blood',tier:'grey',icon:'💥',name:'Quick Blood',desc:'Crit chance +4%',tags:['offense'],apply:p=>{p.stats.critChance=(p.stats.critChance||5)+4;}},
-  {id:'g_light_frame',tier:'grey',icon:'🪽',name:'Light Frame',desc:'Dodge +4%',tags:['defense'],apply:p=>{p.stats.dodge=Math.min(95,(p.stats.dodge||0)+4);}},
-  {id:'g_feather_lining',tier:'grey',icon:'❤️',name:'Feather Lining',desc:'+5 Max HP',tags:['sustain'],apply:p=>{p.stats.maxHp+=5;p.stats.hp=Math.min(p.stats.hp+5,p.stats.maxHp);}},
-  {id:'g_talon_precision',tier:'grey',icon:'👁️',name:'Talon Precision',desc:'First attack each battle +8% hit chance',tags:['utility'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+8;}},
+  // Grey (15)
+  {id:'g_feather_lining',tier:'grey',icon:'❤️',name:'Feather Lining',desc:'+4 Max HP',tags:['stat','hp'],apply:p=>{p.stats.maxHp+=4;p.stats.hp=Math.min(p.stats.hp,p.stats.maxHp);}},
+  {id:'g_keen_beak',tier:'grey',icon:'🗡️',name:'Keen Beak',desc:'+1 ATK',tags:['stat','atk'],apply:p=>{p.stats.atk+=1;}},
+  {id:'g_spell_feather',tier:'grey',icon:'✨',name:'Spell Feather',desc:'+1 MATK',tags:['stat','matk'],apply:p=>{p.stats.matk=(p.stats.matk||0)+1;}},
+  {id:'g_feather_guard',tier:'grey',icon:'🛡️',name:'Feather Guard',desc:'+1 DEF',tags:['stat','def'],apply:p=>{p.stats.def+=1;}},
+  {id:'g_warding_down',tier:'grey',icon:'🔷',name:'Warding Down',desc:'+1 MDEF',tags:['stat','mdef'],apply:p=>{p.stats.mdef=(p.stats.mdef||0)+1;}},
+  {id:'g_fleet_step',tier:'grey',icon:'💨',name:'Fleet Step',desc:'+1 SPD',tags:['stat','spd'],apply:p=>{p.stats.spd=(p.stats.spd||0)+1;}},
+  {id:'g_quick_blood',tier:'grey',icon:'💥',name:'Quick Blood',desc:'Crit chance +3%',tags:['stat','crit'],apply:p=>{p.stats.critChance=(p.stats.critChance||5)+3;}},
+  {id:'g_light_frame',tier:'grey',icon:'🪽',name:'Light Frame',desc:'Dodge +4%',tags:['defense','dodge'],apply:p=>{p.stats.dodge=Math.min(95,(p.stats.dodge||0)+4);}},
+  {id:'g_focused_eye',tier:'grey',icon:'🎯',name:'Focused Eye',desc:'+5% hit chance',tags:['stat','accuracy'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+5;}},
+  {id:'g_first_bite',tier:'grey',icon:'🦴',name:'First Bite',desc:'First attack each battle +10% damage',tags:['opening','offense'],stackable:false,apply:p=>{p.firstAttackEachBattleBonusPct=Math.max(p.firstAttackEachBattleBonusPct||0,0.10);}},
+  {id:'g_guard_posture',tier:'grey',icon:'🛡',name:'Guard Posture',desc:'First hit each battle deals -10% damage',tags:['defense'],stackable:false,apply:p=>{p.firstHitReduce=Math.max(p.firstHitReduce||0,0.10);}},
+  {id:'g_energy_fletch',tier:'grey',icon:'🔋',name:'Energy Fletch',desc:'Max Energy +1',tags:['energy'],apply:p=>{p.energyBonus=(p.energyBonus||0)+1;p.energyMax=(p.energyMax||0)+1;}},
+  {id:'g_crit_medicine',tier:'grey',icon:'💉',name:'Critical Medicine',desc:'Heal 3 HP on crit',tags:['combat-trigger','sustain'],apply:p=>{p.healOnCrit=(p.healOnCrit||0)+3;}},
+  {id:'g_dodge_medicine',tier:'grey',icon:'🪶',name:'Evasive Medicine',desc:'Heal 4 HP on dodge',tags:['combat-trigger','sustain'],apply:p=>{p.healOnDodge=(p.healOnDodge||0)+4;}},
+  {id:'g_finish_medicine',tier:'grey',icon:'🦅',name:'Hunter Medicine',desc:'Heal 5 HP on kill',tags:['combat-trigger','sustain'],apply:p=>{p.healOnKill=(p.healOnKill||0)+5;}},
 
-  {id:'gr_serrated_talon',tier:'green',icon:'🩸',name:'Serrated Talon',desc:'Attacks apply Bleed(1) on hit (10% chance)',tags:['offense'],apply:p=>{p.bleedOnHitChance=(p.bleedOnHitChance||0)+10;}},
-  {id:'gr_venom_beak',tier:'green',icon:'☣️',name:'Venom Beak',desc:'Attacks apply Poison(1) on hit (10% chance)',tags:['offense'],apply:p=>{p.poisonOnHitChance=(p.poisonOnHitChance||0)+10;}},
-  {id:'gr_blood_memory',tier:'green',icon:'🗡️',name:'Blood Memory',desc:'Deal +2 damage to Bleeding enemies',tags:['offense'],apply:p=>{p.vsBleedFlatBonus=(p.vsBleedFlatBonus||0)+2;}},
-  {id:'gr_toxic_study',tier:'green',icon:'🧪',name:'Toxic Study',desc:'Poison deals +1 damage',tags:['offense'],apply:p=>{p.poisonFlatBonus=(p.poisonFlatBonus||0)+1;}},
-  {id:'gr_calm_focus',tier:'green',icon:'🎯',name:'Calm Focus',desc:'First attack each battle +20% accuracy',tags:['utility'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+20;}},
-  {id:'gr_war_rhythm',tier:'green',icon:'🔋',name:'War Rhythm',desc:'First attack each battle costs 0 Energy',tags:['utility'],stackable:false,apply:p=>{p.firstAttackFree=true;}},
-  {id:'gr_hard_plumage',tier:'green',icon:'🪨',name:'Hard Plumage',desc:'First hit each battle deals -15% damage',tags:['defense'],stackable:false,apply:p=>{p.firstHitReduce=Math.max(p.firstHitReduce||0,0.15);}},
-  {id:'gr_battle_instinct',tier:'green',icon:'⚡',name:'Battle Instinct',desc:'Gain +1 SPD when below 50% HP',tags:['utility'],stackable:false,apply:p=>{p.lowHpSpdBonus=1;}},
-  {id:'gr_rune_focus',tier:'green',icon:'🔮',name:'Rune Focus',desc:'First spell each battle +30% damage',tags:['offense'],stackable:false,apply:p=>{p.firstSpellBattleBonusPct=Math.max(p.firstSpellBattleBonusPct||0,0.30);}},
-  {id:'gr_iron_molt',tier:'green',icon:'🛡️',name:'Iron Molt',desc:'Gain +1 DEF when below 50% HP',tags:['defense'],stackable:false,apply:p=>{p.lowHpDefBonus=1;}},
+  // Green (15)
+  {id:'gr_sturdy_heart',tier:'green',icon:'💚',name:'Sturdy Heart',desc:'+8 Max HP',tags:['stat','hp'],apply:p=>{p.stats.maxHp+=8;p.stats.hp=Math.min(p.stats.hp,p.stats.maxHp);}},
+  {id:'gr_razor_talons',tier:'green',icon:'🗡️',name:'Razor Talons',desc:'+2 ATK',tags:['stat','atk'],apply:p=>{p.stats.atk+=2;}},
+  {id:'gr_arcane_plume',tier:'green',icon:'🔮',name:'Arcane Plume',desc:'+2 MATK',tags:['stat','matk'],apply:p=>{p.stats.matk=(p.stats.matk||0)+2;}},
+  {id:'gr_iron_molt',tier:'green',icon:'🧱',name:'Iron Molt',desc:'+2 DEF',tags:['stat','def'],apply:p=>{p.stats.def+=2;}},
+  {id:'gr_rune_guard',tier:'green',icon:'🌀',name:'Rune Guard',desc:'+2 MDEF',tags:['stat','mdef'],apply:p=>{p.stats.mdef=(p.stats.mdef||0)+2;}},
+  {id:'gr_tailwind',tier:'green',icon:'🌬️',name:'Tailwind',desc:'+2 SPD',tags:['stat','spd'],apply:p=>{p.stats.spd=(p.stats.spd||0)+2;}},
+  {id:'gr_calm_focus',tier:'green',icon:'🎯',name:'Calm Focus',desc:'+10% hit chance',tags:['stat','accuracy'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+10;}},
+  {id:'gr_blood_trigger',tier:'green',icon:'🩸',name:'Blood Trigger',desc:'Crits apply Bleed(1)',tags:['status-synergy','bleed'],apply:p=>{p.critBleed=(p.critBleed||0)+1;}},
+  {id:'gr_venom_beak',tier:'green',icon:'☣️',name:'Venom Beak',desc:'Attacks apply Poison(1) on hit (12% chance)',tags:['status-synergy','poison'],apply:p=>{p.poisonOnHitChance=(p.poisonOnHitChance||0)+12;}},
+  {id:'gr_serrated_talon',tier:'green',icon:'🪓',name:'Serrated Talon',desc:'Attacks apply Bleed(1) on hit (12% chance)',tags:['status-synergy','bleed'],apply:p=>{p.bleedOnHitChance=(p.bleedOnHitChance||0)+12;}},
+  {id:'gr_toxic_study',tier:'green',icon:'🧪',name:'Toxic Study',desc:'Poison deals +1 damage',tags:['status-synergy','poison'],apply:p=>{p.poisonFlatBonus=(p.poisonFlatBonus||0)+1;}},
+  {id:'gr_blood_memory',tier:'green',icon:'🦷',name:'Blood Memory',desc:'+2 damage vs Bleeding enemies',tags:['status-synergy','bleed'],apply:p=>{p.vsBleedFlatBonus=(p.vsBleedFlatBonus||0)+2;}},
+  {id:'gr_war_rhythm',tier:'green',icon:'⚡',name:'War Rhythm',desc:'First attack each battle costs 0 EN',tags:['energy','opening'],stackable:false,apply:p=>{p.firstAttackFree=true;}},
+  {id:'gr_spell_rhythm',tier:'green',icon:'🎵',name:'Spell Rhythm',desc:'First spell each battle costs 0 EN',tags:['energy','opening'],stackable:false,apply:p=>{p.firstSpellFree=true;}},
+  {id:'gr_hard_plumage',tier:'green',icon:'🛡️',name:'Hard Plumage',desc:'First hit each battle deals -15% damage',tags:['defense'],stackable:false,apply:p=>{p.firstHitReduce=Math.max(p.firstHitReduce||0,0.15);}},
 
-  {id:'b_deep_cut',tier:'blue',icon:'🩸',name:'Deep Cut',desc:'Bleed stacks applied by you increase by +1',tags:['offense'],apply:p=>{p.bleedBonusStacks=(p.bleedBonusStacks||0)+1;}},
-  {id:'b_venom_reservoir',tier:'blue',icon:'☣️',name:'Venom Reservoir',desc:'Poison lasts 1 extra turn',tags:['offense'],apply:p=>{p.poisonExtraTurns=(p.poisonExtraTurns||0)+1;}},
-  {id:'b_predator_sight',tier:'blue',icon:'👁️',name:'Predator Sight',desc:'+10% Crit Chance',tags:['offense'],apply:p=>{p.stats.critChance=(p.stats.critChance||5)+10;}},
-  {id:'b_execution_beak',tier:'blue',icon:'💢',name:'Execution Beak',desc:'Crit damage +30%',tags:['offense'],apply:p=>{p.critDamageBonusPct=(p.critDamageBonusPct||0)+0.30;}},
-  {id:'b_spell_echo',tier:'blue',icon:'🎶',name:'Spell Echo',desc:'Every 4th spell deals +40% damage',tags:['offense'],stackable:false,apply:p=>{p.everyFourthSpellBonusPct=0.40;}},
-  {id:'b_quick_recovery',tier:'blue',icon:'🩹',name:'Quick Recovery',desc:'Heal 3 HP after battle',tags:['sustain'],apply:p=>{p.postBattleFlatHeal=(p.postBattleFlatHeal||0)+3;}},
-  {id:'b_storm_pulse',tier:'blue',icon:'🌩️',name:'Storm Pulse',desc:'First attack each battle always hits',tags:['utility'],stackable:false,apply:p=>{p.firstAttackAlwaysHit=true;}},
-  {id:'b_iron_feather_mantle',tier:'blue',icon:'🧱',name:'Iron Feather Mantle',desc:'+2 DEF',tags:['defense'],apply:p=>{p.stats.def+=2;}},
-  {id:'b_arcane_plumage',tier:'blue',icon:'🔷',name:'Arcane Plumage',desc:'+2 MDEF',tags:['defense'],apply:p=>{p.stats.mdef=(p.stats.mdef||0)+2;}},
-  {id:'b_hawk_instinct',tier:'blue',icon:'💨',name:'Hawk Instinct',desc:'+2 SPD',tags:['utility'],apply:p=>{p.stats.spd=(p.stats.spd||0)+2;}},
+  // Blue (12)
+  {id:'b_vital_gale',tier:'blue',icon:'💙',name:'Vital Gale',desc:'+12 Max HP',tags:['stat','hp'],apply:p=>{p.stats.maxHp+=12;p.stats.hp=Math.min(p.stats.hp,p.stats.maxHp);}},
+  {id:'b_predator_sight',tier:'blue',icon:'👁️',name:'Predator Sight',desc:'+8% Crit Chance',tags:['stat','crit'],apply:p=>{p.stats.critChance=(p.stats.critChance||5)+8;}},
+  {id:'b_execution_beak',tier:'blue',icon:'💢',name:'Execution Beak',desc:'Crit damage +25%',tags:['stat','crit'],apply:p=>{p.critDamageBonusPct=(p.critDamageBonusPct||0)+0.25;}},
+  {id:'b_iron_feather_mantle',tier:'blue',icon:'🧱',name:'Iron Feather Mantle',desc:'+3 DEF',tags:['stat','def'],apply:p=>{p.stats.def+=3;}},
+  {id:'b_arcane_mantle',tier:'blue',icon:'🔷',name:'Arcane Mantle',desc:'+3 MDEF',tags:['stat','mdef'],apply:p=>{p.stats.mdef=(p.stats.mdef||0)+3;}},
+  {id:'b_hawk_instinct',tier:'blue',icon:'💨',name:'Hawk Instinct',desc:'+3 SPD',tags:['stat','spd'],apply:p=>{p.stats.spd=(p.stats.spd||0)+3;}},
+  {id:'b_storm_pulse',tier:'blue',icon:'🌩️',name:'Storm Pulse',desc:'First attack each battle always hits',tags:['opening'],stackable:false,apply:p=>{p.firstAttackAlwaysHit=true;}},
+  {id:'b_spell_echo',tier:'blue',icon:'🎶',name:'Spell Echo',desc:'Every 4th spell deals +30% damage',tags:['status-synergy','magic'],stackable:false,apply:p=>{p.everyFourthSpellBonusPct=0.30;}},
+  {id:'b_deep_cut',tier:'blue',icon:'🩸',name:'Deep Cut',desc:'Bleed applied by you gains +1 stack',tags:['status-synergy','bleed'],apply:p=>{p.bleedBonusStacks=(p.bleedBonusStacks||0)+1;}},
+  {id:'b_venom_reservoir',tier:'blue',icon:'☣️',name:'Venom Reservoir',desc:'Poison lasts +1 turn',tags:['status-synergy','poison'],apply:p=>{p.poisonExtraTurns=(p.poisonExtraTurns||0)+1;}},
+  {id:'b_opening_drive',tier:'blue',icon:'🚩',name:'Opening Drive',desc:'First attack each battle +20% damage',tags:['opening','offense'],stackable:false,apply:p=>{p.firstAttackEachBattleBonusPct=Math.max(p.firstAttackEachBattleBonusPct||0,0.20);}},
+  {id:'b_energy_reserve',tier:'blue',icon:'🔋',name:'Energy Reserve',desc:'Max Energy +1',tags:['energy'],apply:p=>{p.energyBonus=(p.energyBonus||0)+1;p.energyMax=(p.energyMax||0)+1;}},
 
-  {id:'p_blood_frenzy',tier:'purple',icon:'🩸',name:'Blood Frenzy',desc:'Deal +25% damage to Bleeding enemies',tags:['offense'],stackable:false,apply:p=>{p.vsBleedPctBonus=Math.max(p.vsBleedPctBonus||0,0.25);}},
-  {id:'p_venom_scholar',tier:'purple',icon:'☣️',name:'Venom Scholar',desc:'Poison damage increases by +50%',tags:['offense'],stackable:false,apply:p=>{p.poisonTickMult=Math.max(p.poisonTickMult||1,1.5);}},
-  {id:'p_duelist_discipline',tier:'purple',icon:'🎯',name:'Duelist Discipline',desc:'First attack each battle crit chance +30%',tags:['offense'],apply:p=>{p.firstAttackCritBonus=(p.firstAttackCritBonus||0)+30;}},
-  {id:'p_battle_meditation',tier:'purple',icon:'🧘',name:'Battle Meditation',desc:'Your first spell each battle costs 0 Energy',tags:['utility'],stackable:false,apply:p=>{p.firstSpellFree=true;}},
-  {id:'p_survivors_molt',tier:'purple',icon:'🪶',name:"Survivor's Molt",desc:'When first reduced below 30% HP heal 8',tags:['sustain'],stackable:false,apply:p=>{p.survivorMoltHeal=Math.max(p.survivorMoltHeal||0,8);}},
-  {id:'p_precision_talon',tier:'purple',icon:'🏹',name:'Precision Talon',desc:'+15% Hit Chance',tags:['utility'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+15;}},
-  {id:'p_relentless_strike',tier:'purple',icon:'⚔️',name:'Relentless Strike',desc:'Your first attack each turn deals +10% damage',tags:['offense'],stackable:false,apply:p=>{p.firstAttackEachTurnBonusPct=Math.max(p.firstAttackEachTurnBonusPct||0,0.10);}},
+  // Purple (8)
+  {id:'p_iron_heart',tier:'purple',icon:'💜',name:'Iron Heart',desc:'+16 Max HP',tags:['stat','hp'],apply:p=>{p.stats.maxHp+=16;p.stats.hp=Math.min(p.stats.hp,p.stats.maxHp);}},
+  {id:'p_blood_frenzy',tier:'purple',icon:'🩸',name:'Blood Frenzy',desc:'+20% damage vs Bleeding enemies',tags:['status-synergy','bleed'],stackable:false,apply:p=>{p.vsBleedPctBonus=Math.max(p.vsBleedPctBonus||0,0.20);}},
+  {id:'p_venom_scholar',tier:'purple',icon:'☣️',name:'Venom Scholar',desc:'Poison damage +40%',tags:['status-synergy','poison'],stackable:false,apply:p=>{p.poisonTickMult=Math.max(p.poisonTickMult||1,1.4);}},
+  {id:'p_duelist_discipline',tier:'purple',icon:'🎯',name:'Duelist Discipline',desc:'First attack each battle crit chance +25%',tags:['opening','offense'],apply:p=>{p.firstAttackCritBonus=(p.firstAttackCritBonus||0)+25;}},
+  {id:'p_battle_meditation',tier:'purple',icon:'🧘',name:'Battle Meditation',desc:'First spell each battle costs 0 EN',tags:['energy'],stackable:false,apply:p=>{p.firstSpellFree=true;}},
+  {id:'p_survivors_molt',tier:'purple',icon:'🪶',name:"Survivor's Molt",desc:'Once per battle below 30% HP, heal 8',tags:['combat-trigger','defense'],stackable:false,apply:p=>{p.survivorMoltHeal=Math.max(p.survivorMoltHeal||0,8);}},
+  {id:'p_precision_talon',tier:'purple',icon:'🏹',name:'Precision Talon',desc:'+15% hit chance',tags:['stat','accuracy'],apply:p=>{p.firstAttackAccBonus=(p.firstAttackAccBonus||0)+15;}},
+  {id:'p_relentless_strike',tier:'purple',icon:'⚔️',name:'Relentless Strike',desc:'First attack each turn deals +10% damage',tags:['opening','offense'],stackable:false,apply:p=>{p.firstAttackEachTurnBonusPct=Math.max(p.firstAttackEachTurnBonusPct||0,0.10);}},
 
-  {id:'z_sky_predator',tier:'gold',icon:'👑',name:'Sky Predator',desc:'Your first attack each battle always crits',tags:['offense'],stackable:false,apply:p=>{p.firstAttackAlwaysCrit=true;}},
-  {id:'z_blackstone_trophy',tier:'gold',icon:'🗿',name:'Blackstone Trophy',desc:'Enemies start battle with Fear(1)',tags:['utility'],stackable:false,apply:p=>{p.openingEnemyFear=(p.openingEnemyFear||0)+1;}},
-  {id:'z_molting_ritual',tier:'gold',icon:'🔥',name:'Molting Ritual',desc:'After each battle gain +1 ATK but lose 3 Max HP',tags:['risk'],stackable:false,apply:p=>{p.moltingRitual=true;}},
+  // Gold (5)
+  {id:'z_king_bloodline',tier:'gold',icon:'👑',name:'King Bloodline',desc:'+20 Max HP',tags:['stat','hp'],stackable:false,apply:p=>{p.stats.maxHp+=20;p.stats.hp=Math.min(p.stats.hp,p.stats.maxHp);}},
+  {id:'z_sky_predator',tier:'gold',icon:'🦅',name:'Sky Predator',desc:'First attack each battle always crits',tags:['unique','offense'],stackable:false,apply:p=>{p.firstAttackAlwaysCrit=true;}},
+  {id:'z_blackstone_trophy',tier:'gold',icon:'🗿',name:'Blackstone Trophy',desc:'Enemies start battle with Fear(1)',tags:['unique','control'],stackable:false,apply:p=>{p.openingEnemyFear=(p.openingEnemyFear||0)+1;}},
+  {id:'z_tempo_crown',tier:'gold',icon:'⏱️',name:'Tempo Crown',desc:'First attack each turn +20% damage',tags:['unique','opening'],stackable:false,apply:p=>{p.firstAttackEachTurnBonusPct=Math.max(p.firstAttackEachTurnBonusPct||0,0.20);}},
+  {id:'z_void_rune',tier:'gold',icon:'🌑',name:'Void Rune',desc:'Spells gain +15% damage',tags:['unique','magic'],stackable:false,apply:p=>{p.augSpellDmgPct=Math.max(p.augSpellDmgPct||0,0.15);}},
 ];
 
 function getUpgradePool(){ return UPGRADE_CARDS_REWORK.slice(); }
@@ -1432,11 +1492,59 @@ const REWARD_TIERS = {
   gold:{label:'Legendary', color:'gold'},
 };
 
+const CLASS_ROLE_BY_CLASS = {
+  assassin:'striker',
+  ranger:'striker',
+  tank:'tank',
+  knight:'bruiser',
+  mage:'mage',
+  summoner:'trickster',
+  bard:'support',
+};
+
+const CLASS_PERK_DEFS = {
+  striker:[
+    {id:'piercingTempo',name:'Piercing Tempo',desc:'Attacks gain +10% penetration.',apply:p=>{p.perkPiercePct=(p.perkPiercePct||0)+0.10;}},
+    {id:'openingRush',name:'Opening Rush',desc:'First attack each battle deals +15% damage.',apply:p=>{p.perkOpeningRush=true;}},
+    {id:'predatorRhythm',name:'Predator Rhythm',desc:'Second attack each turn gains +10% crit chance.',apply:p=>{p.perkSecondAttackCrit=true;}},
+  ],
+  tank:[
+    {id:'ironCore',name:'Iron Core',desc:'First hit each battle deals 15% less damage to you.',apply:p=>{p.perkIronCore=true;}},
+    {id:'holdTheLine',name:'Hold the Line',desc:'After Guard, next attack deals +10% damage.',apply:p=>{p.perkHoldTheLine=true;}},
+    {id:'heavyFrame',name:'Heavy Frame',desc:'+1 DEF and +4 Max HP.',apply:p=>{p.stats.def+=1;p.stats.maxHp+=4;p.stats.hp=Math.min(p.stats.maxHp,p.stats.hp+4);}},
+  ],
+  mage:[
+    {id:'arcFocus',name:'Arc Focus',desc:'Spells gain +8% accuracy.',apply:p=>{p.perkSpellAcc=(p.perkSpellAcc||0)+8;}},
+    {id:'venomLore',name:'Venom Lore',desc:'Poison you apply deals +1 damage per tick.',apply:p=>{p.perkPoisonTickBonus=(p.perkPoisonTickBonus||0)+1;}},
+    {id:'dreadVerse',name:'Dread Verse',desc:'First spell each battle applies Fear(1).',apply:p=>{p.perkFirstSpellFear=true;}},
+  ],
+  trickster:[
+    {id:'slipstream',name:'Slipstream',desc:'Dodging grants +1 SPD next turn.',apply:p=>{p.perkSlipstream=true;}},
+    {id:'falseOpening',name:'False Opening',desc:'Debuffed enemies have -6% dodge.',apply:p=>{p.perkVsDebuffedAcc=(p.perkVsDebuffedAcc||0)+6;}},
+    {id:'quickTheft',name:'Quick Theft',desc:'First utility skill each battle refunds 1 EN.',apply:p=>{p.perkUtilityRefund=true;}},
+  ],
+  bruiser:[
+    {id:'crushingForce',name:'Crushing Force',desc:'Heavy attacks gain +10% penetration.',apply:p=>{p.perkHeavyPierce=(p.perkHeavyPierce||0)+0.10;}},
+    {id:'warBody',name:'War Body',desc:'Below 50% HP, deal +10% damage.',apply:p=>{p.perkWarBody=true;}},
+    {id:'ironMomentum',name:'Iron Momentum',desc:'After heavy attack, gain +1 DEF for 1 turn.',apply:p=>{p.perkIronMomentum=true;}},
+  ],
+  predator:[
+    {id:'markedForDeath',name:'Marked for Death',desc:'+15% damage to Feared enemies.',apply:p=>{p.perkVsFearPct=(p.perkVsFearPct||0)+0.15;}},
+    {id:'patientHunter',name:'Patient Hunter',desc:'First attack vs full HP target deals +15% damage.',apply:p=>{p.perkFirstVsFull=true;}},
+    {id:'executionLine',name:'Execution Line',desc:'+20% damage to enemies below 40% HP.',apply:p=>{p.perkExecutePct=(p.perkExecutePct||0)+0.20;}},
+  ],
+  support:[
+    {id:'songline',name:'Songline',desc:'Buffs you apply last 1 extra turn.',apply:p=>{p.perkBuffDuration=(p.perkBuffDuration||0)+1;}},
+    {id:'restorativeRhythm',name:'Restorative Rhythm',desc:'Healing skills restore +3 HP.',apply:p=>{p.perkHealFlat=(p.perkHealFlat||0)+3;}},
+    {id:'graceUnderFlight',name:'Grace Under Flight',desc:'After utility skill, gain +8% accuracy next turn.',apply:p=>{p.perkUtilityAcc=true;}},
+  ],
+};
+
 // Drop rate weights (non-boss) — [grey,green,blue,purple,gold]
-const NORMAL_WEIGHTS = [42,34,16,7,1];
+const NORMAL_WEIGHTS = [42,34,17,7,0];
 
 // Boss drop weights (fallback; boss rewards are mostly handled by generateBossRewards)
-const BOSS_WEIGHTS   = [1,3,35,50,11];
+const BOSS_WEIGHTS   = [2,4,42,52,0];
 
 const ALL_REWARDS = [
   {id:'g_hp10', tier:'grey', icon:'💊', name:'Stitched Wing', desc:'Max HP +6 (heal +6)', tags:['sustain','hp'], apply:p=>{ p.stats.maxHp+=6; p.stats.hp=Math.min(p.stats.hp+6,p.stats.maxHp); }},
@@ -2607,6 +2715,9 @@ let G = {
   shinyObjects:0,
   _pendingStorkShop:false,
   _pendingShopMode:null,
+  runClassPerks:[],
+  classPerksByBird:{},
+  _classPerkChoicesGranted:0,
   autoQueuedAbilityId:null,
   abilityCooldowns:{},
   _actionTapLockUntil:0,
@@ -3518,6 +3629,9 @@ function startGame() {
   G.runUpgradesPurchased = new Set();
   G.codex = {abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
   G.shinyObjects = 0;
+  G.runClassPerks = [];
+  G.classPerksByBird = {};
+  G._classPerkChoicesGranted = 0;
   saveRun();
   G.phase='PLAYER';
   const runStartEvt = {birdKey:G.player.birdKey, difficulty:G.difficulty, endless:!!G.endlessMode};
@@ -3533,6 +3647,7 @@ function makeEndlessEnemy(stage) {
   const src = (pool.length?pool:ENEMIES)[Math.floor(Math.random()*(pool.length?pool.length:ENEMIES.length))];
   const clone = JSON.parse(JSON.stringify(src));
   clone.isBoss = isBoss;
+  clone.enemyTier = isBoss ? (clone.enemyTier||'boss') : (clone.enemyTier||'normal');
   if (isBoss) {
     clone.bossTitle = stage > 20 ? '💀 Endless Titan' : (clone.bossTitle||'⚡ Stage Boss');
     if(stage>20) clone.name = 'Corrupted ' + clone.name;
@@ -3560,6 +3675,9 @@ function resetForNewBattle(){
   G.actionQueue=[]; G.actionBusy=false;
   G.comboCount=0; G.comboReady=false;
   G._goldReplaceMode=false;
+  G._perkIronCoreUsed=false;
+  G._perkFirstVsFullUsed=false;
+  G._perkUtilityRefundUsed=false;
   G.turnCount=0;
   G._incomingAttackKind=null;
   G._firstAttackUsed=false;
@@ -3618,9 +3736,9 @@ function loadStage() {
         if(pool.length>0){
           const src=pool[Math.floor(Math.random()*pool.length)];
           ed={name:src.name,emoji:src.emoji,birdKey:src.birdKey,portraitKey:src.birdKey,hp:src.hp,maxHp:src.hp,atk:src.atk,def:src.def,spd:src.spd,
-            acc:src.acc,dodge:src.dodge,size:src.size,aiStyle:src.aiStyle,isBoss:false,bossTitle:'',
+            acc:src.acc,dodge:src.dodge,size:src.size,enemyClass:(src.enemyClass||inferEnemyClassFromStyle(src.aiStyle)),aiStyle:src.aiStyle,aiPersonality:(src.aiPersonality||inferAIPersonalityFromStyle(src.aiStyle,src.name)),isBoss:false,bossTitle:'',enemyTier:'elite',
             abilities:src.abilities,stats:{hp:src.hp,maxHp:src.hp,atk:src.atk,def:src.def,spd:src.spd,
-            acc:src.acc,dodge:src.dodge,mdef:8,matk:6}};
+            acc:src.acc,dodge:src.dodge,mdef:8,matk:6,cc:0.05,cd:1.5,critChance:5,critMult:1.5,en:(src.size==='xl'?5:src.size==='large'?4:src.size==='medium'?4:3)}};
         }
       }
       // Fallback / normal enemy
@@ -3635,14 +3753,18 @@ function loadStage() {
     }
 
   }
-  const scaled=enemyScaleFactor(ed, G.stage, diffMult, G.bossKills||0);
+  const scaled=ed.isBoss
+    ? buildScaledBoss(ed, G.stage, {isEndless:(G.endlessMode && G.stage>20), diffMult})
+    : buildScaledEnemy(ed, G.stage, {isEndless:(G.endlessMode && G.stage>20), diffMult});
   ed.hp=scaled.hp; ed.maxHp=scaled.maxHp;
-  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
   ed.atk=scaled.atk; ed.def=scaled.def; ed.spd=scaled.spd;
   ed.acc=scaled.acc; ed.dodge=scaled.dodge; ed.mdodge=scaled.mdodge;
+  ed.cc=scaled.cc; ed.cd=scaled.cd;
   ed.mdef=scaled.mdef; ed.matk=scaled.matk;
-  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk};
-  const baseEnemyEnergy = ed.isBoss ? 6 : (ed.size==='xl'?5:ed.size==='large'?4:ed.size==='medium'?4:3);
+  ed.enemyClass=scaled.enemyClass||ed.enemyClass||inferEnemyClassFromStyle(ed.aiStyle);
+  if(G.player?.mutBloodMoon){ ed.atk=Math.floor(ed.atk*1.10); ed.matk=Math.floor((ed.matk||ed.atk)*1.10); }
+  ed.stats = {hp:ed.hp, maxHp:ed.hp, atk:ed.atk, def:ed.def, spd:ed.spd, acc:ed.acc, dodge:ed.dodge, mdodge:ed.mdodge, mdef:ed.mdef, matk:ed.matk, cc:ed.cc, cd:ed.cd, critChance:Math.round((ed.cc||0.05)*100), critMult:ed.cd||1.5, en:(scaled.en||0)};
+  const baseEnemyEnergy = Math.max(1, scaled.en||ed.stats.en||3);
   ed.energyMax=baseEnemyEnergy;
   ed.energy=baseEnemyEnergy;
   ed.energyRegen=0;
@@ -3651,6 +3773,7 @@ function loadStage() {
   AvianEvents.emit('stage:loaded', stageEvt);
   runModuleHook('onStageLoaded', stageEvt);
   if(!G.enemy.aiType) G.enemy.aiType=mapAiStyleToType(G.enemy.aiStyle);
+  if(!G.enemy.aiPersonality) G.enemy.aiPersonality=inferAIPersonalityFromStyle(G.enemy.aiStyle,G.enemy.name);
   codexMark('enemies', G.enemy.id||G.enemy.name, 'seen');
   enforceAbilityCosts(G.player);
   applyBiomeModifiers();
@@ -3802,8 +3925,8 @@ function refreshBattleUI() {
 
   // Enemy stats display (same layout/order as player)
   const ep2=G.enemy.stats;
-  const eCritChance=Math.max(0,Math.min(100,ep2.critChance||5));
-  const eCritMult=(ep2.critMult||1.5);
+  const eCritChance=Math.max(0,Math.min(100,Math.round((ep2.cc??((ep2.critChance||5)/100))*100)));
+  const eCritMult=(ep2.cd??ep2.critMult??1.5);
   const enemyCell=(klass,label,val,{suffix='',title=''}={})=>
     `<div class="est ${klass}" title="${title}"><span class="stat-k">${label}</span><span class="stat-v">${val}${suffix}</span></div>`;
   document.getElementById('enemy-stats-mini').innerHTML =
@@ -4679,12 +4802,57 @@ function normalizeAbilityCooldownsForPlayer(p){
 }
 
 function getPlayerPiercePctForAbility(ab){
-  const cls=(G.player?.class || BIRDS[G.player?.birdKey]?.class || '').toLowerCase();
-  const isAttack=(ab?.btnType==='attack'||ab?.type==='attack'||/strike|shot|peck|slash|talon|arrow|pierce/i.test(ab?.name||''));
-  if(cls==='ranger'&&isAttack){
-    return Math.max(ab?.piercePct||0,0.25);
-  }
-  return ab?.piercePct||0;
+  const base=ab?.piercePct||0;
+  const t=ABILITY_TEMPLATES?.[ab?.id]||ab||{};
+  const txt=`${t.name||''} ${t.desc||''}`.toLowerCase();
+  const isHeavy=txt.includes('heavy')||txt.includes('smash')||txt.includes('slam')||txt.includes('crusher');
+  let perk=(G.player?.perkPiercePct||0);
+  if(isHeavy) perk+=(G.player?.perkHeavyPierce||0);
+  return Math.max(0, base+perk);
+}
+
+function getPlayerClassRole(player=G.player){
+  const cls=(player?.class || BIRDS[player?.birdKey]?.class || '').toLowerCase();
+  return CLASS_ROLE_BY_CLASS[cls]||'striker';
+}
+function getOwnedPerkIds(){
+  return new Set([...(G.runClassPerks||[]), ...((G.classPerksByBird||{})[G.player?.birdKey]||[])]);
+}
+function applyClassPerk(perkId){
+  const role=getPlayerClassRole();
+  const perk=(CLASS_PERK_DEFS[role]||[]).find(p=>p.id===perkId);
+  if(!perk || getOwnedPerkIds().has(perkId)) return false;
+  if(!Array.isArray(G.runClassPerks)) G.runClassPerks=[];
+  if(!G.classPerksByBird || typeof G.classPerksByBird!=='object') G.classPerksByBird={};
+  if(!Array.isArray(G.classPerksByBird[G.player.birdKey])) G.classPerksByBird[G.player.birdKey]=[];
+  G.runClassPerks.push(perkId);
+  G.classPerksByBird[G.player.birdKey].push(perkId);
+  perk.apply?.(G.player);
+  logMsg(`🧬 Class Perk: ${perk.name}`,'exp-gain');
+  saveRun();
+  return true;
+}
+function maybeOfferClassPerkChoice(){
+  const isStory=(G.ui?.gameMode||'story')==='story';
+  const role=getPlayerClassRole();
+  const owned=getOwnedPerkIds();
+  const pool=(CLASS_PERK_DEFS[role]||[]).filter(p=>!owned.has(p.id));
+  if(!pool.length) return false;
+  const dueEarly=isStory && G._classPerkChoicesGranted<1 && G.stage>=4;
+  const dueEndless=!isStory && G._classPerkChoicesGranted<2 && (G.endlessBattle||0)>=8;
+  if(!dueEarly && !dueEndless) return false;
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;';
+  const cards=pool.slice(0,3).map(p=>`<button data-perk="${p.id}" style="text-align:left;background:rgba(28,22,12,.96);border:1px solid rgba(201,168,76,.35);color:var(--text);border-radius:10px;padding:12px;cursor:pointer;"><div style="font-family:Cinzel,serif;color:var(--gold-light)">${p.name}</div><div style="font-size:.82rem;color:var(--text-dim)">${p.desc}</div></button>`).join('');
+  overlay.innerHTML=`<div style="width:min(760px,94vw);background:rgba(16,12,8,.98);border:1px solid var(--gold);border-radius:14px;padding:16px;"><div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:10px;">Choose a ${role.toUpperCase()} Class Perk</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">${cards}</div></div>`;
+  overlay.querySelectorAll('button[data-perk]').forEach(btn=>btn.addEventListener('click',()=>{
+    applyClassPerk(btn.getAttribute('data-perk'));
+    G._classPerkChoicesGranted=(G._classPerkChoicesGranted||0)+1;
+    overlay.remove();
+  }));
+  document.body.appendChild(overlay);
+  return true;
 }
 
 function applyRangerPassiveOnTurnStart(){
@@ -4866,18 +5034,8 @@ function getPlayerEffectiveAcc(){
   return Math.max(0,getPlayerBaseAcc()+getPlayerAccMod());
 }
 
-const STAT_KEYS = ['maxHp','atk','def','matk','mdef','spd','dodge','mdodge'];
 const SOFTCAP_K = {acc:120,dodge:120,mdodge:140};
 const HIT_CLAMP = {min:0.15,max:0.95};
-const CLASS_GROWTH_PROFILES = {
-  tank:{maxHp:0.055,atk:0.010,def:0.050,matk:0.000,mdef:0.028,acc:0.010,spd:0.006,dodge:0.004,mdodge:0.004},
-  knight:{maxHp:0.030,atk:0.028,def:0.045,matk:0.005,mdef:0.025,acc:0.022,spd:0.015,dodge:0.008,mdodge:0.008},
-  assassin:{maxHp:0.010,atk:0.045,def:0.008,matk:0.000,mdef:0.008,acc:0.026,spd:0.045,dodge:0.012,mdodge:0.008},
-  ranger:{maxHp:0.018,atk:0.028,def:0.010,matk:0.008,mdef:0.015,acc:0.045,spd:0.032,dodge:0.012,mdodge:0.010},
-  mage:{maxHp:0.010,atk:0.000,def:0.008,matk:0.048,mdef:0.026,acc:0.022,spd:0.020,dodge:0.006,mdodge:0.012},
-  bard:{maxHp:0.022,atk:0.015,def:0.022,matk:0.018,mdef:0.022,acc:0.022,spd:0.024,dodge:0.010,mdodge:0.010},
-  summoner:{maxHp:0.022,atk:0.010,def:0.010,matk:0.038,mdef:0.024,acc:0.022,spd:0.015,dodge:0.009,mdodge:0.010},
-};
 function softCapChance(stat,k){return stat<=0?0:stat/(stat+k);}
 function clamp01(v){return Math.max(0,Math.min(1,v));}
 function getAccChance(acc){return softCapChance(Math.max(0,acc||0),SOFTCAP_K.acc);}
@@ -4889,76 +5047,9 @@ function calcHitChance(attAcc,defDodge,baseHit=0.72){
 }
 function calcDefenseMultiplier(def){return 100/(100+Math.max(0,def||0));}
 
-function applyClassGrowthOnLevelUp(){
-  if(!G.player) return;
-
-  const bd = BIRDS[G.player.birdKey] || {};
-  const cls = (bd.class || 'knight').toLowerCase();
-  const lvl = (G.player.birdLevel || 1);
-
-  let hpFlat  = (lvl <= 10) ? 8 : 0;
-  let hpPct   = (lvl <= 10) ? 0 : 0.04;
-  let defFlat = (lvl <= 10) ? 1 : 0;
-  let defPct  = (lvl <= 10) ? 0 : 0.02;
-  let mdefFlat = (lvl <= 10) ? 1 : 0;
-  let mdefPct  = (lvl <= 10) ? 0 : 0.02;
-
-  if(cls === 'tank'){
-    hpFlat += 2; hpPct += 0.01; defPct += 0.01; mdefPct += 0.01;
-  } else if(cls === 'knight'){
-    defPct += 0.01;
-  } else if(cls === 'assassin'){
-    hpFlat = Math.max(0, hpFlat - 2);
-    hpPct  = Math.max(0, hpPct - 0.01);
-    defFlat = Math.max(0, defFlat - 1);
-    mdefFlat = Math.max(0, mdefFlat - 1);
-  } else if(cls === 'mage' || cls === 'summoner'){
-    mdefPct += 0.01;
-  } else if(cls === 'bard'){
-    hpFlat += 1;
-  }
-
-  if(G.player.stats.maxHp < 1) G.player.stats.maxHp = 1;
-  if(G.player.stats.def == null) G.player.stats.def = 0;
-  if(G.player.stats.mdef == null) G.player.stats.mdef = 0;
-  if(G.player.stats.spd == null) G.player.stats.spd = 0;
-
-  const oldMax = G.player.stats.maxHp;
-  const hpGain = Math.max(1, Math.floor(oldMax * hpPct)) + hpFlat;
-  G.player.stats.maxHp += hpGain;
-
-  const defGain = Math.max(0, Math.floor(G.player.stats.def * defPct)) + defFlat;
-  G.player.stats.def += defGain;
-
-  const oldMdef = G.player.stats.mdef;
-  const mdefGain = Math.max(0, Math.floor(oldMdef * mdefPct)) + mdefFlat;
-  G.player.stats.mdef = oldMdef + mdefGain;
-
-  if(cls === 'ranger' && lvl % 4 === 0){
-    G.player.stats.spd += 1;
-  }
-
-  G.player.stats.hp = Math.min(G.player.stats.hp + hpGain, G.player.stats.maxHp);
-}
-
 // Apply one-time bonuses when stage changes
 function applyGrowthStageTransition(p, fromStage, toStage){
   if(!p?.stats) return;
-
-  if(toStage===GROWTH.JUVENILE){
-    p.stats.maxHp += 5;
-    p.stats.hp = Math.min(p.stats.hp + 5, p.stats.maxHp);
-    p.stats.atk += 1;
-    p.stats.def += 1;
-    p.stats.spd = (p.stats.spd||0) + 1;
-  }
-  if(toStage===GROWTH.ADULT){
-    p.stats.maxHp += 10;
-    p.stats.hp = Math.min(p.stats.hp + 10, p.stats.maxHp);
-    p.stats.atk += 2;
-    p.stats.def += 1;
-    p.stats.spd = (p.stats.spd||0) + 1;
-  }
 
   const cls=(p.class || (BIRDS[p.birdKey]?.class) || '').toLowerCase();
   p.growthStage = toStage;
@@ -4999,71 +5090,149 @@ function checkGrowthStage(p){
   if(prev!==next) applyGrowthStageTransition(p, prev, next);
   else p.growthStage = next;
 }
-function enemyScaleFactor(base, stage, diffMult, bossKills){
-  const s=Math.max(1,stage);
-  const isBoss=(s%10===0);
-  const bossIndex=Math.floor((s-1)/10);
+const ENEMY_TIER_MULTIPLIERS = {
+  normal:{hp:1.0,atk:1.0,def:1.0},
+  elite:{hp:1.4,atk:1.15,def:1.2},
+  boss:{hp:2.0,atk:1.3,def:1.3},
+  lieutenant:{hp:1.7,atk:1.2,def:1.2},
+};
 
-  // Smoother early curve + dedicated endless curve (endless systems are NOT used in story mode)
-  const endlessDepth=Math.max(0,s-20);
-  const growthBase=Math.pow(1.038,s-1);
-  const endlessCurve=endlessDepth<=0?1:(endlessDepth<=20?Math.pow(1.030,endlessDepth):Math.pow(1.030,20)*Math.pow(1.022,endlessDepth-20));
-  const growth=growthBase*endlessCurve;
-  const hpStageMult=Math.pow(growth,1.12);
-  const atkStageMult=Math.pow(growth,0.88);
-  const defStageMult=Math.pow(growth,0.82);
+const ENEMY_SIZE_MODIFIERS = {
+  tiny:{hp:0.75,atk:0.85,def:0.7,matk:1.0,mdef:0.9,spd:1.35,acc:1.05},
+  small:{hp:0.9,atk:0.95,def:0.9,matk:1.0,mdef:0.95,spd:1.15,acc:1.03},
+  medium:{hp:1.0,atk:1.0,def:1.0,matk:1.0,mdef:1.0,spd:1.0,acc:1.0},
+  large:{hp:1.25,atk:1.15,def:1.2,matk:1.0,mdef:1.1,spd:0.9,acc:0.97},
+  xl:{hp:1.5,atk:1.25,def:1.35,matk:1.0,mdef:1.15,spd:0.8,acc:0.95},
+};
 
-  let hp=(base.hp||base.stats?.hp||1)*hpStageMult;
-  let atk=(base.atk||base.stats?.atk||1)*atkStageMult;
-  let def=(base.def||base.stats?.def||0)*defStageMult;
-  let matk=(base.matk||base.stats?.matk||6)*atkStageMult;
-  let mdef=(base.mdef||base.stats?.mdef||8)*defStageMult;
-  let spd=(base.spd||base.stats?.spd||1)+Math.floor((s-1)/8);
+const ENEMY_CLASS_MODIFIERS = {
+  striker:{atk:1.2,matk:0.9,def:0.85,mdef:1.0,spd:1.15,acc:1.05,ccAdd:0.08,cdSet:1.6},
+  mage:{atk:0.9,matk:1.25,def:1.0,mdef:1.15,spd:1.0,acc:1.02,ccAdd:0.03},
+  tank:{atk:1.0,matk:1.0,def:1.35,mdef:1.25,spd:0.85,acc:0.95,ccAdd:0.0},
+  trickster:{atk:1.0,matk:1.0,def:1.0,mdef:1.0,spd:1.2,acc:1.08,ccAdd:0.05},
+  bruiser:{atk:1.25,matk:1.0,def:1.1,mdef:1.0,spd:1.0,acc:1.0,ccAdd:0.04},
+  predator:{atk:1.15,matk:1.0,def:1.0,mdef:1.0,spd:1.1,acc:1.05,ccAdd:0.10,cdSet:1.7},
+  support:{atk:1.0,matk:1.1,def:1.0,mdef:1.1,spd:1.0,acc:1.05,ccAdd:0.0},
+};
 
-  if(isBoss){
-    const bossHPmult=1.55+0.10*bossIndex;
-    const bossDMGmult=1.18+0.05*bossIndex;
-    const bossDEFmult=1.12+0.03*bossIndex;
-    hp*=bossHPmult;
-    atk*=bossDMGmult; matk*=bossDMGmult;
-    def*=bossDEFmult; mdef*=bossDEFmult;
+function getEnemyBaseStats(base){
+  const s=base?.stats||{};
+  const hp=(base.hp??s.maxHp??s.hp??1);
+  const size=base?.size||'medium';
+  const en=(s.en??base.en??(base.isBoss?6:(size==='xl'?5:size==='large'?4:size==='medium'?4:3)));
+  const ccRaw=(s.cc??base.cc??((s.critChance??base.critChance??5)/100));
+  const cdRaw=(s.cd??base.cd??(s.critMult??base.critMult??1.5));
+  return {
+    hp:Math.max(1,Math.floor(hp)),
+    atk:Math.max(1,Math.floor(base.atk??s.atk??1)),
+    def:Math.max(0,Math.floor(base.def??s.def??0)),
+    matk:Math.max(1,Math.floor(base.matk??s.matk??6)),
+    mdef:Math.max(0,Math.floor(base.mdef??s.mdef??8)),
+    spd:Math.max(1,Math.floor(base.spd??s.spd??1)),
+    acc:Math.max(60,Math.floor(base.acc??s.acc??70)),
+    dodge:Math.max(0,Math.floor(base.dodge??s.dodge??5)),
+    mdodge:Math.max(0,Math.floor(base.mdodge??s.mdodge??(base.dodge??s.dodge??3))),
+    cc:Math.max(0,Math.min(0.95,Number(ccRaw)||0.05)),
+    cd:Math.max(1.1,Number(cdRaw)||1.5),
+    en:Math.max(1,Math.floor(en)),
+  };
+}
+
+function resolveEnemyTier(enemyBase, forceTier=''){
+  if(forceTier) return forceTier;
+  if(enemyBase?.enemyTier) return enemyBase.enemyTier;
+  if(enemyBase?.isLieutenant) return 'lieutenant';
+  if(enemyBase?.isElite) return 'elite';
+  if(enemyBase?.isBoss) return 'boss';
+  return 'normal';
+}
+
+function buildScaledEnemy(enemyBase, stage, opts={}){
+  const s=Math.max(1, Math.floor(stage||1));
+  const isEndless=!!opts.isEndless;
+  const diffMult=Number.isFinite(opts.diffMult)?opts.diffMult:1;
+  const tier=resolveEnemyTier(enemyBase, opts.tier);
+  const mult=ENEMY_TIER_MULTIPLIERS[tier]||ENEMY_TIER_MULTIPLIERS.normal;
+  const base=getEnemyBaseStats(enemyBase);
+  const sizeKey=String(enemyBase?.size||'medium').toLowerCase();
+  const sizeMod=ENEMY_SIZE_MODIFIERS[sizeKey]||ENEMY_SIZE_MODIFIERS.medium;
+  const classKey=String(enemyBase?.enemyClass||inferEnemyClassFromStyle(enemyBase?.aiStyle)||'support').toLowerCase();
+  const classMod=ENEMY_CLASS_MODIFIERS[classKey]||ENEMY_CLASS_MODIFIERS.support;
+
+  // Base -> Size -> Class -> Stage -> Tier -> Endless
+  let hpBase=base.hp*sizeMod.hp;
+  let atkBase=base.atk*sizeMod.atk;
+  let defBase=base.def*sizeMod.def;
+  let matkBase=base.matk*sizeMod.matk;
+  let mdefBase=base.mdef*sizeMod.mdef;
+  let spdBase=base.spd*sizeMod.spd;
+  let accBase=base.acc*sizeMod.acc;
+  let cc=base.cc;
+  let cd=base.cd;
+
+  atkBase*=classMod.atk;
+  matkBase*=classMod.matk;
+  defBase*=classMod.def;
+  mdefBase*=classMod.mdef;
+  spdBase*=classMod.spd;
+  accBase*=classMod.acc;
+  cc=Math.min(0.95,Math.max(0,cc+(classMod.ccAdd||0)));
+  if(Number.isFinite(classMod.cdSet)) cd=classMod.cdSet;
+
+  let hp=hpBase*(1+s*0.05);
+  let atk=atkBase*(1+s*0.035);
+  let matk=matkBase*(1+s*0.035);
+  let def=defBase+Math.floor(s/5);
+  let mdef=mdefBase+Math.floor(s/6);
+  let spd=spdBase+Math.floor(s/10);
+
+  hp*=mult.hp;
+  atk*=mult.atk;
+  matk*=mult.atk;
+  def*=mult.def;
+  mdef*=mult.def;
+
+  if(isEndless && s>20){
+    const milestone=Math.max(0,Math.floor((s-20)/10));
+    hp*=1+milestone*0.22;
+    atk*=1+milestone*0.12;
+    matk*=1+milestone*0.12;
+    def+=milestone;
+    mdef+=milestone;
+    spd+=Math.floor(milestone/2);
   }
 
-  hp*=1+bossKills*0.08;
-  atk*=1+bossKills*0.03;
-  def*=1+bossKills*0.03;
-  matk*=1+bossKills*0.03;
-  mdef*=1+bossKills*0.03;
+  hp*=diffMult;
+  atk*=diffMult;
+  matk*=diffMult;
+  def*=diffMult;
+  mdef*=diffMult;
 
-  const diff=G.difficulty||'juvenile';
-  if(diff==='predator'){
-    hp*=1.16; atk*=1.10; matk*=1.10; def*=1.06; mdef*=1.06;
-  } else if(diff==='murder'){
-    hp*=1.34; atk*=1.18; matk*=1.18; def*=1.10; mdef*=1.10;
-  } else {
-    hp*=diffMult; atk*=diffMult; matk*=diffMult; def*=diffMult; mdef*=diffMult;
-  }
+  const acc=Math.max(60,Math.min(96,Math.floor(accBase+Math.floor((s-1)/5)+(tier==='boss'?2:0))));
+  const dodge=Math.max(0,Math.min(42,Math.floor(base.dodge+Math.floor((s-1)/8)+(tier==='boss'?2:0))));
+  const mdodge=Math.max(0,Math.min(32,Math.floor(base.mdodge+Math.floor((s-1)/10)+(tier==='boss'?1:0))));
 
-  const accTarget=Math.min(90,70+Math.floor((s-1)/5));
-  const dodgeTarget=Math.min(40,5+Math.floor((s-1)/7));
-  const mdodgeTarget=Math.min(30,3+Math.floor((s-1)/9));
-  const accRaw=Math.max((base.acc??base.stats?.acc??70),accTarget)+(isBoss?2:0);
-  const dodgeRaw=Math.max((base.dodge??base.stats?.dodge??5),dodgeTarget)+(isBoss?2:0);
-  const mdodgeBase=(base.mdodge??base.stats?.mdodge??base.dodge??base.stats?.dodge??3);
-  const mdodgeRaw=Math.max(mdodgeBase,mdodgeTarget)+(isBoss?1:0);
+  hp=Math.max(1,Math.round(hp));
+  atk=Math.max(1,Math.round(atk));
+  matk=Math.max(1,Math.round(matk));
+  def=Math.max(0,Math.round(def));
+  mdef=Math.max(0,Math.round(mdef));
+  spd=Math.max(1,Math.round(spd));
 
-  const acc=Math.max(60,Math.min(94,Math.floor(accRaw)));
-  const dodge=Math.max(0,Math.min(42,Math.floor(dodgeRaw)));
-  const mdodge=Math.max(0,Math.min(32,Math.floor(mdodgeRaw)));
+  return {hp,maxHp:hp,atk,def,matk,mdef,spd,acc,dodge,mdodge,cc,cd,critChance:Math.round(cc*100),critMult:cd,en:base.en,tier,enemyClass:classKey};
+}
 
-  hp=Math.max(1,Math.floor(hp));
-  atk=Math.max(1,Math.floor(atk));
-  matk=Math.max(1,Math.floor(matk));
-  def=Math.max(0,Math.floor(def));
-  mdef=Math.max(0,Math.floor(mdef));
-  spd=Math.max(1,Math.floor(spd));
+function buildScaledBoss(enemyBase, stage, opts={}){
+  const forcedTier=opts.tier||resolveEnemyTier(enemyBase);
+  return buildScaledEnemy(enemyBase, stage, {...opts,tier:forcedTier});
+}
 
-  return {hp,maxHp:hp,atk,def,matk,mdef,spd,acc,dodge,mdodge};
+function enemyScaleFactor(base, stage, diffMult){
+  const isEndless=(G.endlessMode && stage>20);
+  const opts={isEndless,diffMult};
+  return (base?.isBoss)
+    ? buildScaledBoss(base,stage,opts)
+    : buildScaledEnemy(base,stage,opts);
 }
 
 function getBaseMdodge(p) {
@@ -5125,6 +5294,9 @@ function applyPlayerSlow(spdPenalty,dodgePenalty,turns){
 
 function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
   let dmg=Math.max(1,amount);
+  const activeAb=srcAbility||G._activePlayerAbility||null;
+  const activeType=String(activeAb?.btnType||activeAb?.type||ABILITY_TEMPLATES?.[activeAb?.id]?.btnType||ABILITY_TEMPLATES?.[activeAb?.id]?.type||'').toLowerCase();
+  if(target==='enemy' && !isMagic && !isCrit && G.player?.perkSecondAttackCrit && (G.playerActionsThisTurn||0)===2 && chance(10)) isCrit=true;
   const critMult=(G.player.goldCritMult||1.5) + (isCrit?(G.player?.critDamageBonusPct||0):0);
   if (isCrit) dmg=Math.floor(dmg*critMult);
   if(target==='enemy'){
@@ -5151,6 +5323,18 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(isAttack && (G.player?.augAttackVsBleedPct||0)>0 && G.enemyStatus?.bleed?.stacks>0) dmg=Math.floor(dmg*(1+G.player.augAttackVsBleedPct));
     if(isAttack && (G.player?.augFirstAttackBattlePct||0)>0 && !G._firstAttackUsed) dmg=Math.floor(dmg*(1+G.player.augFirstAttackBattlePct));
     if(isAttack && (G.player?.augAttackExecutePct||0)>0 && G.enemy.stats.hp<=Math.floor((G.enemy.stats.maxHp||1)*0.5)) dmg=Math.floor(dmg*(1+G.player.augAttackExecutePct));
+    if((G.player?.perkWarBody||false) && (G.player.stats.hp||1)<=Math.floor((G.player.stats.maxHp||1)*0.5)) dmg=Math.floor(dmg*1.10);
+    if((G.player?.perkOpeningRush||false) && isAttack && !G._firstAttackUsed) dmg=Math.floor(dmg*1.15);
+    if((G.player?.perkVsFearPct||0)>0 && (G.enemyStatus?.feared||0)>0) dmg=Math.floor(dmg*(1+G.player.perkVsFearPct));
+    if((G.player?.perkExecutePct||0)>0 && (G.enemy.stats.hp||1)<=Math.floor((G.enemy.stats.maxHp||1)*0.4)) dmg=Math.floor(dmg*(1+G.player.perkExecutePct));
+    if((G.player?.perkFirstVsFull||false) && !G._perkFirstVsFullUsed && (G.enemy.stats.hp||0)>=(G.enemy.stats.maxHp||1)){
+      dmg=Math.floor(dmg*1.15);
+      G._perkFirstVsFullUsed=true;
+    }
+    if((G.playerStatus?.holdTheLineBoost||0)>0 && isAttack){
+      dmg=Math.floor(dmg*1.10);
+      delete G.playerStatus.holdTheLineBoost;
+    }
     if(isAttack && (G.player?.augThirdAttackPct||0)>0){
       G.player._augAtkCounter=(G.player._augAtkCounter||0)+1;
       if((G.player._augAtkCounter%3)===0) dmg=Math.floor(dmg*(1+G.player.augThirdAttackPct));
@@ -5164,6 +5348,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(isAttack && !G.playerTurnFlags?.firstAttackResolved && (G.player?.firstAttackEachTurnBonusPct||0)>0){
       dmg=Math.floor(dmg*(1+G.player.firstAttackEachTurnBonusPct));
       if(G.playerTurnFlags) G.playerTurnFlags.firstAttackResolved=true;
+    }
+    if(isAttack && !G._firstAttackUsed && (G.player?.firstAttackEachBattleBonusPct||0)>0){
+      dmg=Math.floor(dmg*(1+G.player.firstAttackEachBattleBonusPct));
     }
   }
   let wasBlocked=false;
@@ -5205,6 +5392,14 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     const hitChance=calcHitChance(effectiveAcc,playerDodge,0.72);
     if (Math.random()>=hitChance){
       const _pbd=BIRDS[G.player.birdKey]; if(_pbd&&_pbd.passive&&_pbd.passive.onDodge)_pbd.passive.onDodge(G.player);
+      if((G.player?.healOnDodge||0)>0){
+        const heal=Math.max(0,G.player.healOnDodge||0);
+        G.player.stats.hp=Math.min(G.player.stats.maxHp,G.player.stats.hp+heal);
+        spawnFloat('player',`+${heal}`,'fn-heal');
+      }
+      if(G.player?.perkSlipstream){
+        G.playerStatus.perkSlipstream=1;
+      }
       return {dmgDealt:0,wasDodged:true,wasBlocked:false,isCrit};
     }
     const bypassDeflect=!!G._incomingBypassesDeflect;
@@ -5290,9 +5485,15 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
       dmg=Math.max(1,Math.floor(dmg*calcDefenseMultiplier(G.enemy.stats.mdef||0)));
     }
     if(G.comboReady&&!isCrit){isCrit=true;dmg=Math.max(1,Math.floor(dmg*(G.player.goldCritMult||1.5)));consumeCombo();logMsg('🔥 Combo Crit!','crit');}
+    dmg=applyBossBurstBuffer(dmg);
     G.enemy.stats.hp-=dmg;
     const _atkKind=String(srcAbility?.btnType||srcAbility?.type||G._activePlayerAbility?.btnType||G._activePlayerAbility?.type||'').toLowerCase();
     if((_atkKind==='physical'||_atkKind==='ranged') && dmg>0){
+      if(isCrit && (G.player?.healOnCrit||0)>0){
+        const heal=Math.max(0,G.player.healOnCrit||0);
+        G.player.stats.hp=Math.min(G.player.stats.maxHp,G.player.stats.hp+heal);
+        spawnFloat('player',`+${heal}`,'fn-heal');
+      }
       if((G.player?.bleedOnHitChance||0)>0 && chance(Math.min(95,G.player.bleedOnHitChance))) applyAilment('enemy','bleed',1);
       if((G.player?.poisonOnHitChance||0)>0 && chance(Math.min(95,G.player.poisonOnHitChance))) applyAilment('enemy','poison',1);
       if((G.player?.augAttackBleedChance||0)>0 && chance(Math.min(95,G.player.augAttackBleedChance))) applyAilment('enemy','bleed',1);
@@ -5316,6 +5517,11 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(G.enemy.stats.hp<=0){
       G.enemy.stats.hp=0;
       setHpBar('enemy',0,G.enemy.stats.maxHp);
+      if((G.player?.healOnKill||0)>0){
+        const heal=Math.max(0,G.player.healOnKill||0);
+        G.player.stats.hp=Math.min(G.player.stats.maxHp,G.player.stats.hp+heal);
+        spawnFloat('player',`+${heal}`,'fn-heal');
+      }
 
       // Prevent any further action; death flow handles transitions
       G.animLock=false;
@@ -5353,6 +5559,10 @@ function pdmg(mult=1,ab=null) {
     // Kiwi Probe Master: high HP bonus
     if(G.player.birdKey==='kiwi'&&G.enemy.stats.hp/G.enemy.stats.maxHp>0.75) base=Math.floor(base*1.10);
   } else {
+    if((G.player?.perkIronCore||false) && !G._perkIronCoreUsed){
+      dmg=Math.floor(dmg*0.85);
+      G._perkIronCoreUsed=true;
+    }
     G._currentPiercePct=0;
   }
   return base;
@@ -5360,6 +5570,25 @@ function pdmg(mult=1,ab=null) {
 // Check and consume combo crit — call before dealDamage for physical attacks
 function checkComboCrit() {
   return consumeCombo(); // returns true if combo was ready (free crit)
+}
+
+function calcEnemyAbilityDamage(enemy,{stat='atk',base=0,scaling=1,variance=0.15}={}){
+  const s=Math.max(1,Math.floor(enemy?.stats?.[stat]||enemy?.[stat]||1));
+  const core=base+(s*scaling);
+  const lo=Math.max(1,Math.floor(core*(1-variance)));
+  const hi=Math.max(lo,Math.floor(core*(1+variance)));
+  return roll(lo,hi);
+}
+
+function applyBossBurstBuffer(rawDamage){
+  const dmg=Math.max(0,Math.floor(rawDamage||0));
+  const e=G.enemy;
+  if(!e?.isBoss) return dmg;
+  const maxHp=Math.max(1,Math.floor(e?.stats?.maxHp||e?.maxHp||1));
+  const cap=Math.floor(maxHp*0.40);
+  if(dmg<=cap) return dmg;
+  const excess=dmg-cap;
+  return cap+Math.floor(excess*0.70);
 }
 
 function edmg(mult=1) {
@@ -5376,6 +5605,14 @@ function edmg(mult=1) {
     out=Math.floor(out*1.4);
   }
   return out;
+}
+
+function rollEnemyCritDamage(baseDamage){
+  const raw=Math.max(1,Math.floor(baseDamage||1));
+  const cc=Math.max(0,Math.min(0.95,G.enemy?.stats?.cc??((G.enemy?.stats?.critChance||5)/100)));
+  const cd=Math.max(1.1,Number(G.enemy?.stats?.cd??G.enemy?.stats?.critMult??1.5));
+  const isCrit=chance(Math.round(cc*100));
+  return {amount:isCrit?Math.max(1,Math.floor(raw*cd)):raw,isCrit};
 }
 
 function getPlayerMissChance(ab) {
@@ -5404,6 +5641,13 @@ function getPlayerMissChance(ab) {
   const isSpell=(kind==='spell');
   if(isAttack) extra+=(G.player?.augAttackAcc||0);
   if(isSpell) extra+=(G.player?.augSpellAcc||0);
+  if(isSpell) extra+=(G.player?.perkSpellAcc||0);
+  if((G.playerStatus?.perkUtilityAcc||0)>0){ extra+=8; delete G.playerStatus.perkUtilityAcc; }
+  if((G.player?.perkVsDebuffedAcc||0)>0){
+    const es=G.enemyStatus||{};
+    const debuffed=!!(es.poison||es.bleed||es.burning||es.weaken||es.feared||es.confused||es.paralyzed||es.slow||es.accDebuff>0);
+    if(debuffed) extra += G.player.perkVsDebuffedAcc;
+  }
   if((G.player?.augPostDefAcc||0)>0 && G.playerStatus?.postDefAccNext){ extra += G.player.augPostDefAcc; delete G.playerStatus.postDefAccNext; }
   if(G.player?.relHawkLedger && isEndlessRunActive()){ const eb=G.endlessBattle||0; if(eb>=10) extra+=8; if(eb>=20) extra+=8; if(eb>=30) extra+=8; }
   return Math.max(floor, reduced - accBonus + tookiePenalty - (G.playerStatus.accDebuff||0) + classAdj + sizeAdj - missReduce - extra);
@@ -5536,8 +5780,9 @@ async function tickDoTs(who) {
   const stats=who==='player'?G.player.stats:G.enemy.stats;
   // Poison
   if (status.poison&&status.poison.stacks>0&&status.poison.turns>0) {
-    const tickMult = who==='player' ? (G.player?.poisonTickMult||1) : 1;
-    const flatBonus = who==='player' ? ((G.player?.poisonFlatBonus||0)+(G.player?.relVenomLedger?1:0)) : 0;
+    const ownerBonus = who==='enemy';
+    const tickMult = ownerBonus ? (G.player?.poisonTickMult||1) : 1;
+    const flatBonus = ownerBonus ? ((G.player?.poisonFlatBonus||0)+(G.player?.perkPoisonTickBonus||0)+(G.player?.relVenomLedger?1:0)) : 0;
     const dmg=Math.max(1, Math.floor(status.poison.stacks * tickMult)+flatBonus);
     stats.hp-=dmg;
     spawnFloat(who,`☣ -${dmg}`,'fn-poison');
@@ -6849,6 +7094,14 @@ registerAbilityAlias('diveSnatch','fishSnatcher','Dive Snatch');
 registerAbilityAlias('savageKick','beakSlam','Savage Kick');
 registerAbilityAlias('skyStrike','deathDive','Sky Strike');
 registerAbilityAlias('dreadCall','dirge','Dread Call');
+// Basic-move family aliases to keep starter identities distinct.
+registerAbilityAlias('swoopCut','dart','Swoop Cut',{isBasic:true,desc:'Striker basic. Quick cut with clean tempo pressure.'});
+registerAbilityAlias('glintJab','dart','Glint Jab',{isBasic:true,desc:'Trickster basic. Fast jab with slight setup pressure.'});
+registerAbilityAlias('mockingPeck','dart','Mocking Peck',{isBasic:true,desc:'Trickster basic. Reliable peck that taunts tempo.'});
+registerAbilityAlias('fruitSpit','mudshot','Fruit Spit',{isBasic:true,desc:'Mage/support basic. Light magic shot with soft control.',energyByLevel:[1,1,1,1],energyCost:1});
+registerAbilityAlias('bracePeck','gooseHonk','Brace Peck',{isBasic:true,desc:'Tank basic. Heavy peck that steadies the line.'});
+registerAbilityAlias('icebreakerHonk','gooseHonk','Icebreaker Honk',{isBasic:true,desc:'Tank basic. Chilling honk that cracks defenses.'});
+registerAbilityAlias('huntersJab','dart',"Hunter's Jab",{isBasic:true,desc:'Predator basic. Precise jab for clean finishing lines.'});
 
 async function playerAction(ab,fromQueue=false) {
   const now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
@@ -6921,6 +7174,17 @@ async function playerAction(ab,fromQueue=false) {
   codexMark('abilities',ab.id,'used');
   if(G.enemy?.id==='duke_blakiston') dukeTrackDecree(ab.id);
   G._activePlayerAbility=ab;
+  const _abKindNow=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
+  if(_abKindNow==='utility' && G.player?.perkUtilityRefund && !G._perkUtilityRefundUsed){
+    gainEnergy(G.player,1);
+    G._perkUtilityRefundUsed=true;
+  }
+  if((_abKindNow==='utility' || _abKindNow==='buff' || _abKindNow==='defend') && G.player?.perkUtilityAcc){
+    G.playerStatus.perkUtilityAcc=1;
+  }
+  if(G.player?.perkHoldTheLine && /guard|defend|shield|crowdefend/i.test(ab.id||'')){
+    G.playerStatus.holdTheLineBoost=1;
+  }
   G.playerActionsThisTurn=(G.playerActionsThisTurn||0)+1;
   renderEnergyOrbs();
   G.turnPhase=TURN.RESOLVING;
@@ -6938,6 +7202,9 @@ async function playerAction(ab,fromQueue=false) {
   await ACTIONS[ab.id](ab);
   if(chargedDouble && !G.battleOver && G.enemy.stats.hp>0){await ACTIONS[ab.id](ab);}
   const _abKind=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
+  if((_abKind==='physical'||_abKind==='ranged') && G.player?.perkIronMomentum && /heavy|slam|crusher|smash/i.test((ab.name||ab.id||'').toLowerCase())){
+    addStatus(G.playerStatus,'defending',1,999);
+  }
   if(_abKind==='physical'||_abKind==='ranged') G._firstAttackUsed=true;
   if(_abKind==='spell'){ G._firstSpellUsed=true; G._spellCastCount=(G._spellCastCount||0)+1; }
   G._lastPlayerAbility = ab.id;
@@ -6970,6 +7237,14 @@ function startPlayerTurn(player){
   if(isEndlessRunActive() && player.relFeatheredClock && ((G.endlessBattle||0)%3===0)) player.energy += 1;
   G.playerActionsThisTurn=0;
   G.playerTurnFlags={energyGainedThisTurn:0,onHitTriggered:false,firstAttackResolved:false};
+  if(G.playerStatus.perkSlipstream){
+    G.player.stats.spd=(G.player.stats.spd||1)+1;
+    G.playerStatus.perkSlipstream=0;
+    G.playerStatus.perkSlipstreamDecay=1;
+  }else if(G.playerStatus.perkSlipstreamDecay){
+    G.player.stats.spd=Math.max(1,(G.player.stats.spd||1)-1);
+    delete G.playerStatus.perkSlipstreamDecay;
+  }
   if(player.mutSuddenFlight) player._mutSuddenFlightUsed=false;
   G.turn='player';
   G.turnPhase=TURN.PLAYER;
@@ -7493,36 +7768,74 @@ function getEnemyActionEnergyCost(action){
   }
   return 1;
 }
+
+const AI_PERSONALITY_PROFILES = {
+  aggressive:{damageBias:1.35,heavyBias:1.25,controlBias:0.85,buffBias:0.60,guardBias:0.55,healBias:0.50,finisherBias:1.20,repeatBias:0.85},
+  tactical:{damageBias:1.10,heavyBias:1.00,controlBias:1.10,buffBias:1.00,guardBias:0.90,healBias:0.80,finisherBias:1.05,repeatBias:0.80},
+  opportunistic:{damageBias:1.15,heavyBias:1.10,controlBias:0.95,buffBias:0.70,guardBias:0.70,healBias:0.65,finisherBias:1.50,repeatBias:0.80},
+  control:{damageBias:0.95,heavyBias:0.85,controlBias:1.40,buffBias:1.00,guardBias:0.85,healBias:0.75,finisherBias:1.00,repeatBias:0.75},
+  defender:{damageBias:0.95,heavyBias:0.90,controlBias:1.00,buffBias:0.95,guardBias:1.35,healBias:1.15,finisherBias:0.95,repeatBias:0.80},
+  duelist:{damageBias:1.25,heavyBias:1.20,controlBias:0.95,buffBias:0.70,guardBias:0.60,healBias:0.50,finisherBias:1.30,repeatBias:0.90},
+  executioner:{damageBias:1.25,heavyBias:1.30,controlBias:1.05,buffBias:0.55,guardBias:0.50,healBias:0.45,finisherBias:1.65,repeatBias:0.95},
+  seer:{damageBias:0.95,heavyBias:0.80,controlBias:1.45,buffBias:1.25,guardBias:0.85,healBias:0.70,finisherBias:0.95,repeatBias:0.70},
+  reaper:{damageBias:1.05,heavyBias:0.95,controlBias:1.20,buffBias:1.10,guardBias:0.75,healBias:1.25,finisherBias:1.15,repeatBias:0.80},
+  scavenger:{damageBias:1.10,heavyBias:1.10,controlBias:1.00,buffBias:0.75,guardBias:0.65,healBias:0.60,finisherBias:1.45,repeatBias:0.80},
+  tyrant:{damageBias:1.20,heavyBias:1.15,controlBias:1.20,buffBias:0.90,guardBias:0.75,healBias:0.65,finisherBias:1.40,repeatBias:0.85},
+};
+
+function getAIPersonalityProfile(enemy){
+  const id=(enemy?.aiPersonality||'tactical').toLowerCase();
+  return AI_PERSONALITY_PROFILES[id]||AI_PERSONALITY_PROFILES.tactical;
+}
+function getEnemyAIMemory(enemy){
+  if(!enemy.aiMemory){
+    enemy.aiMemory={lastAbilityId:null,lastActionCategory:null,lastTurnHadDamage:true,utilityStreak:0,turnsSinceHit:0,openingSetupUsed:false};
+  }
+  return enemy.aiMemory;
+}
 function getEnemyMode(e,p){
   const hpPct=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
   const pHpPct=(p.stats.hp||1)/Math.max(1,p.stats.maxHp||1);
-  const canDebuff=(e.abilities||[]).some(id=>['eWeaken','eFear','eBlind','ePoison','eVenom'].includes(id));
+  const canDebuff=(e.abilities||[]).some(id=>['eWeaken','eFear','eBlind','ePoison','eVenom','eStun'].includes(id));
   if(hpPct<0.30) return 'RECOVER';
-  if(pHpPct<0.35) return 'EXECUTE';
+  if(pHpPct<0.40) return 'EXECUTE';
   if(canDebuff) return 'SETUP';
   return 'PRESSURE';
+}
+function classifyEnemyActionCategory(action){
+  if(!action) return 'utility';
+  if(action.type==='strike') return 'damage';
+  if(action.type==='heavy') return 'heavy';
+  if(action.type==='defend') return 'guard';
+  if(action.type!=='ability') return 'utility';
+  const id=String(action.abilityId||'');
+  if(['eHeal'].includes(id)) return 'heal';
+  if(['eShield'].includes(id)) return 'guard';
+  if(['eRage'].includes(id)) return 'buff';
+  if(['eWeaken','eFear','eBlind','ePoison','eVenom','eStun','eBurn'].includes(id)) return 'control';
+  return 'damage';
 }
 function buildEnemyActionPool(e,mode){
   const abs=e.abilities||[];
   const pool=[];
-  const add=(a,w)=>{for(let i=0;i<w;i++) pool.push(a);};
+  const push=(a,w=1,meta={})=>{for(let i=0;i<w;i++) pool.push({...a,...meta});};
   if(mode==='RECOVER'){
-    if(abs.includes('eHeal')) add({type:'ability',abilityId:'eHeal',icon:'🌿',label:'Heal'},5);
-    if(abs.includes('eShield')) add({type:'ability',abilityId:'eShield',icon:'🛡',label:'Shield'},4);
-    add({type:'defend',icon:'🛡',label:'Defend'},3);
-    add({type:'strike',icon:'⚔',label:'Attack'},2);
+    if(abs.includes('eHeal')) push({type:'ability',abilityId:'eHeal',icon:'🌿',label:'Heal'},4,{isUtility:true});
+    if(abs.includes('eShield')) push({type:'ability',abilityId:'eShield',icon:'🛡',label:'Shield'},3,{isUtility:true});
+    push({type:'defend',icon:'🛡',label:'Defend'},2,{isUtility:true});
+    push({type:'strike',icon:'⚔',label:'Attack'},2);
   }else if(mode==='EXECUTE'){
-    add({type:'heavy',icon:'💢',label:'Heavy Strike'},5);
-    add({type:'strike',icon:'⚔',label:'Attack'},3);
-    for(const id of abs){ if(['eRage','eStun','ePoison','eBurn'].includes(id)) add({type:'ability',abilityId:id,icon:'✦',label:ENEMY_ABILITY_POOL[id]?.name||id},2); }
+    push({type:'heavy',icon:'💢',label:'Heavy Strike',tags:['HEAVY','FINISH']},5);
+    push({type:'strike',icon:'⚔',label:'Attack'},3);
+    for(const id of abs){ if(['eRage','eStun','ePoison','eBurn','eFear'].includes(id)) push({type:'ability',abilityId:id,icon:'✦',label:ENEMY_ABILITY_POOL[id]?.name||id},2,{isUtility:['eRage'].includes(id)}); }
   }else if(mode==='SETUP'){
-    for(const id of abs){ if(['eWeaken','eFear','eBlind','ePoison','eVenom'].includes(id)) add({type:'ability',abilityId:id,icon:'🌀',label:ENEMY_ABILITY_POOL[id]?.name||id},4); }
-    add({type:'strike',icon:'⚔',label:'Attack'},3);
-    add({type:'defend',icon:'🛡',label:'Defend'},1);
+    for(const id of abs){ if(['eWeaken','eFear','eBlind','ePoison','eVenom'].includes(id)) push({type:'ability',abilityId:id,icon:'🌀',label:ENEMY_ABILITY_POOL[id]?.name||id},4,{isUtility:true}); }
+    push({type:'strike',icon:'⚔',label:'Attack'},3);
+    push({type:'defend',icon:'🛡',label:'Defend'},1,{isUtility:true});
   }else{
-    add({type:'strike',icon:'⚔',label:'Attack'},5);
-    add({type:'heavy',icon:'💢',label:'Heavy Strike'},2);
-    for(const id of abs){ if(['eWeaken','eFear','eBlind','eRage'].includes(id)) add({type:'ability',abilityId:id,icon:'✦',label:ENEMY_ABILITY_POOL[id]?.name||id},2); }
+    push({type:'strike',icon:'⚔',label:'Attack'},5);
+    push({type:'heavy',icon:'💢',label:'Heavy Strike',tags:['HEAVY']},2);
+    for(const id of abs){ if(['eWeaken','eFear','eBlind','eRage'].includes(id)) push({type:'ability',abilityId:id,icon:'✦',label:ENEMY_ABILITY_POOL[id]?.name||id},2,{isUtility:['eRage'].includes(id)}); }
   }
   return pool;
 }
@@ -7530,109 +7843,98 @@ function projectedEnemyActionDamage(a,e){
   if(!a) return 0;
   if(a.type==='strike') return Math.floor((e.stats.atk||8)*1.0);
   if(a.type==='heavy') return Math.floor((e.stats.atk||8)*1.6);
-  if(a.type==='ability'){
-    if(a.abilityId==='eStun') return Math.floor((e.stats.atk||8)*1.1);
-    return 0;
-  }
+  if(a.type==='ability') return ['eStun'].includes(a.abilityId)?Math.floor(6+((e.stats.atk||8)*0.95)):0;
   return 0;
+}
+function getEnemyOpeningBias(enemy,turnNumber){
+  const p=(enemy.aiPersonality||'tactical').toLowerCase();
+  if(turnNumber>1) return {};
+  if(['aggressive','duelist','executioner'].includes(p)) return {damage:1.25,heavy:1.20,control:0.9};
+  if(['control','seer'].includes(p)) return {control:1.35,buff:1.2,damage:0.9};
+  if(['defender'].includes(p)) return {guard:1.25,heal:1.15,damage:0.9};
+  if(['scavenger','opportunistic'].includes(p)) return {control:1.2,damage:1.05};
+  if(['tyrant'].includes(p)) return {control:1.25,damage:1.1};
+  return {};
+}
+function getEnemyActionComboBonus(enemy,action,cat){
+  const m=getEnemyAIMemory(enemy);
+  const p=(enemy.aiPersonality||'tactical').toLowerCase();
+  const prev=String(m.lastAbilityId||'');
+  if(!prev) return 1;
+  if(['duelist','executioner'].includes(p) && ['eWeaken','eFear','eBlind'].includes(prev) && (cat==='heavy'||cat==='damage')) return 1.30;
+  if(['seer','control'].includes(p) && prev==='eBlind' && cat==='damage') return 1.25;
+  if(['reaper','scavenger'].includes(p) && ['ePoison','eVenom'].includes(prev) && (cat==='damage'||cat==='heavy')) return 1.25;
+  if(p==='tyrant' && ['eShield','eRage','eWeaken','eFear'].includes(prev) && (cat==='heavy'||cat==='damage')) return 1.35;
+  return 1;
 }
 function planEnemyTurn(e,p){
   const mode=getEnemyMode(e,p);
   const pool=buildEnemyActionPool(e,mode);
   const actions=[];
+  const mem=getEnemyAIMemory(e);
+  const profile=getAIPersonalityProfile(e);
   let energy=e.energyMax||3;
-  let projected=0;
-  let hardCCUsedLast=(G.enemyLastPlan||[]).some(a=>a.type==='ability'&&a.abilityId==='eStun');
-  let nonDmgEvery2=0;
-  const diff=G.difficulty||'juvenile';
-  const murderMode=diff==='murder';
-  const hardMode=diff==='predator';
-
-  // Turn-1 debuff opener guaranteed on Murder, preferred on Hard
-  const hardCCBlocked=!!G.enemyUsedHardCCLastTurn;
-  if((G.enemyTurnCount||0)<=1){
-    const openers=(e.abilities||[]).filter(id=>['eWeaken','eBlind','eFear'].includes(id));
-    if(openers.length){
-      const opener={type:'ability',abilityId:openers[0],icon:'🌀',label:ENEMY_ABILITY_POOL[openers[0]]?.name||openers[0]};
-      const oc=getEnemyActionEnergyCost(opener);
-      if(oc<=energy && (murderMode || (hardMode&&chance(70)))){
-        actions.push({...opener,energyCost:oc});
-        energy-=oc;
+  let actionsTaken=0;
+  const maxActions=Math.min(MAX_ENEMY_ACTIONS_PER_TURN,6);
+  let turnHadDamage=false;
+  while(energy>0 && actionsTaken<maxActions){
+    const affordable=pool.filter(a=>getEnemyActionEnergyCost(a)<=energy);
+    if(!affordable.length) break;
+    let best=null; let bestScore=-1;
+    for(const cand of affordable){
+      const cat=classifyEnemyActionCategory(cand);
+      let w=10;
+      if(cat==='damage') w*=profile.damageBias;
+      if(cat==='heavy') w*=profile.heavyBias;
+      if(cat==='control') w*=profile.controlBias;
+      if(cat==='buff') w*=profile.buffBias;
+      if(cat==='guard') w*=profile.guardBias;
+      if(cat==='heal') w*=profile.healBias;
+      const pHp=(p.stats.hp||1)/Math.max(1,p.stats.maxHp||1);
+      const eHp=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+      if(pHp<=0.5 && (cat==='heavy'||cat==='damage')) w*=profile.finisherBias;
+      if(mem.lastAbilityId && (cand.abilityId||cand.type)===mem.lastAbilityId) w*=profile.repeatBias;
+      if(!mem.lastTurnHadDamage && (cat==='damage'||cat==='heavy')) w*=1.45;
+      if(mem.utilityStreak>=1 && (cat==='damage'||cat==='heavy')) w*=1.25;
+      const opening=getEnemyOpeningBias(e,G.enemyTurnCount||1);
+      if(opening[cat]) w*=opening[cat];
+      if(['aggressive','duelist','executioner'].includes((e.aiPersonality||'')) && pHp<0.5 && (cat==='guard'||cat==='heal') && eHp>0.25) w*=0.7;
+      if(['control','seer'].includes((e.aiPersonality||''))){
+        const hasDebuffs=!!(G.playerStatus.weaken||G.playerStatus.feared||G.playerStatus.confused||G.playerStatus.paralyzed||G.playerStatus.poison||G.playerStatus.bleed||G.playerStatus.accDebuff);
+        if(!hasDebuffs && cat==='control' && !mem.openingSetupUsed) w*=1.3;
+        if(mem.openingSetupUsed && cat==='control') w*=0.75;
+        if(hasDebuffs && (cat==='damage'||cat==='heavy')) w*=1.15;
       }
+      if((e.aiPersonality||'')==='defender' && eHp<0.5 && (cat==='guard'||cat==='heal')) w*=1.2;
+      if((e.aiPersonality||'')==='reaper' && eHp<0.7 && cat==='heal') w*=1.3;
+      if((e.aiPersonality||'')==='reaper' && (G.playerStatus.poison?.stacks||0)>0 && (cat==='damage'||cat==='heavy')) w*=1.2;
+      if(['scavenger','opportunistic'].includes((e.aiPersonality||'')) && pHp<0.5 && (cat==='heavy'||cat==='damage')) w*=1.25;
+      if((e.aiPersonality||'')==='tyrant' && mem.utilityStreak>=1 && (cat==='damage'||cat==='heavy')) w*=1.4;
+      if(getEnemyActionComboBonus(e,cand,cat)>1) w*=getEnemyActionComboBonus(e,cand,cat);
+      const cost=getEnemyActionEnergyCost(cand);
+      if(cost===energy) w*=1.1;
+      if(w>bestScore){bestScore=w;best={...cand,energyCost:cost,category:cat};}
+    }
+    if(!best) break;
+    actions.push(best);
+    energy-=best.energyCost;
+    actionsTaken++;
+    const didDmg=projectedEnemyActionDamage(best,e)>0;
+    turnHadDamage = turnHadDamage || didDmg;
+    mem.lastAbilityId=best.abilityId||best.type;
+    mem.lastActionCategory=best.category;
+    if((G.enemyTurnCount||1)<=1 && (best.category==='control'||best.category==='buff'||best.category==='guard')) mem.openingSetupUsed=true;
+    mem.utilityStreak=(best.category==='guard'||best.category==='heal'||best.category==='buff'||best.category==='control')?(mem.utilityStreak+1):0;
+    if(globalThis.__AI_DEBUG){
+      console.debug('[AI]', e.name, 'persona=', e.aiPersonality, 'pick=', mem.lastAbilityId, 'cat=', best.category, 'EN->', energy);
     }
   }
-
-  // Smarter heal gate: only if meaningful missing HP
-  const hpMissingPct=1-((e.stats.hp||1)/Math.max(1,e.stats.maxHp||1));
-  if(hpMissingPct<=0.12){
-    for(let i=pool.length-1;i>=0;i--){ if(pool[i].type==='ability'&&pool[i].abilityId==='eHeal') pool.splice(i,1); }
-  }
-  while(energy>0&&pool.length){
-    let pick=pool[Math.floor(Math.random()*pool.length)];
-    if((hardMode||murderMode) && chance(murderMode?65:45)){
-      const weighted=pool.slice().sort((a,b)=>projectedEnemyActionDamage(b,e)-projectedEnemyActionDamage(a,e));
-      pick=weighted[0]||pick;
-    }
-    const c=getEnemyActionEnergyCost(pick);
-    if(c>energy){
-      const affordable=pool.filter(a=>getEnemyActionEnergyCost(a)<=energy);
-      if(!affordable.length) break;
-      pick=affordable[Math.floor(Math.random()*affordable.length)];
-    }
-    if((hardCCUsedLast||hardCCBlocked)&&pick.type==='ability'&&pick.abilityId==='eStun'){
-      const noCC=pool.filter(a=>!(a.type==='ability'&&a.abilityId==='eStun')&&getEnemyActionEnergyCost(a)<=energy);
-      if(noCC.length) pick=noCC[Math.floor(Math.random()*noCC.length)];
-    }
-    const dmg=projectedEnemyActionDamage(pick,e);
-    const capPct=e.isBoss?0.60:0.45;
-    if(projected+dmg > (p.stats.maxHp||1)*capPct){
-      const lighter=pool.filter(a=>projectedEnemyActionDamage(a,e)<=Math.max(1,(p.stats.maxHp||1)*capPct-projected)&&getEnemyActionEnergyCost(a)<=energy);
-      if(lighter.length) pick=lighter[Math.floor(Math.random()*lighter.length)];
-    }
-    actions.push({...pick,energyCost:getEnemyActionEnergyCost(pick)});
-    energy-=getEnemyActionEnergyCost(pick);
-    projected+=projectedEnemyActionDamage(pick,e);
-    if(pick.type==='ability'&&pick.abilityId==='eStun') hardCCUsedLast=true;
-    if(['defend'].includes(pick.type) || (pick.type==='ability'&&['eWeaken','eFear','eBlind','eRage','eHeal','eShield'].includes(pick.abilityId))) nonDmgEvery2=0;
-    else nonDmgEvery2++;
-    if(nonDmgEvery2>=2){
-      const support=pool.filter(a=>(a.type==='defend'||(a.type==='ability'&&['eWeaken','eFear','eBlind','eShield','eHeal'].includes(a.abilityId)))&&getEnemyActionEnergyCost(a)<=energy);
-      if(support.length&&energy>0){
-        const sup=support[Math.floor(Math.random()*support.length)];
-        actions.push({...sup,energyCost:getEnemyActionEnergyCost(sup)});
-        energy-=getEnemyActionEnergyCost(sup);
-      }
-      break;
-    }
-    if(actions.length>=4) break;
+  if(!turnHadDamage){
+    const fallback=pool.find(a=>['strike','heavy'].includes(a.type)&&getEnemyActionEnergyCost(a)<= (e.energyMax||3));
+    if(fallback && actions.length<maxActions) actions.push({...fallback,energyCost:getEnemyActionEnergyCost(fallback),category:classifyEnemyActionCategory(fallback)});
   }
   return {mode,actions};
 }
-
-const ENEMY_AI = {
-  aggressive(enemy){
-    if(enemyCanUse(enemy,'heavy')) return enemyUse(enemy,'heavy');
-    return enemyUse(enemy,'strike');
-  },
-  defensive(enemy){
-    if(enemyHpPct(enemy)<=0.55 && enemyCanUse(enemy,'defend')) return enemyUse(enemy,'defend');
-    if(enemyCanUse(enemy,'debuff') && Math.random()<0.25) return enemyUse(enemy,'debuff');
-    return enemyUse(enemy,'strike');
-  },
-  trickster(enemy){
-    if(enemyCanUse(enemy,'debuff')) return enemyUse(enemy,'debuff');
-    if(enemyCanUse(enemy,'strike') && Math.random()<0.65) return enemyUse(enemy,'strike');
-    return enemyUse(enemy,'defend');
-  },
-  predator(enemy){
-    if(playerHpPct()<=0.45 && enemyCanUse(enemy,'heavy')) return enemyUse(enemy,'heavy');
-    if(enemyCanUse(enemy,'heavy') && Math.random()<0.35) return enemyUse(enemy,'heavy');
-    return enemyUse(enemy,'strike');
-  },
-  boss(enemy){
-    return enemyUse(enemy,'heavy')||enemyUse(enemy,'strike');
-  }
-};
 
 function enemyHpPct(e){ return (e?.stats?.hp||1)/Math.max(1,(e?.stats?.maxHp||1)); }
 function playerHpPct(){ return (G.player?.stats?.hp||1)/Math.max(1,(G.player?.stats?.maxHp||1)); }
@@ -7644,39 +7946,15 @@ function mapAiStyleToType(style){
   if(['predator'].includes(s)) return 'predator';
   return 'aggressive';
 }
-function enemyActionFromPool(e,key){
-  const mode=getEnemyMode(e,G.player);
-  const pool=buildEnemyActionPool(e,mode);
-  const pickers={
-    strike:()=>pool.find(a=>a.type==='strike'),
-    heavy:()=>pool.find(a=>a.type==='heavy')||pool.find(a=>a.type==='ability'&&['eStun','eRage'].includes(a.abilityId)),
-    defend:()=>pool.find(a=>a.type==='defend')||pool.find(a=>a.type==='ability'&&['eShield','eHeal'].includes(a.abilityId)),
-    debuff:()=>pool.find(a=>a.type==='ability'&&['eWeaken','eFear','eBlind'].includes(a.abilityId)),
-  };
-  const a=(pickers[key]&&pickers[key]())||pool[0];
-  return a?{...a,energyCost:getEnemyActionEnergyCost(a)}:null;
-}
-function enemyCanUse(enemy,key){ return !!enemyActionFromPool(enemy,key); }
-function enemyUse(enemy,key){ return enemyActionFromPool(enemy,key); }
-function bossScriptPick(enemy){ return enemyUse(enemy,'heavy')||enemyUse(enemy,'strike'); }
-
 function planEnemyAction() {
   const e=G.enemy;
-  const aiType=(e.aiType||mapAiStyleToType(e.aiStyle)||'aggressive').toLowerCase();
-  const fn=ENEMY_AI[aiType]||ENEMY_AI.aggressive;
-  let actions=[];
-  const first=fn(e);
-  if(first) actions.push(first);
-  const second=(Math.random()<0.55)?fn(e):null;
-  if(second) actions.push(second);
-  if(!actions.length){
-    const plan=planEnemyTurn(e,G.player);
-    actions=plan.actions;
-  }
+  const plan=planEnemyTurn(e,G.player);
+  const actions=(plan.actions||[]).slice(0,MAX_ENEMY_ACTIONS_PER_TURN);
   G.enemyPlannedActions=actions;
+  const persona=(e.aiPersonality||'tactical');
   const preview=actions.slice(0,2).map(a=>`${a.icon||'•'} ${a.type==='ability'?(ENEMY_ABILITY_POOL[a.abilityId]?.name||a.abilityId):a.label}`).join(' → ');
   const more=actions.length>2?' +':'';
-  return {label:`${preview}${more}`,type:'plan',actions,mode:aiType};
+  return {label:`[${persona}] ${preview}${more}`,type:'plan',actions,mode:plan.mode,personality:persona};
 }
 
 
@@ -7708,7 +7986,8 @@ function dukeApplyDecreePunish(){
 }
 function dukeOwlsVerdict(){
   const p=G.player.stats; const missing=1-(p.hp/p.maxHp); const mult=1.15+missing*0.95;
-  const r=dealDamage('player',edmg(1.35*mult));
+  const burst=rollEnemyCritDamage(edmg(1.35*mult));
+  const r=dealDamage('player',burst.amount);
   spawnFloat('player',`🦉-${r.dmgDealt}`,'fn-dmg');
   logMsg('🦉 Owl’s Verdict!','boss');
 }
@@ -7720,19 +7999,22 @@ function dukeSummonCourt(){
 }
 function dukeTurnAI(){
   const e=G.enemy; const d=e.duke;
+  const mem=getEnemyAIMemory(e);
   const enraged=isBossEnrageAllowed() && e.stats.hp<=Math.floor(e.stats.maxHp*0.35);
   if(enraged) setStatusMax(G.enemyStatus,'enraged',2);
   d.riverCd=Math.max(0,(d.riverCd||0)-1);
   d.summonCd=Math.max(0,(d.summonCd||0)-1);
   d.verdictCd=Math.max(0,(d.verdictCd||0)-1);
   if(d.phase>=3) dukeApplyDecreePunish();
-  if(d.phase===1 && e.stats.hp<=Math.floor(e.stats.maxHp*0.75)){ dukeNightfall(); return; }
+  if(d.phase===1 && e.stats.hp<=Math.floor(e.stats.maxHp*0.75)){ mem.utilityStreak=(mem.utilityStreak||0)+1; mem.lastTurnHadDamage=false; mem.lastAbilityId='dukeNightfall'; mem.lastActionCategory='control'; dukeNightfall(); return; }
   if(d.phase===2){ d.nightfallTurns--; if(d.nightfallTurns<=0){ d.phase=3; logMsg('📜 The Court speaks in decree.','boss'); } }
-  if(d.summonCd===0){ d.summonCd=4; dukeSummonCourt(); return; }
-  if(d.riverCd===0){ d.riverCd=3; dukeRiverGrip(); return; }
+  if(d.summonCd===0){ d.summonCd=4; mem.utilityStreak=(mem.utilityStreak||0)+1; mem.lastTurnHadDamage=false; mem.lastAbilityId='dukeSummonCourt'; mem.lastActionCategory='guard'; dukeSummonCourt(); return; }
+  if(d.riverCd===0){ d.riverCd=3; mem.utilityStreak=(mem.utilityStreak||0)+1; mem.lastTurnHadDamage=false; mem.lastAbilityId='dukeRiverGrip'; mem.lastActionCategory='control'; dukeRiverGrip(); return; }
   const p=G.player.stats;
-  if(d.verdictCd===0 && (p.hp<=Math.floor(p.maxHp*0.35) || (G.enemyStatus.enraged||0)>0)){ d.verdictCd=3; dukeOwlsVerdict(); return; }
-  const r=dealDamage('player',edmg(1.0));
+  if(d.verdictCd===0 && (p.hp<=Math.floor(p.maxHp*0.5) || (G.enemyStatus.enraged||0)>0)){ d.verdictCd=3; mem.utilityStreak=0; mem.lastAbilityId='dukeOwlsVerdict'; mem.lastActionCategory='heavy'; mem.lastTurnHadDamage=true; dukeOwlsVerdict(); return; }
+  const snap=rollEnemyCritDamage(edmg(1.0));
+  const r=dealDamage('player',snap.amount);
+  mem.utilityStreak=0; mem.lastAbilityId='dukeTalons'; mem.lastActionCategory='damage'; mem.lastTurnHadDamage=(r.dmgDealt||0)>0;
   spawnFloat('player',`-${r.dmgDealt}`,'fn-dmg');
   logMsg('🦉 Talons in the dark.','boss');
 }
@@ -7744,9 +8026,15 @@ async function enemyTurn() {
   G.enemyTurnCount=(G.enemyTurnCount||0)+1;
   startEnemyTurn(e);
   if(G.enemy?.aiType==='boss_duke'){
-    dukeTurnAI();
+    let dukeActions=0;
+    while((e.energy||0)>0 && dukeActions<MAX_ENEMY_ACTIONS_PER_TURN){
+      dukeTurnAI();
+      e.energy=Math.max(0,(e.energy||0)-1);
+      dukeActions++;
+      if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
+      await delay(220);
+    }
     G.animLock=false;
-    if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
     afterEnemyTurn();
     return;
   }
@@ -7797,6 +8085,8 @@ async function enemyTurn() {
 
   G.enemyActionsThisTurn=0;
   let usedHardCCThisTurn=false;
+  const aiMem=getEnemyAIMemory(e);
+  let turnHadDamage=false;
   for(const action of plan){
     if(G.enemyActionsThisTurn>=MAX_ENEMY_ACTIONS_PER_TURN) break;
     const cost=getEnemyActionEnergyCost(action);
@@ -7821,22 +8111,26 @@ async function enemyTurn() {
       G._incomingAttackKind='physical';
       if(totalEnemyMiss>0&&chance(totalEnemyMiss)){await doMiss('enemy');logMsg(`${e.name} attack missed!`,'miss');}
       else{
-        const r=dealDamage('player',edmg());
+        const strikeRoll=rollEnemyCritDamage(edmg());
+        const r=dealDamage('player',strikeRoll.amount);
         await doAttack('enemy','player',r);
         setHpBar('player',G.player.stats.hp,G.player.stats.maxHp);
         if(r.wasDodged)logMsg(`${e.name} attacks — dodged!`,'enemy-action');
-        else logMsg(`${e.name} attacks for ${r.dmgDealt}!`,'enemy-action');
+        else logMsg(`${e.name} attacks${strikeRoll.isCrit?' CRIT':''} for ${r.dmgDealt}!`,'enemy-action');
+        if((r.dmgDealt||0)>0) turnHadDamage=true;
       }
     } else if(action.type==='heavy'){
       G._incomingAttackKind='physical';
       const missTot=20+totalEnemyMiss;
       if(chance(missTot)){await doMiss('enemy');logMsg(`${e.name} heavy missed!`,'miss');}
       else{
-        const r=dealDamage('player',edmg(1.6));
+        const heavyRoll=rollEnemyCritDamage(edmg(1.6));
+        const r=dealDamage('player',heavyRoll.amount);
         await doAttack('enemy','player',r);
         setHpBar('player',G.player.stats.hp,G.player.stats.maxHp);
         if(r.wasDodged)logMsg(`Heavy — dodged!`,'enemy-action');
-        else logMsg(`💢 ${e.name} heavy hits for ${r.dmgDealt}!`,'enemy-action');
+        else logMsg(`💢 ${e.name} heavy${heavyRoll.isCrit?' CRIT':''} hits for ${r.dmgDealt}!`,'enemy-action');
+        if((r.dmgDealt||0)>0) turnHadDamage=true;
       }
     } else if(action.type==='defend'){
       if(G.enemyStatus.feared>0){logMsg(`${e.name} too afraid to defend!`,'enemy-action');}
@@ -7858,15 +8152,20 @@ async function enemyTurn() {
         }
         await doSpell('enemy',`✦ ${eab.name}!`);
         eab.fn(G.enemy,G.player,G);
+        if(projectedEnemyActionDamage(action,e)>0) turnHadDamage=true;
         const _macBd=BIRDS[G.player.birdKey];
         if(_macBd&&_macBd.passive&&_macBd.passive.onEnemyAbility) _macBd.passive.onEnemyAbility(G.player,action.abilityId);
         renderStatuses('player-status',G.playerStatus); renderStatuses('enemy-status',G.enemyStatus);
       }
     }
 
+    aiMem.lastAbilityId=action.abilityId||action.type;
+    aiMem.lastActionCategory=classifyEnemyActionCategory(action);
     if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){break;}
   }
 
+  aiMem.lastTurnHadDamage=turnHadDamage;
+  aiMem.turnsSinceHit=turnHadDamage?0:((aiMem.turnsSinceHit||0)+1);
   G.enemyUsedHardCCLastTurn=usedHardCCThisTurn;
   G.animLock=false;
   if(G.player.stats.hp<=0||G.enemy.stats.hp<=0){if(checkDeath())return;}
@@ -8080,17 +8379,27 @@ function postCombat() {
       }
     }
 
-    // Shiny reward
-    const enemySize = (G.enemy.size || 'medium').toLowerCase();
-    const sizeShiny =
-      enemySize === 'tiny' ? 1 :
-      enemySize === 'small' ? 2 :
-      enemySize === 'medium' ? 3 :
-      enemySize === 'large' ? 4 :
-      enemySize === 'xl' ? 5 : 3;
-
-    const bossShiny = G.enemy.isBoss ? 10 : 0;
-    const stageBonusShiny = Math.floor(Math.max(1, G.stage) / 10);
+    // Shiny reward economy rebalance
+    const isStoryMode=(G.ui?.gameMode||'story')==='story';
+    const stage=Math.max(1,G.stage||1);
+    const endlessBattle=Math.max(0,G.endlessBattle||0);
+    let shinyGain=0;
+    if(G.enemy.isBoss){
+      if(isStoryMode){
+        if(stage>=20) shinyGain=roll(40,60);
+        else if(stage>=10) shinyGain=roll(25,35);
+        else shinyGain=roll(20,30);
+      } else {
+        shinyGain=roll(30,45);
+      }
+    } else {
+      if(isStoryMode){
+        shinyGain = (stage<10) ? roll(8,14) : roll(12,18);
+      } else {
+        const infl=Math.min(6,Math.floor(endlessBattle/12));
+        shinyGain = roll(10,16) + infl;
+      }
+    }
 
     // SAFE: bs defaults prevent crashes
     const perfectBonus = (bs.dmgTaken <= 0) ? 2 : 0;
@@ -8102,11 +8411,10 @@ function postCombat() {
       G.player.stats.hp = Math.min(G.player.stats.hp, G.player.stats.maxHp);
       logMsg('🔥 Molting Ritual: +1 ATK, -3 Max HP.', 'system');
     }
-    const shinyGain = sizeShiny + bossShiny + stageBonusShiny + perfectBonus + fastWinBonus;
+    shinyGain += perfectBonus + fastWinBonus;
     G.shinyObjects += shinyGain;
 
     const bonusParts = [];
-    if (stageBonusShiny > 0) bonusParts.push(`stage +${stageBonusShiny}`);
     if (perfectBonus > 0) bonusParts.push('perfect +2');
     if (fastWinBonus > 0) bonusParts.push('fast +1');
     const bonusTxt = bonusParts.length ? ` (${bonusParts.join(', ')})` : '';
@@ -8114,34 +8422,23 @@ function postCombat() {
 
     // Level up check
     let leveled = false;
+    let levelUpsGained = 0;
     while (G.player.exp >= expForLevel(G.player.birdLevel + 1)) {
       G.player.exp -= expForLevel(G.player.birdLevel + 1);
       G.player.birdLevel++;
-      const _preStats={...G.player.stats};
       checkGrowthStage(G.player);
-      applyClassGrowthOnLevelUp();
-      const _postStats={...G.player.stats};
-      G._lastLevelUpStatsBefore=_preStats;
-      G._lastLevelUpStatsAfter=_postStats;
-      G._lastLevelUpStatGains={
-        hp:(_postStats.maxHp||0)-(_preStats.maxHp||0),
-        atk:(_postStats.atk||0)-(_preStats.atk||0),
-        def:(_postStats.def||0)-(_preStats.def||0),
-        spd:(_postStats.spd||0)-(_preStats.spd||0),
-        matk:(_postStats.matk||0)-(_preStats.matk||0),
-        mdef:(_postStats.mdef||0)-(_preStats.mdef||0)
-      };
 
-      // Level-up heal depends on bird size
-      const sizeHeal = { tiny: 0.60, small: 0.50, medium: 0.35, large: 0.25, xl: 0.15 };
-      const healPct = sizeHeal[G.player.size] || 0.35;
-      const lvHeal = Math.max(1, Math.floor(G.player.stats.maxHp * healPct));
+      // Level-up heal: 50% of currently missing HP
+      const missingHp = Math.max(0, G.player.stats.maxHp - G.player.stats.hp);
+      const lvHeal = Math.max(1, Math.floor(missingHp * 0.50));
       G.player.stats.hp = Math.min(G.player.stats.hp + lvHeal, G.player.stats.maxHp);
 
       leveled = true;
+      levelUpsGained++;
       logMsg(`🌟 LEVEL UP! Now Lv.${G.player.birdLevel}! Healed ${lvHeal} HP.`, 'exp-gain');
       SFX.levelUp();
     }
+    G._pendingLevelUpChoices = (G._pendingLevelUpChoices||0) + levelUpsGained;
 
     handleBossClearUnlocks();
     checkRunUnlocks();
@@ -8225,7 +8522,7 @@ function showRewardScreen(hasLevelUp) {
 function confirmReward() {
   if(!G._pendingReward) return;
   if(document.getElementById('gold-replace-ui')) return;
-  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=3){
+  if(G._pendingReward.tier==='gold'&&getGoldCardCount()>=getGoldCardLimit()){
     showGoldReplaceUI(G._pendingReward);
     return;
   }
@@ -8290,8 +8587,9 @@ function showGoldReplaceUI(newReward){
   const ui=document.createElement('div');
   ui.id='gold-replace-ui';
   ui.style.cssText='background:rgba(20,15,5,.97);border:1px solid var(--gold);border-radius:12px;padding:16px;margin-top:12px;text-align:center;';
+  const cap=getGoldCardLimit();
   ui.innerHTML=`<div style="font-family:Cinzel,serif;color:var(--gold);margin-bottom:8px;font-size:.85rem;letter-spacing:.08em">⚠ LEGENDARY LIMIT — Replace a Gold Card</div>
-    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold 3 Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
+    <div style="color:var(--text-dim);font-size:.78rem;margin-bottom:12px">You hold ${cap} Legendary cards. Choose one to replace with <strong style="color:var(--gold)">${newReward.name}</strong>:</div>
     <div id="gold-replace-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     <button onclick="document.getElementById('gold-replace-ui').remove();G._goldReplaceMode=false;" style="margin-top:10px;background:rgba(40,35,25,.8);border:1px solid var(--border);color:var(--text-dim);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;">✕ Cancel</button>`;
   const list=ui.querySelector('#gold-replace-list');
@@ -8351,23 +8649,22 @@ function generateBossRewards() {
     const rw=pool[Math.floor(Math.random()*pool.length)];
     used.add(rw.id); return rw;
   }
-  function pick(forced,optional){
+  function pick(forced){
     const r=pickTier(forced)||pickTier('purple')||pickTier('blue');
     if(r) out.push(r);
-    if(optional&&out.length<3&&chance(optional*100)){const r2=pickTier('gold');if(r2)out.push(r2);}
   }
   
-  // Stage 40 endless boss: 3 gold
+  // Stage 40 endless boss: 3 high-tier non-gold
   if(endlessBattle>0&&endlessBattle%20===0){
-    for(let i=0;i<3;i++){const r=pickTier('gold');if(r)out.push(r);}
+    for(let i=0;i<3;i++){const r=pickTier('purple')||pickTier('blue');if(r)out.push(r);}
   }
-  // Stage 10/20 main bosses: 1 purple guaranteed + 25% gold
+  // Stage 10/20 main bosses: 1 purple guaranteed
   else if(stage%10===0){
-    pick('purple', 0.20);
+    pick('purple');
   }
-  // Default boss: purple + possible gold
+  // Default boss: purple baseline
   else {
-    pick('purple', 0.12);
+    pick('purple');
   }
   
   if(isEndlessRunActive()){
@@ -8380,8 +8677,8 @@ function generateBossRewards() {
   // Fill remaining 3 slots
   while(out.length<3){
     let tier;
-    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
-    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple','gold'],[47,48,5]);}
+    if(stage>=35||endlessBattle>30){tier=rollWeighted(['blue','purple'],[50,50]);}
+    else if(stage>=20||endlessBattle>10){tier=rollWeighted(['blue','purple'],[50,50]);}
     else{tier=rollTier(true);}
     const r=pickTier(tier);
     if(r) out.push(r);
@@ -8399,11 +8696,40 @@ function rollWeighted(tiers,weights){
 
 // Gold card limit: max 3, prompt replacement if at limit
 function getGoldCardCount(){return(G.collectedRewards||[]).filter(r=>r.tier==='gold').length;}
+function getGoldCardLimit(){
+  if((G.ui?.gameMode||'story')==='story' && (G.stage||1)<20) return 1;
+  return 3;
+}
 
 // ============================================================
 //  LEVEL-UP SCREEN — select then confirm
 // ============================================================
-let _luSelectedSkillId=null;
+let _luSelectedStatChoiceId=null;
+const LEVELUP_STAT_POOL = [
+  {id:'vit6', label:'+6 Vitality', stat:'maxHp', amount:6, apply(){ G.player.stats.maxHp=(G.player.stats.maxHp||1)+6; G.player.stats.hp=Math.min((G.player.stats.hp||1)+6,G.player.stats.maxHp||1); }},
+  {id:'atk2', label:'+2 ATK', stat:'atk', amount:2, apply(){ G.player.stats.atk=(G.player.stats.atk||0)+2; }},
+  {id:'matk2', label:'+2 MATK', stat:'matk', amount:2, apply(){ G.player.stats.matk=(G.player.stats.matk||0)+2; }},
+  {id:'def1', label:'+1 DEF', stat:'def', amount:1, apply(){ G.player.stats.def=(G.player.stats.def||0)+1; }},
+  {id:'mdef1', label:'+1 MDEF', stat:'mdef', amount:1, apply(){ G.player.stats.mdef=(G.player.stats.mdef||0)+1; }},
+  {id:'spd1', label:'+1 SPD', stat:'spd', amount:1, apply(){ G.player.stats.spd=(G.player.stats.spd||0)+1; }},
+  {id:'acc2', label:'+2 ACC', stat:'acc', amount:2, apply(){ G.player.stats.acc=(G.player.stats.acc||0)+2; }},
+  {id:'cc2', label:'+2% CC', stat:'critChance', amount:2, apply(){ G.player.stats.critChance=Math.min(95,(G.player.stats.critChance||5)+2); }},
+  {id:'cd01', label:'+0.1 CD', stat:'goldCritMult', amount:0.1, apply(){ G.player.goldCritMult=Math.min(3.0,(G.player.goldCritMult||1.5)+0.1); }},
+];
+const ENDLESS_RARE_LEVELUP_CHOICES = [
+  {id:'vit10', label:'+10 Vitality', stat:'maxHp', amount:10, apply(){ G.player.stats.maxHp=(G.player.stats.maxHp||1)+10; G.player.stats.hp=Math.min((G.player.stats.hp||1)+10,G.player.stats.maxHp||1); }},
+  {id:'atk3', label:'+3 ATK', stat:'atk', amount:3, apply(){ G.player.stats.atk=(G.player.stats.atk||0)+3; }},
+  {id:'spd2', label:'+2 SPD', stat:'spd', amount:2, apply(){ G.player.stats.spd=(G.player.stats.spd||0)+2; }},
+];
+const LEVELUP_ARCHETYPE_WEIGHT = {
+  striker:{atk:3.0,spd:2.8,matk:0.9,mdef:0.9,maxHp:0.9,def:1.0,acc:1.2,critChance:1.3,goldCritMult:1.1},
+  mage:{atk:0.9,spd:1.0,matk:3.0,mdef:2.8,maxHp:1.0,def:0.9,acc:1.1,critChance:1.0,goldCritMult:1.0},
+  tank:{atk:1.0,spd:0.8,matk:0.9,mdef:1.4,maxHp:3.0,def:3.0,acc:0.9,critChance:0.8,goldCritMult:0.9},
+  trickster:{atk:1.3,spd:3.0,matk:1.0,mdef:1.0,maxHp:0.9,def:1.0,acc:2.6,critChance:1.1,goldCritMult:1.0},
+  bruiser:{atk:3.0,spd:1.2,matk:0.9,mdef:1.0,maxHp:1.1,def:2.6,acc:1.0,critChance:1.1,goldCritMult:1.0},
+  predator:{atk:2.8,spd:2.0,matk:0.9,mdef:0.9,maxHp:1.0,def:1.0,acc:1.4,critChance:2.8,goldCritMult:2.0},
+  support:{atk:0.9,spd:1.1,matk:2.5,mdef:2.5,maxHp:1.1,def:1.0,acc:1.2,critChance:0.9,goldCritMult:0.9},
+};
 
 function isMainAttackAbility(ab){
   if(!ab) return false;
@@ -8444,6 +8770,44 @@ function applyMainAttackAutoLevel(){
       logMsg(`⚔ ${main.name} auto-upgraded to Lv.${newLv}!`,'exp-gain');
     }
   }
+}
+
+function getPlayerLevelArchetype(){
+  const cls=String(BIRDS[G.player?.birdKey]?.class||'knight').toLowerCase();
+  if(['assassin'].includes(cls)) return 'striker';
+  if(['mage','summoner'].includes(cls)) return 'mage';
+  if(['tank'].includes(cls)) return 'tank';
+  if(['bard'].includes(cls)) return 'support';
+  if(['ranger'].includes(cls)) return 'predator';
+  if(['knight'].includes(cls)) return 'bruiser';
+  return 'support';
+}
+
+function weightedPickUniqueOptions(pool,count,getWeight){
+  const source=[...pool];
+  const out=[];
+  while(source.length&&out.length<count){
+    const weights=source.map(x=>Math.max(0.01,Number(getWeight(x))||1));
+    const total=weights.reduce((a,b)=>a+b,0);
+    let r=Math.random()*total;
+    let idx=0;
+    for(let i=0;i<source.length;i++){ r-=weights[i]; if(r<=0){ idx=i; break; } }
+    out.push(source.splice(idx,1)[0]);
+  }
+  return out;
+}
+
+function buildLevelUpStatChoices(){
+  const arch=getPlayerLevelArchetype();
+  const bias=LEVELUP_ARCHETYPE_WEIGHT[arch]||LEVELUP_ARCHETYPE_WEIGHT.support;
+  const basePool=[...LEVELUP_STAT_POOL];
+  if(isEndlessRunActive() && chance(18)){
+    const rare=ENDLESS_RARE_LEVELUP_CHOICES[Math.floor(Math.random()*ENDLESS_RARE_LEVELUP_CHOICES.length)];
+    const replaceIdx=Math.floor(Math.random()*basePool.length);
+    basePool.splice(replaceIdx,1,rare);
+  }
+  const picks=weightedPickUniqueOptions(basePool,3,(opt)=>bias[opt.stat]||1);
+  return picks.map((x,i)=>({...x,choiceId:`${x.id}_${i}_${Date.now()}`}));
 }
 
 function getBirdExclusiveLearnPool(birdKey){
@@ -8510,62 +8874,55 @@ function ensureMainAttackAndLoadoutRules(){
 
 function showLevelUpScreen() {
   showScreen('screen-levelup');
-  _luSelectedSkillId=null;
-  const g=G._lastLevelUpStatGains||{};
-  const gainTxt=[['HP',g.hp],['ATK',g.atk],['DEF',g.def],['SPD',g.spd],['MATK',g.matk],['MDEF',g.mdef]].filter(x=>x[1]>0).map(x=>`${x[0]} +${x[1]}`).join(' · ');
-  document.getElementById('lu-sub').textContent=`Lv.${G.player.birdLevel} reached! Stat gains: ${gainTxt||'minor growth'} — choose a skill to improve:`;
-  const before=G._lastLevelUpStatsBefore||{};
-  const after=G._lastLevelUpStatsAfter||{};
-  const pairs=[['HP','maxHp'],['ATK','atk'],['DEF','def'],['SPD','spd'],['MATK','matk'],['MDEF','mdef']];
+  _luSelectedStatChoiceId=null;
+  const remaining=Math.max(1,G._pendingLevelUpChoices||1);
+  document.getElementById('lu-sub').textContent=`Lv.${G.player.birdLevel} reached! Choose 1 stat upgrade (${remaining} remaining):`;
+  const now=G.player.stats||{};
+  const pairs=[['HP','maxHp'],['ATK','atk'],['DEF','def'],['SPD','spd'],['MATK','matk'],['MDEF','mdef'],['ACC','acc']];
   const prevWrap=document.getElementById('lu-stat-preview');
   if(prevWrap){
     prevWrap.innerHTML=pairs.map(([label,key])=>{
-      const ov=before[key]??0;
-      const nv=after[key]??ov;
-      const improved=nv>ov;
-      const arrow=improved?'<span class="lu-stat-arrow">➜</span>':'<span class="lu-stat-arrow" style="opacity:.4;color:var(--text-dim)">→</span>';
-      return `<div class="lu-stat-row"><strong>${label}</strong><span><span class="v-old">${ov}</span>${arrow}<span class="${improved?'v-new':'v-old'}">${nv}</span></span></div>`;
+      const val=now[key]??0;
+      return `<div class="lu-stat-row"><strong>${label}</strong><span><span class="v-new">${val}</span></span></div>`;
     }).join('');
   }
 
   document.getElementById('lu-skills-panel').classList.add('active');
 
   document.getElementById('lu-skill-confirm').className='confirm-btn';
-  document.getElementById('lu-skip-btn').className='confirm-btn visible';
+  document.getElementById('lu-skip-btn').className='confirm-btn';
 
-  buildSkillGrid();
+  buildStatChoiceGrid();
 }
 
 function showLUPanel(which) {
   document.getElementById('lu-skills-panel').classList.add('active');
-  _luSelectedSkillId=null;
+  _luSelectedStatChoiceId=null;
   document.getElementById('lu-skill-confirm').className='confirm-btn';
-  document.getElementById('lu-skip-btn').className='confirm-btn visible';
+  document.getElementById('lu-skip-btn').className='confirm-btn';
 }
 
-function buildSkillGrid() {
+function buildStatChoiceGrid() {
   const grid=document.getElementById('lu-skill-grid'); grid.innerHTML='';
-  G.player.abilities.filter(a=>a&&a.id&&a.id!=='skipTurn'&&a.id!=='sittingDuck').forEach(ab=>{
-    const tmpl=ABILITY_TEMPLATES[ab.id];
-    if(!tmpl||ab.level>=4)return;
-    const nextLv=ab.level+1;
-    const nextDesc=tmpl.levels[Math.min(nextLv-1,tmpl.levels.length-1)].desc;
+  const options=buildLevelUpStatChoices();
+  G._levelUpStatChoices=options;
+  options.forEach(opt=>{
     const c=document.createElement('div');
     c.className='skill-upgrade-card';
     c.innerHTML=`
-      <div class="su-name">${ab.name}</div>
-      <div class="su-lv">Lv.${ab.level} → Lv.${nextLv}</div>
-      <div class="su-effect">${nextDesc}</div>`;
+      <div class="su-name">${opt.label}</div>
+      <div class="su-lv">Stat Choice</div>
+      <div class="su-effect">Improve ${String(opt.stat).toUpperCase()} by ${opt.amount}.</div>`;
     c.onclick=()=>{
       document.querySelectorAll('#lu-skill-grid .skill-upgrade-card').forEach(x=>x.classList.remove('selected'));
       c.classList.add('selected');
-      _luSelectedSkillId=ab.id;
+      _luSelectedStatChoiceId=opt.choiceId;
       document.getElementById('lu-skill-confirm').className='confirm-btn visible';
     };
     grid.appendChild(c);
   });
   if(!grid.children.length){
-    grid.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:20px;">All abilities at max level!<br><span style="font-size:.8rem;opacity:.7;">Press Continue.</span></div>';
+    grid.innerHTML='<div style="color:var(--text-dim);text-align:center;padding:20px;">No stat upgrades available.</div>';
   }
 }
 
@@ -8638,24 +8995,22 @@ function refreshPlayerAbilityAilments(){
 }
 
 async function confirmSkillUpgrade() {
-  if(!_luSelectedSkillId){logMsg('Select a skill to upgrade first!','miss');return;}
-  const ab=G.player.abilities.find(a=>a.id===_luSelectedSkillId);
-  if(!ab){return;}
-  const prevLevel=ab.level||1;
-  ab.level=Math.min(ab.level+1,4);
-  const tmpl=ABILITY_TEMPLATES[_luSelectedSkillId];
-  if(tmpl){
-    if(prevLevel<4 && ab.level===4 && (tmpl.type==='physical'||tmpl.type==='ranged') && ailmentSlotsForLevel(tmpl,4)>ailmentSlotsForLevel(tmpl,3)){
-      const choice=await openAbilityModificationChoice(ab, tmpl);
-      if(choice) ab.modAilmentChoice=choice;
-    }
-    ab.ailmentIds=deriveAbilityAilments(ab, tmpl);
+  if(!_luSelectedStatChoiceId){logMsg('Select a stat upgrade first!','miss');return;}
+  const pick=(G._levelUpStatChoices||[]).find(x=>x.choiceId===_luSelectedStatChoiceId);
+  if(!pick){
+    logMsg('That stat upgrade is no longer available.','miss');
+    showLevelUpScreen();
+    return;
   }
-  logMsg(`🌟 ${ab.name} upgraded to Lv.${ab.level}!`,'exp-gain');
-  refreshPlayerAbilityAilments();
-  normalizeAbilityCooldownsForPlayer(G.player);
-  enforceAbilityCosts(G.player);
-  _luSelectedSkillId=null;
+  pick.apply();
+  logMsg(`📈 ${pick.label} applied!`,'exp-gain');
+  _luSelectedStatChoiceId=null;
+  G._levelUpStatChoices=[];
+  G._pendingLevelUpChoices=Math.max(0,(G._pendingLevelUpChoices||1)-1);
+  if((G._pendingLevelUpChoices||0)>0){
+    showLevelUpScreen();
+    return;
+  }
   afterLevelUp();
 }
 
@@ -8675,19 +9030,11 @@ function advanceStage() {
     logMsg('🔓 Legendary birds unlocked: Shoebill Stork & Harpy Eagle!','boss');
   }
   saveRun();
+  if(maybeOfferClassPerkChoice()) return;
 
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
   const lastEnemyWasBoss = G.enemy && G.enemy.isBoss;
   const safeHP = G.player.stats.hp > G.player.stats.maxHp * 0.2;
-  const signatureDue = !lastEnemyWasBoss && safeHP && (G.stage % 5 === 0);
-  if(signatureDue){
-    const sigEvt={stage:G.stage, type:'grove-guaranteed'};
-    AvianEvents.emit('signature:event', sigEvt);
-    runModuleHook('onSignatureEvent', sigEvt);
-    logMsg('🌳 Signature Event — Whispering Grove appears.', 'system');
-    setTimeout(()=>showGroveEvent(), 350);
-    return;
-  }
   if(!lastEnemyWasBoss && safeHP && Math.random() < 0.1){
     setTimeout(()=>showGroveEvent(), 350);
     return; // halt progression until grove resolves
@@ -8815,57 +9162,29 @@ async function resolveGrove(idx){
     // ── SNAKE: size-dependent ────────────────────────────────────
     case 'snake':{
       chosen.className='grove-tree revealed outcome-snake';
-      if(isSmall){
-        // Bad for tiny/small: venom bite −25% current HP
-        const dmg = Math.max(1, Math.floor(hp * 0.25));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍</span><span class="grove-outcome-label">Venom Bite!</span>`;
-        msg = `🐍 Snake venom seeps in. −${dmg} HP (−25% current)`;
-        flavor = 'Too small to resist the fangs…';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.poison();
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      } else {
-        // Good for medium/XL: crush the snake, +50% missing HP
-        const heal = Math.max(1, Math.floor(missing * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🐍💪</span><span class="grove-outcome-label">Snake Crushed!</span>`;
-        msg = `💪 You crush the snake underfoot! +${heal} HP restored`;
-        flavor = 'Your strength turned the tables.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.20));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🐍💚</span><span class="grove-outcome-label">Serpent Remedy!</span>`;
+      msg = `🐍 Ancient serpent salve! +${heal} HP (20% max)`;
+      flavor = 'The grove mends your flock equally.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
     // ── EGG: size-dependent ──────────────────────────────────────
     case 'egg':{
       chosen.className='grove-tree revealed outcome-egg';
-      if(isSmall){
-        // Good for tiny/small: raid the nest +50% current HP
-        const heal = Math.max(1, Math.floor(hp * 0.50));
-        G.player.stats.hp = Math.min(maxHp, hp + heal);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🎉</span><span class="grove-outcome-label">Egg Raided!</span>`;
-        msg = `🥚 You slip inside and feast on eggs! +${heal} HP`;
-        flavor = 'Small enough to sneak past the thorns.';
-        floatClass='fn-heal';
-        SFX.heal();
-        spawnFloat('player',`+${heal}`,'fn-heal');
-      } else {
-        // Bad for medium/XL: thorn trap −40% missing HP
-        const dmg = Math.max(1, Math.floor(missing * 0.40));
-        G.player.stats.hp = Math.max(1, hp - dmg);
-        setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
-        chosen.innerHTML=`<span>🥚🌿</span><span class="grove-outcome-label">Thorns Shred!</span>`;
-        msg = `🌿 Hidden thorns tear through your feathers! −${dmg} HP`;
-        flavor = 'Too large to fit without getting shredded.';
-        floatClass='fn-dmg';
-        doScreenShake(); SFX.hit(1.0);
-        spawnFloat('player',`-${dmg}`,'fn-dmg');
-      }
+      const heal = Math.max(1, Math.floor(maxHp * 0.10));
+      G.player.stats.hp = Math.min(maxHp, hp + heal);
+      setHpBar('player', G.player.stats.hp, G.player.stats.maxHp);
+      chosen.innerHTML=`<span>🥚✨</span><span class="grove-outcome-label">Golden Egg!</span>`;
+      msg = `🥚 Nourishing yolk shared by all birds! +${heal} HP (10% max)`;
+      flavor = 'No thorns, no traps — only renewal.';
+      floatClass='fn-heal';
+      SFX.heal();
+      spawnFloat('player',`+${heal}`,'fn-heal');
       break;
     }
   }
@@ -8887,7 +9206,7 @@ function showGroveNestRewards(){
   const grid = document.getElementById('grove-reward-grid');
   grid.innerHTML='';
 
-  // Grove nest rewards: mostly blue/purple, with 5% chance each for a grey and a gold slot.
+  // Grove nest rewards: mostly blue/purple, with small grey chance and no gold rewards.
   const used = new Set();
   const picks=[];
   const pick=(tier)=>{
@@ -8897,13 +9216,12 @@ function showGroveNestRewards(){
     used.add(r.id); return r;
   };
   const rollNestTier=()=>{
-    if(chance(5)) return 'gold';
     if(chance(5)) return 'grey';
     return chance(56)?'blue':'purple';
   };
   while(picks.length<3){
     const tier=rollNestTier();
-    const rw=pick(tier)||pick('blue')||pick('purple')||pick('grey')||pick('gold');
+    const rw=pick(tier)||pick('blue')||pick('purple')||pick('grey');
     if(!rw) break;
     picks.push(rw);
   }
@@ -8979,6 +9297,8 @@ function showVictory(){
     :`${G.player.name} conquered all 20 stages and ascended to legend! 🔓 New birds unlocked!`;
   const abilityList=(G.player.abilities||[]).map(a=>`${ABILITY_TEMPLATES[a.id]?.name||a.id} Lv${a.level||1}`).join(' · ');
   document.getElementById('gameover-msg').textContent=endMsg;
+  const flyAgainBtn=document.getElementById('fly-again-btn');
+  if(flyAgainBtn) flyAgainBtn.style.display=(G.ui?.gameMode==='story')?'none':'inline-block';
   const unlockIds=['unlock_hummingbird','unlock_shoebill','unlock_secretary','unlock_magpie','unlock_kookaburra','unlock_peregrine','unlock_harpy','unlock_ostrich','unlock_kiwi','unlock_lyrebird','unlock_toucan','unlock_penguin','unlock_emu','unlock_swan','unlock_flamingo','unlock_seagull','unlock_albatross','unlock_duke_blakiston'];
   const unlockedNow=unlockIds.filter(id=>isUnlocked(id)).map(id=>id.replace('unlock_','').replace(/_/g,' '));
   const runUnlocks=document.getElementById('run-unlocks');
@@ -8998,6 +9318,7 @@ function showVictory(){
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
   showScreen('screen-gameover');
+  if((G.ui?.gameMode||'story')==='story') startStoryCinematic();
 }
 function showDefeat(){
   G.phase='REWARD';
@@ -9015,6 +9336,9 @@ function showDefeat(){
   document.getElementById('gameover-title').textContent='💀 Fallen';
   const stageLabel=G.endlessMode&&G.stage>ENEMIES.length?`Endless Battle ${G.endlessBattle}`:`Stage ${G.stage}`;
   document.getElementById('gameover-msg').textContent=`${G.player.name} fell at ${stageLabel}. Lv.${G.player.birdLevel}. Rise again.`;
+  const flyAgainBtn=document.getElementById('fly-again-btn');
+  if(flyAgainBtn) flyAgainBtn.style.display='inline-block';
+  hideStoryCinematic();
   const endEvt={won:false, bird:G.player?.birdKey||'unknown', stageReached:G.stage||1, deathCause:G._lastDeathCause||'hp_zero', endless:!!G.endlessMode};
   AvianEvents.emit('run:end', endEvt);
   runModuleHook('onRunEnd', endEvt);
@@ -9041,6 +9365,55 @@ function showRunStats(){
     <div class="vstat"><div class="vstat-val">${G.player.stats.atk}</div><div class="vstat-lbl">Final ATK</div></div>
     <div class="vstat"><div class="vstat-val">${G.player.stats.hp}/${G.player.stats.maxHp}</div><div class="vstat-lbl">HP Left</div></div>`;
   el.style.display='grid';
+}
+
+let _storyCineTimer=null;
+let _storyCineSpeed=1;
+let _storyCineSkip=false;
+function hideStoryCinematic(){
+  if(_storyCineTimer){ clearTimeout(_storyCineTimer); _storyCineTimer=null; }
+  const wrap=document.getElementById('story-cinematic');
+  if(wrap) wrap.style.display='none';
+}
+function startStoryCinematic(){
+  const wrap=document.getElementById('story-cinematic');
+  const textEl=document.getElementById('story-cinematic-text');
+  const slower=document.getElementById('story-slower-btn');
+  const faster=document.getElementById('story-faster-btn');
+  const skip=document.getElementById('story-skip-btn');
+  if(!wrap||!textEl||!slower||!faster||!skip) return;
+
+  const lines=[
+    'The marsh goes still. Feathers settle. The old court is silent.',
+    `${G.player?.name||'Your bird'} rises above the blackwater and broken reeds.`,
+    'A new song carries across the canopy — the sky remembers your ascent.'
+  ].join('\n\n');
+
+  _storyCineSpeed=1;
+  _storyCineSkip=false;
+  let i=0;
+  textEl.textContent='';
+  textEl.scrollTop=0;
+  wrap.style.display='block';
+
+  slower.onclick=()=>{ _storyCineSpeed=Math.max(0.5, Math.round((_storyCineSpeed-0.25)*100)/100); };
+  faster.onclick=()=>{ _storyCineSpeed=Math.min(3, Math.round((_storyCineSpeed+0.25)*100)/100); };
+  skip.onclick=()=>{ _storyCineSkip=true; };
+
+  const tick=()=>{
+    if(_storyCineSkip){
+      textEl.textContent=lines;
+      textEl.scrollTop=textEl.scrollHeight;
+      _storyCineTimer=null;
+      return;
+    }
+    i=Math.min(lines.length, i+1);
+    textEl.textContent=lines.slice(0,i);
+    textEl.scrollTop=textEl.scrollHeight;
+    if(i>=lines.length){ _storyCineTimer=null; return; }
+    _storyCineTimer=setTimeout(tick, Math.max(10, Math.floor(30/_storyCineSpeed)));
+  };
+  tick();
 }
 
 // ============================================================
@@ -9447,14 +9820,14 @@ function pickUniqueRewardByTier(tier,used){
 }
 function makeUtilityOffer(kind='regular'){
   const utilsRegular=[
-    {id:'shop_util_heal20',tier:'green',icon:'🍖',name:'Field Rations',desc:'Heal 20% HP',apply:p=>{const h=Math.max(1,Math.floor(p.stats.maxHp*0.20));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
-    {id:'shop_util_cleanse',tier:'green',icon:'🧼',name:'Spring Cleanse',desc:'Cleanse active debuffs and restore 10% HP',apply:p=>{G.playerStatus={};const h=Math.max(1,Math.floor(p.stats.maxHp*0.10));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_heal_missing20',tier:'green',icon:'🍖',name:'Field Rations',desc:'Restore 20% of missing HP',costOverride:22,apply:p=>{const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.20));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_cleanse_missing35',tier:'green',icon:'🧼',name:'Spring Cleanse',desc:'Cleanse active debuffs and restore 35% of missing HP',costOverride:36,apply:p=>{G.playerStatus={};const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.35));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
     {id:'shop_util_refresh',tier:'blue',icon:'🪙',name:'Coupon Wing',desc:'Next shop refresh is free',apply:p=>{G._freeShopRefresh=(G._freeShopRefresh||0)+1;}},
     {id:'shop_util_energy',tier:'green',icon:'🔋',name:'Spark Draft',desc:'Gain +1 max energy this run (max +3)',apply:p=>{p.energyBonus=Math.min(3,(p.energyBonus||0)+1);p.energyMax=Math.max(1,(p.energyMax||3)+1);}},
     {id:'shop_util_focus',tier:'green',icon:'🎯',name:'Hunter Focus',desc:'ACC +5 and Crit +3%',apply:p=>{p.stats.acc=Math.min(100,(p.stats.acc||80)+5);p.stats.critChance=(p.stats.critChance||5)+3;}},
   ];
   const utilsBoss=[
-    {id:'shop_util_heal40',tier:'blue',icon:'🩹',name:'Boss First Aid',desc:'Heal 40% HP and cleanse debuffs',apply:p=>{G.playerStatus={};const h=Math.max(1,Math.floor(p.stats.maxHp*0.40));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
+    {id:'shop_util_heal_boss_missing35',tier:'blue',icon:'🩹',name:'Boss First Aid',desc:'Cleanse and restore 35% of missing HP',costOverride:36,apply:p=>{G.playerStatus={};const miss=Math.max(0,p.stats.maxHp-p.stats.hp);const h=Math.max(1,Math.floor(miss*0.35));p.stats.hp=Math.min(p.stats.hp+h,p.stats.maxHp);}},
     {id:'shop_util_discount',tier:'purple',icon:'🛍️',name:'Royal Voucher',desc:'Your next purchase costs 2 less shiny',apply:p=>{G._nextShopDiscount=Math.max(G._nextShopDiscount||0,2);}},
     {id:'shop_util_refresh2',tier:'blue',icon:'🎟️',name:'Double Refresh Pass',desc:'Gain 2 free shop refreshes',apply:p=>{G._freeShopRefresh=(G._freeShopRefresh||0)+2;}},
     {id:'shop_util_bossward',tier:'purple',icon:'🛡️',name:'Boss Ward',desc:'MDEF +3 and cleanse one debuff now',apply:p=>{p.stats.mdef=(p.stats.mdef||0)+3;const bad=['weaken','paralyzed','slow','burning','poison','bleed','feared','lullabied'];const hit=bad.find(k=>G.playerStatus[k]);if(hit) delete G.playerStatus[hit];}},
@@ -9512,11 +9885,12 @@ function generateShopItems() {
   _shopItems=[];
   const used=new Set();
   const mode=G._shopMode||'boss';
+  const goldCapReached = getGoldCardCount()>=getGoldCardLimit();
   if(mode==='grey'){
     // Regular shop: 1 ability item, 2 upgrade cards, 1 utility
     _shopItems.push(makeAbilityOffer(false));
     for(let i=0;i<2;i++){
-      const tier=rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
+      const tier=goldCapReached?rollShopTier({grey:52,green:30,blue:16,purple:2}):rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
       const pick=pickUniqueRewardByTier(tier,used)||pickUniqueRewardByTier('green',used)||pickUniqueRewardByTier('grey',used);
       if(pick) _shopItems.push(pick);
     }
@@ -9525,7 +9899,7 @@ function generateShopItems() {
     // Boss shop: 1 high-quality ability item, 3 high-tier cards, 1 utility
     _shopItems.push(makeAbilityOffer(true));
     for(let i=0;i<3;i++){
-      const tier=rollShopTier({blue:50,purple:38,gold:12});
+      const tier=goldCapReached?rollShopTier({blue:56,purple:44}):rollShopTier({blue:50,purple:38,gold:12});
       const pick=pickUniqueRewardByTier(tier,used)||pickUniqueRewardByTier('purple',used)||pickUniqueRewardByTier('blue',used);
       if(pick) _shopItems.push(pick);
     }
@@ -9533,7 +9907,7 @@ function generateShopItems() {
   }
   renderShopItems();
 }
-const SHOP_COSTS={grey:2,green:2,blue:4,purple:6,gold:12};
+const SHOP_COSTS={grey:24,green:36,blue:58,purple:78,gold:105};
 
 const SHOP_BANNED_IDS = new Set(['skipTurn','sittingDuck','endTurn','mimic']);
 function canOfferAbilityInShop(p, tmpl){
@@ -9558,11 +9932,15 @@ function shopResetVisitState(){
   SHOP_STATE.purchaseMadeThisVisit = false;
   SHOP_STATE.selectedIndex = null;
   _shopSelectedIdx = null;
+  G._shopRefreshCount = 0;
 }
 function shopLockVisitState(){
   SHOP_STATE.purchaseMadeThisVisit = true;
   SHOP_STATE.selectedIndex = null;
   _shopSelectedIdx = null;
+}
+function getShopRefreshCost(){
+  return 10 + 6*Math.max(0,G._shopRefreshCount||0);
 }
 function shopTooltipNode(){
   let tt=document.getElementById('shop-ability-tooltip');
@@ -9620,10 +9998,15 @@ function renderShopItems() {
   SHOP_STATE.selectedIndex=null;
   _shopSelectedIdx=null;
   const buyBtn=document.getElementById('shop-buy-btn'); if(buyBtn) buyBtn.disabled=true;
-  const refreshBtn=document.getElementById('shop-refresh-btn'); if(refreshBtn) refreshBtn.disabled=!!SHOP_STATE.purchaseMadeThisVisit;
+  const refreshBtn=document.getElementById('shop-refresh-btn');
+  if(refreshBtn){
+    refreshBtn.disabled=!!SHOP_STATE.purchaseMadeThisVisit;
+    const rCost=(G._freeShopRefresh||0)>0?0:getShopRefreshCost();
+    refreshBtn.textContent=`🔄 Refresh (${rCost}🌟)`;
+  }
 
   _shopItems.forEach((item,idx)=>{
-    let baseCost=SHOP_COSTS[item.tier]||1;
+    let baseCost=(typeof item.costOverride==='number')?item.costOverride:(SHOP_COSTS[item.tier]||1);
     if(G.player?.mutLongWar) baseCost=Math.ceil(baseCost*1.15);
     const cost=Math.max(0,baseCost-Math.max(0,G._nextShopDiscount||0));
     const canAfford=G.shinyObjects>=cost;
@@ -9735,7 +10118,7 @@ async function shopBuySelected() {
   if(selected===null||selected>=_shopItems.length) return false;
   const item=_shopItems[selected];
 
-  let baseCost=SHOP_COSTS[item.tier]||1;
+  let baseCost=(typeof item.costOverride==='number')?item.costOverride:(SHOP_COSTS[item.tier]||1);
   if(G.player?.mutLongWar) baseCost=Math.ceil(baseCost*1.15);
   const discount=Math.max(0,G._nextShopDiscount||0);
   const cost=Math.max(0,baseCost-discount);
@@ -9823,8 +10206,12 @@ function shopRefresh() {
     return false;
   }
   if((G._freeShopRefresh||0)>0){G._freeShopRefresh--; }
-  else if(G.shinyObjects>=3){G.shinyObjects-=3;}
-  else { logMsg('Need 3 shiny objects to refresh!','miss'); return false; }
+  else {
+    const rc=getShopRefreshCost();
+    if(G.shinyObjects<rc){ logMsg(`Need ${rc} shiny objects to refresh!`,'miss'); return false; }
+    G.shinyObjects-=rc;
+  }
+  G._shopRefreshCount=(G._shopRefreshCount||0)+1;
   const log=document.getElementById('shop-purchase-log');
   if(log) log.textContent='🔄 Shop refreshed!';
   generateShopItems();
@@ -10594,51 +10981,7 @@ SPRITE_KEYS_ALL.add('magpie');
     };
   }
 
-  function personalityForEnemy(e){
-    if(!e || isBossEnemy(e)) return null;
-    const key = normKey(e.birdKey || e.id || e.name);
-    const hpPct = (e?.stats?.hp || 1) / Math.max(1, (e?.stats?.maxHp || 1));
-    const playerHpPct = ((globalThis.G?.player?.stats?.hp || 1) / Math.max(1, (globalThis.G?.player?.stats?.maxHp || 1)));
-
-    if(hpPct <= 0.32 && !PREDATORS.has(key)) return 'defensive';
-    if(playerHpPct <= 0.35 && (PREDATORS.has(key) || AGGRESSORS.has(key))) return 'predator';
-    if(TRICKSTERS.has(key)) return 'trickster';
-    if(DEFENSIVE.has(key)) return 'defensive';
-    if(PREDATORS.has(key)) return 'predator';
-    if(AGGRESSORS.has(key)) return 'aggressive';
-    if(/pigeon|dove/.test(key)) return 'defensive';
-    if(/raven|crow|magpie/.test(key)) return 'trickster';
-    if(/hawk|falcon|eagle|owl/.test(key)) return 'predator';
-    return null;
-  }
-
-  const oldPlanEnemyAction = globalThis.planEnemyAction;
-  if(typeof oldPlanEnemyAction === 'function'){
-    globalThis.planEnemyAction = function(){
-      const e = globalThis.G?.enemy;
-      if(!e || isBossEnemy(e)) return oldPlanEnemyAction.apply(this, arguments);
-      const originalAiType = e.aiType;
-      const originalAiStyle = e.aiStyle;
-      const p = personalityForEnemy(e);
-      if(p){
-        e.aiPersonality = p;
-        e.aiType = p;
-      }
-      const result = oldPlanEnemyAction.apply(this, arguments);
-      if(result && p){
-        result.personality = p;
-        if(typeof result.label === 'string' && !result.label.includes('[')){
-          const tag = p.charAt(0).toUpperCase() + p.slice(1);
-          result.label = `[${tag}] ` + result.label;
-        }
-      }
-      e.aiType = originalAiType;
-      e.aiStyle = originalAiStyle;
-      return result;
-    };
-  }
-
-  globalThis.__birdSpritePolish = { refreshAmbient, playAttackMotion, playHitMotion, personalityForEnemy };
+  globalThis.__birdSpritePolish = { refreshAmbient, playAttackMotion, playHitMotion };
 })();
 
 
