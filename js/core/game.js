@@ -4771,19 +4771,47 @@ function showActionTooltip(e,ab) {
   const hitClass=hit===null?'':(hit>=80?'tt-hit-great':hit>=55?'tt-hit-good':'tt-hit-bad');
   const energy=getEnergyCost(ab);
   const cooldown=getTemplateCooldown(ab);
-  // Show actual dmg range based on current ATK/MATK when possible
+
+  // Show actual damage range whenever this is a damaging action.
   const pAtk=G.player?(G.player.stats.atk||0):0;
   const pMatk=G.player?(G.player.stats.matk||0):0;
-  const scaleStat=(tmpl.btnType==='spell'||tmpl.type==='spell')?pMatk:pAtk;
-  const dmgMult=tmpl.baseDmgMult!==undefined?tmpl.baseDmgMult+0.1*(lv-1):null;
-  const dmgLow=dmgMult?Math.floor(scaleStat*0.8*dmgMult):null;
-  const dmgHigh=dmgMult?Math.floor(scaleStat*1.2*dmgMult):null;
+  const btnType=String(tmpl.btnType||tmpl.type||'').toLowerCase();
+  const isDamaging=['physical','ranged','spell'].includes(btnType);
+  const scaleStat=(btnType==='spell')?pMatk:pAtk;
+
+  const estimateMultiplierFromText=(txt='')=>{
+    const s=String(txt||'');
+    // Prefer multi-hit patterns first, e.g. "2×52%" or "3x 40%"
+    const multi=s.match(/(\d+)\s*[x×]\s*(\d+(?:\.\d+)?)\s*%/i);
+    if(multi){
+      const hits=Math.max(1,Number(multi[1])||1);
+      const pct=Math.max(0,Number(multi[2])||0);
+      return (hits*pct)/100;
+    }
+    // Fallback: first percent value in text
+    const pct=s.match(/(\d+(?:\.\d+)?)\s*%/);
+    if(pct) return (Number(pct[1])||0)/100;
+    return null;
+  };
+
+  let dmgMult = (tmpl.baseDmgMult!==undefined)
+    ? (Number(tmpl.baseDmgMult)||0) + 0.1*(lv-1)
+    : null;
+  if(!(dmgMult>0)){
+    dmgMult = estimateMultiplierFromText(lvData?.desc||'') ?? estimateMultiplierFromText(tmpl?.desc||'');
+  }
+
+  const dmgLow=(isDamaging && dmgMult>0)?Math.max(1,Math.floor(scaleStat*0.8*dmgMult)):null;
+  const dmgHigh=(isDamaging && dmgMult>0)?Math.max(dmgLow,Math.floor(scaleStat*1.2*dmgMult)):null;
   const effectList=(ab.ailmentIds||[]).length?ab.ailmentIds.map(a=>a.replace(/_/g,' ')).join(', '):'—';
+
   let html=`<div class="tt-name">${tmpl.name}</div><div class="tt-type">${tmpl.type} · Lv${ab.level}</div>`;
   html+=`<div class="tt-row"><span class="tt-lbl">Energy</span><span class="tt-val">${energy}</span></div>`;
   html+=`<div class="tt-row"><span class="tt-lbl">Cooldown</span><span class="tt-val">${cooldown>0?cooldown+' turn'+(cooldown>1?'s':''):'None'}</span></div>`;
   if (hit!==null) html+=`<div class="tt-row"><span class="tt-lbl">Hit</span><span class="tt-val ${hitClass}">${hit}%</span></div>`;
-  if (dmgLow!==null) html+=`<div class="tt-row"><span class="tt-lbl">Damage</span><span class="tt-val">${dmgLow}–${dmgHigh}</span></div>`;
+  if (isDamaging) {
+    html+=`<div class="tt-row"><span class="tt-lbl">Damage</span><span class="tt-val">${dmgLow!==null?`${dmgLow}–${dmgHigh}`:'Varies'}</span></div>`;
+  }
   html+=`<div class="tt-row"><span class="tt-lbl">Effects</span><span class="tt-val">${effectList}</span></div>`;
   html+=`<div class="tt-desc">${lvData.desc}</div>`;
   if(window._isTouchDevice) html+=`<div style="text-align:right;margin-top:8px"><button onclick="hideTooltip()" style="background:rgba(201,168,76,.2);border:1px solid var(--gold);border-radius:4px;color:var(--gold);padding:2px 10px;cursor:pointer;font-size:.75rem;">✕ Close</button></div>`;
@@ -7346,7 +7374,7 @@ registerAbilityAlias('piercingScreech','sonicDirge','Piercing Screech',{type:'sp
 registerAbilityAlias('stormChorus','owlPsyche','Storm Chorus',{type:'spell',btnType:'spell'});
 registerAbilityAlias('battleChorus','victoryChant','Battle Chorus',{type:'utility',btnType:'utility'});
 registerAbilityAlias('thunderScreech','sonicDirge','Thunder Screech',{type:'spell',btnType:'spell'});
-registerAbilityAlias('nightTalon','deathDive','Night Talon',{isBasic:true,type:'physical',btnType:'physical'});
+registerAbilityAlias('nightTalon','deathDive','Night Talon',{isBasic:true,type:'physical',btnType:'physical',energyCost:3,energyByLevel:[3,3,3,3]});
 registerAbilityAlias('huntersCry','victoryChant',"Hunter's Cry",{type:'utility',btnType:'utility'});
 registerAbilityAlias('fleshTear','fleshRipper','Flesh Tear',{isBasic:true,type:'physical',btnType:'physical'});
 registerAbilityAlias('raptorDive','deathDive','Raptor Dive',{type:'physical',btnType:'physical'});
@@ -10411,8 +10439,22 @@ function generateShopItems() {
   const used=new Set();
   const mode=G._shopMode||'boss';
   const goldCapReached = getGoldCardCount()>=getGoldCardLimit();
+
+  // Healing shelf always appears first in Stork shop.
+  const healOffers=SHOP_HEALING_ITEMS
+    .filter(it=>!SHOP_STATE.healingPurchasesThisVisit?.has(it.id))
+    .map(it=>({
+      ...it,
+      apply(p){
+        const heal=Math.max(1,Math.floor((p.stats.maxHp||1)*(it.healPct||0)));
+        p.stats.hp=Math.min((p.stats.maxHp||1),(p.stats.hp||0)+heal);
+        spawnFloat('player',`+${heal} 🩹`,'fn-heal');
+      }
+    }));
+  _shopItems.push(...healOffers);
+
   if(mode==='grey'){
-    // Regular shop: 1 ability item, 2 upgrade cards, 1 utility
+    // Regular shop: abilities/cards/utility after healing shelf
     _shopItems.push(makeAbilityOffer(false));
     for(let i=0;i<2;i++){
       const tier=goldCapReached?rollShopTier({grey:52,green:30,blue:16,purple:2}):rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
@@ -10421,7 +10463,7 @@ function generateShopItems() {
     }
     _shopItems.push(makeUtilityOffer('regular'));
   } else {
-    // Boss shop: 1 high-quality ability item, 3 high-tier cards, 1 utility
+    // Boss shop: abilities/cards/utility after healing shelf
     _shopItems.push(makeAbilityOffer(true));
     for(let i=0;i<3;i++){
       const tier=goldCapReached?rollShopTier({blue:56,purple:44}):rollShopTier({blue:50,purple:38,gold:12});
@@ -10429,15 +10471,6 @@ function generateShopItems() {
       if(pick) _shopItems.push(pick);
     }
     _shopItems.push(makeUtilityOffer('boss'));
-  }
-  const healChoices=SHOP_HEALING_ITEMS.filter(it=>!SHOP_STATE.healingPurchasesThisVisit?.has(it.id));
-  if(healChoices.length){
-    const pick=healChoices[Math.floor(Math.random()*healChoices.length)];
-    _shopItems.push({...pick, apply(p){
-      const heal=Math.max(1,Math.floor((p.stats.maxHp||1)*(pick.healPct||0)));
-      p.stats.hp=Math.min((p.stats.maxHp||1),(p.stats.hp||0)+heal);
-      spawnFloat('player',`+${heal} 🩹`,'fn-heal');
-    }});
   }
   renderShopItems();
 }
@@ -10508,22 +10541,13 @@ function resolveShopAbilityTemplate(item){
   return (ABILITY_TEMPLATES && ABILITY_TEMPLATES[learnId]) || null;
 }
 
-function formatAbilityLevelPathway(tmpl){
-  if(!tmpl||!Array.isArray(tmpl.levels)||!tmpl.levels.length) return '';
-  return tmpl.levels.map((lv,i)=>{
-    const en=Array.isArray(tmpl.energyByLevel)?(tmpl.energyByLevel[i] ?? tmpl.energyByLevel[0] ?? tmpl.energyCost ?? 0):(tmpl.energyCost ?? 0);
-    const cd=Array.isArray(tmpl.cooldownByLevel)?(tmpl.cooldownByLevel[i] ?? tmpl.cooldownByLevel[0] ?? 0):0;
-    return `Lv${i+1}: ${lv?.desc||''}${Number.isFinite(en)?` [EN ${en}]`:''}${cd>0?` [CD ${cd}]`:''}`;
-  }).join('\n');
-}
-
 function buildShopItemTooltip(item){
   const tmpl=resolveShopAbilityTemplate(item);
   if(!tmpl) return item?.desc || item?.description || '';
+  const lv1=(Array.isArray(tmpl.levels) && tmpl.levels[0]?.desc) ? tmpl.levels[0].desc : '';
   const parts=[];
-  if(tmpl.desc) parts.push(tmpl.desc);
-  const path=formatAbilityLevelPathway(tmpl);
-  if(path) parts.push(path);
+  if(tmpl.desc) parts.push(`Base: ${tmpl.desc}`);
+  if(lv1) parts.push(`Effects: ${lv1}`);
   return parts.join('\n');
 }
 
