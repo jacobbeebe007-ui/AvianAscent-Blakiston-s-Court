@@ -74,8 +74,8 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .sel-right{position:sticky;top:10px;}
 
 /* VIEW TOGGLE */
-.view-toggle{display:flex;gap:0;justify-content:center;margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid rgba(80,70,50,.4);width:fit-content;margin:0 auto 14px;}
-.view-toggle-btn{padding:6px 18px;background:rgba(20,15,5,.7);color:var(--text-dim);font-size:.75rem;font-family:'Cinzel',serif;letter-spacing:.05em;cursor:pointer;border:none;transition:all .2s;}
+.view-toggle{display:flex;gap:0;justify-content:flex-start;margin-bottom:12px;border-radius:8px;overflow-x:auto;overflow-y:hidden;border:1px solid rgba(80,70,50,.4);width:min(100%,1100px);margin:0 auto 14px;scrollbar-width:thin;}
+.view-toggle-btn{padding:6px 18px;background:rgba(20,15,5,.7);color:var(--text-dim);font-size:.75rem;font-family:'Cinzel',serif;letter-spacing:.05em;cursor:pointer;border:none;transition:all .2s;flex:0 0 auto;white-space:nowrap;}
 .view-toggle-btn.active{background:rgba(80,60,18,.95);color:var(--gold);}
 .class-filter-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
 .class-filter-tab{padding:6px 10px;background:rgba(20,15,5,.72);border:1px solid rgba(201,168,76,.26);border-radius:8px;color:var(--text-dim);font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.04em;cursor:pointer;}
@@ -104,6 +104,11 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 .class-tank{background:rgba(20,140,80,.25);color:#70e8a0;border:1px solid rgba(20,140,80,.4);}
 .class-ranger{background:rgba(220,80,160,.25);color:#ff90d0;border:1px solid rgba(220,80,160,.4);}
 .class-summoner{background:rgba(80,180,220,.25);color:#80e0ff;border:1px solid rgba(80,180,220,.4);}
+.class-striker{background:rgba(180,30,30,.25);color:#ff9090;border:1px solid rgba(180,30,30,.4);}
+.class-bruiser{background:rgba(60,100,200,.25);color:#90c0ff;border:1px solid rgba(60,100,200,.4);}
+.class-trickster{background:rgba(200,120,20,.25);color:#ffc060;border:1px solid rgba(200,120,20,.4);}
+.class-predator{background:rgba(220,80,160,.25);color:#ff90d0;border:1px solid rgba(220,80,160,.4);}
+.class-support{background:rgba(100,40,200,.25);color:#c090ff;border:1px solid rgba(100,40,200,.4);}
 
 /* BIRD CARD compact */
 .bird-card{background:rgba(52,40,16,.88);border:1px solid rgba(201,168,76,.35);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .25s;position:relative;}
@@ -1342,6 +1347,7 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 .ascent-panel-portrait,.ascent-face{min-height:112px !important; overflow:visible !important;}
 .avatar-wrap{height:148px !important; min-width:160px !important; overflow:visible !important;}
 #player-avatar-wrap,#enemy-avatar-wrap,#player-avatar,#enemy-avatar{overflow:visible !important;}
+#enemy-avatar{transform:scaleX(-1);}
 
 /* Generic sprites by location */
 .bird-portrait .sprite4.tiny{width:64px !important;height:64px !important;}
@@ -1392,10 +1398,6 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 }
 
 /* Species tuning requested */
-.sprite4.sprite-robin{
-  width:64px !important;
-  height:64px !important;
-}
 .sprite4.sprite-seagull.medium{
   width:84px !important;
   height:84px !important;
@@ -1433,4 +1435,3 @@ img{image-rendering:pixelated;image-rendering:crisp-edges;}
 
 .nest-ab-path{margin-top:6px;font-size:.7rem;line-height:1.35;color:var(--text-dim);background:rgba(0,0,0,.2);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:6px;}
 .btn-mod{display:block;font-size:.62rem;color:var(--gold-light);opacity:.9;line-height:1.2;}
-.sprite4.sprite-robin{width:56px !important;height:56px !important;}

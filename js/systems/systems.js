@@ -882,15 +882,13 @@ cooldown('chargeUp',3);
     }
 
     if(BIRDS.albatross?.passive){
-      BIRDS.albatross.passive.desc = 'Casting a spell grants +1 SPD (max +4) and +4% summon/spell accuracy (max +16%).';
-      BIRDS.albatross.passive.onBattleStart = function(p){ p._tradeWind = 0; p._tradeWindAcc = 0; };
-      BIRDS.albatross.passive.onSpell = function(p){
-        if((p._tradeWind||0) < 4){
-          p._tradeWind = (p._tradeWind||0) + 1;
+      BIRDS.albatross.passive.name = 'Ocean Wanderer';
+      BIRDS.albatross.passive.desc = '+1 SPD every 2 turns.';
+      BIRDS.albatross.passive.onBattleStart = function(p){ p._oceanWandererTurns = 0; };
+      BIRDS.albatross.passive.onTurnEnd = function(p){
+        p._oceanWandererTurns = (p._oceanWandererTurns||0) + 1;
+        if((p._oceanWandererTurns % 2) === 0){
           p.stats.spd = Math.min(20, (p.stats.spd||1) + 1);
-        }
-        if((p._tradeWindAcc||0) < 16){
-          p._tradeWindAcc = Math.min(16, (p._tradeWindAcc||0) + 4);
         }
       };
     }
