@@ -3208,6 +3208,7 @@ let shopPurchaseMade = false;
 
 function initSelection() {
   const ui=ensureUIState();
+  migrateLegacySelectionView(ui);
   if(!ui.expandedBird && G.selected) ui.expandedBird=G.selected;
   applyUIStateToDOM();
   // Check for saved run
@@ -3236,7 +3237,7 @@ function buildSelectionViewButtons(){
   const host=document.getElementById('view-toggle');
   if(!host) return;
   const ui=ensureUIState();
-  const btns=[['all','All'],['size','By Size'],...ROLE_ORDER.map(c=>[`class:${c}`,idToClassLabel(c)])];
+  const btns=[['all','All'],['size','By Size'],...ROLE_ORDER.map(c=>[`role:${c}`,idToClassLabel(c)])];
   host.innerHTML=btns.map(([id,label])=>`<button class="view-toggle-btn ${ui.selectionView===id?'active':''}" onclick="setSelView('${id}',this)">${label}</button>`).join('');
 }
 
@@ -3257,6 +3258,16 @@ function setGameMode(mode,btn){
 
 function classToRoleId(cls){
   return CLASS_ROLE_BY_CLASS[String(cls||'').toLowerCase()]||'support';
+}
+function migrateLegacySelectionView(ui=ensureUIState()){
+  const raw=String(ui?.selectionView||'all');
+  if(raw.startsWith('role:')) return;
+  if(raw.startsWith('class:')){
+    const legacy=raw.split(':')[1]||'all';
+    ui.selectionView = legacy==='all' ? 'all' : `role:${classToRoleId(legacy)}`;
+    return;
+  }
+  if(raw==='class') ui.selectionView='all';
 }
 function idToClassLabel(id){
   if(id==='all') return 'All';
@@ -3364,15 +3375,17 @@ function selectDifficulty(id) {
 function setSelView(view, btn) {
   const ui=ensureUIState();
   ui.selectionView = String(view||'size');
+  migrateLegacySelectionView(ui);
   buildSelectionViewButtons();
   buildBirdGrid();
 }
 
 function buildBirdGrid() {
   const ui=ensureUIState();
+  migrateLegacySelectionView(ui);
   const selectedView=ui.selectionView;
-  const view = String(selectedView).startsWith('class:') ? 'all' : selectedView;
-  const classFilter = String(selectedView).startsWith('class:') ? (String(selectedView).split(':')[1]||'all') : 'all';
+  const view = String(selectedView).startsWith('role:') ? 'all' : selectedView;
+  const classFilter = String(selectedView).startsWith('role:') ? (String(selectedView).split(':')[1]||'all') : 'all';
 
   const grid = document.getElementById('bird-grid');
   if(!grid) return;
@@ -3440,7 +3453,7 @@ function buildBirdGrid() {
     const header = document.createElement('div');
     header.className = 'size-header';
     header.innerHTML = `<div class="size-header-line"></div><div class="size-header-title">${groupLabels[groupKey]||groupKey}</div>`;
-    if(view==='class' && ROLE_FLAVOR[groupKey]) {
+    if(view==='role' && ROLE_FLAVOR[groupKey]) {
       header.innerHTML += `<div style="font-size:.62rem;color:var(--text-dim);font-style:italic;flex-shrink:0;">${ROLE_FLAVOR[groupKey]}</div>`;
     }
     header.innerHTML += `<div class="size-header-line"></div>`;
