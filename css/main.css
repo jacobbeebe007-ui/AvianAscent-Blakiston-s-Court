@@ -97,18 +97,18 @@ header p{color:var(--text-dim);font-style:italic;font-size:1rem;margin-top:4px;}
 
 /* CLASS BADGE on card */
 .class-badge{display:inline-block;font-size:.62rem;padding:2px 7px;border-radius:10px;letter-spacing:.06em;margin-bottom:4px;font-weight:700;text-transform:uppercase;}
-.class-assassin{background:rgba(180,30,30,.25);color:#ff9090;border:1px solid rgba(180,30,30,.4);}
-.class-mage{background:rgba(100,40,200,.25);color:#c090ff;border:1px solid rgba(100,40,200,.4);}
-.class-bard{background:rgba(200,120,20,.25);color:#ffc060;border:1px solid rgba(200,120,20,.4);}
-.class-knight{background:rgba(60,100,200,.25);color:#90c0ff;border:1px solid rgba(60,100,200,.4);}
+.class-striker{background:rgba(180,30,30,.25);color:#ff9090;border:1px solid rgba(180,30,30,.4);}
+.class-singer{background:rgba(100,40,200,.25);color:#c090ff;border:1px solid rgba(100,40,200,.4);}
+.class-trickster{background:rgba(200,120,20,.25);color:#ffc060;border:1px solid rgba(200,120,20,.4);}
+.class-bruiser{background:rgba(60,100,200,.25);color:#90c0ff;border:1px solid rgba(60,100,200,.4);}
 .class-tank{background:rgba(20,140,80,.25);color:#70e8a0;border:1px solid rgba(20,140,80,.4);}
-.class-ranger{background:rgba(220,80,160,.25);color:#ff90d0;border:1px solid rgba(220,80,160,.4);}
-.class-summoner{background:rgba(80,180,220,.25);color:#80e0ff;border:1px solid rgba(80,180,220,.4);}
+.class-predator{background:rgba(220,80,160,.25);color:#ff90d0;border:1px solid rgba(220,80,160,.4);}
+.class-tank{background:rgba(80,180,220,.25);color:#80e0ff;border:1px solid rgba(80,180,220,.4);}
 .class-striker{background:rgba(180,30,30,.25);color:#ff9090;border:1px solid rgba(180,30,30,.4);}
 .class-bruiser{background:rgba(60,100,200,.25);color:#90c0ff;border:1px solid rgba(60,100,200,.4);}
 .class-trickster{background:rgba(200,120,20,.25);color:#ffc060;border:1px solid rgba(200,120,20,.4);}
 .class-predator{background:rgba(220,80,160,.25);color:#ff90d0;border:1px solid rgba(220,80,160,.4);}
-.class-support{background:rgba(100,40,200,.25);color:#c090ff;border:1px solid rgba(100,40,200,.4);}
+
 
 /* BIRD CARD compact */
 .bird-card{background:rgba(52,40,16,.88);border:1px solid rgba(201,168,76,.35);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .25s;position:relative;}
