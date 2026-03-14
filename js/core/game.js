@@ -677,7 +677,7 @@ const BIRDS = {
     size:'tiny', class:'assassin',
     stats:{hp:28,maxHp:28,atk:5,def:2,spd:9,dodge:35,acc:85,mdef:6,matk:6,critChance:10},
     statBars:{HP:28/50,ATK:5/15,SPD:9/10,Dodge:.7,ACC:.85}, color:'#6a8ae8',
-    startAbilities:['rapidPeck','needleJab','windFeint','predatorMark'],
+    startAbilities:['rapidPeck','swoop','windFeint','predatorMark'],
     passive:{id:'windDancer',name:'Wind Dancer',desc:'Every dodge grants +1% permanent dodge (max +15%).',
       onDodge(p){if(!p._windDancerBonus)p._windDancerBonus=0;if(p._windDancerBonus<15){p._windDancerBonus++;p.stats.dodge=Math.min(p.stats.dodge+1,100);}}},
   },
@@ -3784,7 +3784,7 @@ function resetForNewBattle(){
   }
 }
 
-const EARLY_STAGE_ALLOWED_ENEMIES = new Set(['finch','robin','dove','blackbird','youngsparrow','starling','woodpigeon']);
+const EARLY_STAGE_ALLOWED_ENEMIES = new Set(['finch','robin','dove','blackbird','youngsparrow','woodpigeon']);
 const EARLY_STAGE_BANNED_ENEMIES = new Set(['magpie','crow','peregrinefalcon','peregrine','harpyeagle','harpy','cassowary','lyrebird']);
 function normalizeEnemyNameKey(name){
   return String(name||'').toLowerCase().replace(/[^a-z]/g,'');
@@ -8104,9 +8104,9 @@ function projectedEnemyActionDamage(a,e){
   if(a.type==='ability') return ['eStun'].includes(a.abilityId)?Math.floor(6+((e.stats.atk||8)*0.95)):0;
   return 0;
 }
-function getEnemyEnergySpendCap(e,p,pool,totalEnergy){
+function canEnemyProjectLethal(e,p,pool,totalEnergy){
   const energy=Math.max(0,totalEnergy||0);
-  if(energy<=0) return 0;
+  if(energy<=0) return false;
   const dmgActions=[];
   const seen=new Set();
   for(const a of pool||[]){
@@ -8119,32 +8119,72 @@ function getEnemyEnergySpendCap(e,p,pool,totalEnergy){
     dmgActions.push({cost,dmg});
   }
   const targetHp=Math.max(1,Math.floor(p?.stats?.hp||1));
-  let canFinish=false;
-  if(dmgActions.length){
-    const dp=Array(energy+1).fill(0);
-    for(let en=1;en<=energy;en++){
-      for(const a of dmgActions){
-        if(a.cost<=en) dp[en]=Math.max(dp[en], dp[en-a.cost]+a.dmg);
-      }
+  if(!dmgActions.length) return false;
+  const dp=Array(energy+1).fill(0);
+  for(let en=1;en<=energy;en++){
+    for(const a of dmgActions){
+      if(a.cost<=en) dp[en]=Math.max(dp[en], dp[en-a.cost]+a.dmg);
     }
-    canFinish = dp[energy] >= targetHp;
   }
-  if(canFinish) return energy; // Rule 1: finisher can spend all
-
-  // Rule 2: standard behavior 60–80% EN
+  return dp[energy] >= targetHp;
+}
+function getBossIntentCycle(e){
+  const id=normalizeEnemyNameKey(e?.name||'');
+  if(id==='dukeblakiston') return ['control','buff','pressure','attack'];
+  return ['buff','control','attack','pressure'];
+}
+function selectEnemyIntent(e,p,pool,totalEnergy,mode){
+  const stage=(G.stage||1);
+  const canFinish=(stage>5) && canEnemyProjectLethal(e,p,pool,totalEnergy);
+  if(e?.isBoss){
+    if(canFinish) return {intent:'finish', canFinish:true};
+    const cycle=getBossIntentCycle(e);
+    const idx=Math.max(0,((G.enemyTurnCount||1)-1)%cycle.length);
+    return {intent:cycle[idx]||'attack', canFinish:false};
+  }
+  if(canFinish) return {intent:'finish', canFinish:true};
+  const pHp=(p.stats.hp||1)/Math.max(1,p.stats.maxHp||1);
+  const eHp=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
+  const weights={attack:30,pressure:24,control:20,buff:16,finish:0};
+  if(mode==='SETUP') weights.control+=12;
+  if(mode==='RECOVER') weights.buff+=14;
+  if(pHp<0.55) weights.attack+=10;
+  if(eHp<0.45) weights.buff+=8;
+  const hasControl=(pool||[]).some(a=>classifyEnemyActionCategory(a)==='control');
+  const hasBuff=(pool||[]).some(a=>['buff','guard','heal'].includes(classifyEnemyActionCategory(a)));
+  if(!hasControl) weights.control=0;
+  if(!hasBuff) weights.buff=0;
+  if(stage<=5) weights.finish=0;
+  const entries=Object.entries(weights).filter(([,w])=>w>0);
+  if(!entries.length) return {intent:'attack', canFinish:false};
+  const total=entries.reduce((n,[,w])=>n+w,0);
+  let rollVal=Math.random()*total;
+  for(const [intent,w] of entries){
+    rollVal-=w;
+    if(rollVal<=0) return {intent, canFinish:false};
+  }
+  return {intent:entries[entries.length-1][0], canFinish:false};
+}
+function filterEnemyActionsByIntent(intent,pool){
+  const all=(pool||[]);
+  const categories=all.map(a=>({action:a,cat:classifyEnemyActionCategory(a)}));
+  if(intent==='finish') return categories.filter(x=>x.cat==='damage'||x.cat==='heavy').map(x=>x.action);
+  if(intent==='attack') return categories.filter(x=>x.cat==='damage'||x.cat==='heavy').map(x=>x.action);
+  if(intent==='control') return categories.filter(x=>x.cat==='control').map(x=>x.action);
+  if(intent==='buff') return categories.filter(x=>['buff','guard','heal'].includes(x.cat)).map(x=>x.action);
+  if(intent==='pressure') return categories.filter(x=>x.cat==='control'||x.cat==='damage'||x.cat==='heavy').map(x=>x.action);
+  return all;
+}
+function getEnemyEnergySpendCap(e,p,pool,totalEnergy,intent,canFinish){
+  const energy=Math.max(0,totalEnergy||0);
+  if(energy<=0) return 0;
+  const stage=(G.stage||1);
+  if(intent==='finish' && canFinish && stage>5) return energy;
   const minSpend=Math.max(1,Math.ceil(energy*0.6));
   const maxSpend=Math.max(minSpend,Math.ceil(energy*0.8));
   let spendCap=roll(minSpend,maxSpend);
-  // Rule examples
   if(energy===3) spendCap=Math.min(spendCap,2);
   if(energy===5) spendCap=Math.min(spendCap,3);
-
-  // Rule 4: tactical setup sometimes spends only 1 EN
-  const hasSetup=(pool||[]).some(a=>{
-    if(a.type!=='ability') return false;
-    return ['eWeaken','eFear','eBlind','ePoison','eVenom','eRage','eShield'].includes(a.abilityId);
-  });
-  if(hasSetup && chance(45)) spendCap=Math.min(spendCap,1);
   return Math.max(1,Math.min(energy,spendCap));
 }
 function getEnemyOpeningBias(enemy,turnNumber){
@@ -8175,14 +8215,43 @@ function planEnemyTurn(e,p){
   const mem=getEnemyAIMemory(e);
   const profile=getAIPersonalityProfile(e);
   let energy=e.energyMax||3;
-  const energySpendCap=getEnemyEnergySpendCap(e,p,pool,energy);
+  const intentPick=selectEnemyIntent(e,p,pool,energy,mode);
+  const intent=intentPick.intent||'attack';
+  const intentPool=filterEnemyActionsByIntent(intent,pool);
+  const energySpendCap=getEnemyEnergySpendCap(e,p,pool,energy,intent,!!intentPick.canFinish);
   let spentEnergy=0;
   let actionsTaken=0;
   const earlyTurnLimit=((G.stage||1)<=5)?2:MAX_ENEMY_ACTIONS_PER_TURN;
   const maxActions=Math.min(earlyTurnLimit,6);
   let turnHadDamage=false;
+
+  if(intent==='pressure'){
+    const controlPick=(intentPool.length?intentPool:pool).find(a=>classifyEnemyActionCategory(a)==='control' && getEnemyActionEnergyCost(a)<=energy && (spentEnergy+getEnemyActionEnergyCost(a)<=energySpendCap));
+    if(controlPick && actionsTaken<maxActions){
+      const c=getEnemyActionEnergyCost(controlPick);
+      actions.push({...controlPick,energyCost:c,category:classifyEnemyActionCategory(controlPick)});
+      energy-=c; spentEnergy+=c; actionsTaken++;
+      mem.lastAbilityId=controlPick.abilityId||controlPick.type;
+      mem.lastActionCategory='control';
+      mem.openingSetupUsed=true;
+      mem.utilityStreak=(mem.utilityStreak||0)+1;
+    }
+    const basicPick=pool.find(a=>['strike','heavy'].includes(a.type) && getEnemyActionEnergyCost(a)<=energy && (spentEnergy+getEnemyActionEnergyCost(a)<=energySpendCap));
+    if(basicPick && actionsTaken<maxActions){
+      const c=getEnemyActionEnergyCost(basicPick);
+      const cat=classifyEnemyActionCategory(basicPick);
+      actions.push({...basicPick,energyCost:c,category:cat});
+      energy-=c; spentEnergy+=c; actionsTaken++;
+      turnHadDamage = projectedEnemyActionDamage(basicPick,e)>0;
+      mem.lastAbilityId=basicPick.abilityId||basicPick.type;
+      mem.lastActionCategory=cat;
+      mem.utilityStreak=0;
+    }
+  }
+
   while(energy>0 && actionsTaken<maxActions && spentEnergy<energySpendCap){
-    const affordable=pool.filter(a=>getEnemyActionEnergyCost(a)<=energy);
+    const source=(intentPool.length?intentPool:pool);
+    const affordable=source.filter(a=>getEnemyActionEnergyCost(a)<=energy);
     if(!affordable.length) break;
     let best=null; let bestScore=-1;
     for(const cand of affordable){
@@ -8194,6 +8263,10 @@ function planEnemyTurn(e,p){
       if(cat==='buff') w*=profile.buffBias;
       if(cat==='guard') w*=profile.guardBias;
       if(cat==='heal') w*=profile.healBias;
+      if(intent==='attack' && (cat==='damage'||cat==='heavy')) w*=1.35;
+      if(intent==='control' && cat==='control') w*=1.40;
+      if(intent==='buff' && (cat==='buff'||cat==='guard'||cat==='heal')) w*=1.45;
+      if(intent==='finish' && (cat==='damage'||cat==='heavy')) w*=1.55;
       const pHp=(p.stats.hp||1)/Math.max(1,p.stats.maxHp||1);
       const eHp=(e.stats.hp||1)/Math.max(1,e.stats.maxHp||1);
       if(pHp<=0.5 && (cat==='heavy'||cat==='damage')) w*=profile.finisherBias;
@@ -8232,14 +8305,14 @@ function planEnemyTurn(e,p){
     if((G.enemyTurnCount||1)<=1 && (best.category==='control'||best.category==='buff'||best.category==='guard')) mem.openingSetupUsed=true;
     mem.utilityStreak=(best.category==='guard'||best.category==='heal'||best.category==='buff'||best.category==='control')?(mem.utilityStreak+1):0;
     if(globalThis.__AI_DEBUG){
-      console.debug('[AI]', e.name, 'persona=', e.aiPersonality, 'pick=', mem.lastAbilityId, 'cat=', best.category, 'EN->', energy);
+      console.debug('[AI]', e.name, 'intent=', intent, 'persona=', e.aiPersonality, 'pick=', mem.lastAbilityId, 'cat=', best.category, 'EN->', energy, 'cap=', energySpendCap);
     }
   }
   if(!turnHadDamage){
     const fallback=pool.find(a=>['strike','heavy'].includes(a.type)&&getEnemyActionEnergyCost(a)<= (e.energyMax||3));
     if(fallback && actions.length<maxActions) actions.push({...fallback,energyCost:getEnemyActionEnergyCost(fallback),category:classifyEnemyActionCategory(fallback)});
   }
-  return {mode,actions};
+  return {mode,intent,actions,energySpendCap};
 }
 
 function enemyHpPct(e){ return (e?.stats?.hp||1)/Math.max(1,(e?.stats?.maxHp||1)); }
@@ -8260,7 +8333,7 @@ function planEnemyAction() {
   const persona=(e.aiPersonality||'tactical');
   const preview=actions.slice(0,2).map(a=>`${a.icon||'•'} ${a.type==='ability'?(ENEMY_ABILITY_POOL[a.abilityId]?.name||a.abilityId):a.label}`).join(' → ');
   const more=actions.length>2?' +':'';
-  return {label:`[${persona}] ${preview}${more}`,type:'plan',actions,mode:plan.mode,personality:persona};
+  return {label:`[${persona}|${String(plan.intent||'attack').toUpperCase()}] ${preview}${more}`,type:'plan',actions,mode:plan.mode,intent:plan.intent||'attack',energySpendCap:plan.energySpendCap||0,personality:persona};
 }
 
 
