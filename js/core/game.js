@@ -725,10 +725,8 @@ const BIRDS = {
     stats:{hp:32,maxHp:32,atk:8,def:3,spd:10,dodge:28,acc:88,critChance:10,mdef:8,matk:8},
     statBars:{HP:32/50,ATK:8/15,SPD:10/10,Dodge:.56,ACC:.88}, color:'#6a8ac8',
     startAbilities:['swoopCut','skyfallStrike','windFeint','predatorMark'],
-    passive:{id:'terminalVelocity',name:'Terminal Velocity',desc:'Each turn without taking damage stacks +2% Crit Chance (max +20%). Taking damage resets it.',
-      onBattleStart(p){p._velocityStacks=0;},
-      onTurnEnd(p){if(!p._tookDmgThisTurn){p._velocityStacks=Math.min(p._velocityStacks+2,20);}p._tookDmgThisTurn=false;},
-      onDamage(p){p._tookDmgThisTurn=true;p._velocityStacks=0;}},
+    passive:{id:'terminalVelocity',name:'Terminal Velocity',desc:'First attack each battle deals +20% damage.',
+      onBattleStart(p){p.firstAttackEachBattleBonusPct=0.20;}},
   },
   snowyOwl:{
     name:'Snowy Owl', portraitKey:'snowyOwl', tagline:'Silent. Strike once. Gone.',
@@ -800,8 +798,9 @@ const BIRDS = {
     stats:{hp:38,maxHp:38,atk:6,def:4,spd:6,dodge:20,acc:82,critChance:6,mdef:10,matk:14},
     statBars:{HP:38/50,ATK:6/15,SPD:6/10,Dodge:.4,ACC:.82}, color:'#c8902a',
     startAbilities:['mockingPeck','echoSong','mimicSong','confuseChorus'],
-    passive:{id:'lyreLyre',name:'Lyre Lyre',desc:'Reduces a randomly selected enemy stat at battle start and grants that amount to Lyrebird as a buff.',
+    passive:{id:'lyreLyre',name:'Perfect Mimicry',desc:'First Song each battle repeats at 40% power.',
       onBattleStart(p){
+        p._lyrebirdSongEchoUsed=false;
         const enemy=G?.enemy?.stats;
         if(!enemy) return;
         const picks=[
@@ -833,8 +832,8 @@ const BIRDS = {
     stats:{hp:38,maxHp:38,atk:8,def:3,spd:7,dodge:22,acc:82,mdef:8,matk:14},
     color:'#6030d0',
     startAbilities:['blackPeck','dreadCall','nightfallSong','fearChorus'],
-    passive:{id:'omen',name:'Omen',
-      desc:'At battle start, a random blessing and a random curse are applied to both sides.',
+    passive:{id:'omen',name:'Omen of Dread',
+      desc:'+12% damage vs Feared enemies. At battle start, a random blessing and a random curse are applied to both sides.',
       onBattleStart(p){
         const blessings=[
           ()=>{p.stats.atk+=4;logMsg('☠ Omen Blessing: +4 ATK!','crit');},
@@ -860,7 +859,7 @@ const BIRDS = {
     stats:{hp:42,maxHp:42,atk:7,def:4,spd:8,dodge:32,acc:84,mdef:9,matk:12,critChance:8},
     color:'#2a2a2a',
     startAbilities:['featherFlick','glintJab','mockingSong','stealTempo'],
-    passive:{id:'murderCall',name:'Murder Call',desc:'Mob attacks gain +10% hit vs low-HP foes. Each kill raises summon cap (max +3).',
+    passive:{id:'murderCall',name:'Shiny Collector',desc:'+3 shiny after each victory. Mob attacks gain +10% hit vs low-HP foes. Each kill raises summon cap (max +3).',
       onBattleStart(p){p._murderBonusCap=0;}},
   },
 
@@ -958,8 +957,9 @@ const BIRDS = {
     stats:{hp:54,maxHp:54,atk:8,def:6,spd:7,dodge:14,acc:82,mdef:11,matk:15,critChance:8},
     color:'#9fb7c9',
     startAbilities:['galeStrike','oceanCall','windChorus','stormSong'],
-    passive:{id:'tradeWinds',name:'Trade Winds',desc:'Casting a spell grants +1 SPD (max +4) this battle.',
-      onSpell(p){p._tradeWind=(p._tradeWind||0);if(p._tradeWind<4){p._tradeWind++;p.stats.spd=Math.min(20,(p.stats.spd||1)+1);}}},
+    passive:{id:'tradeWinds',name:'Ocean Wanderer',desc:'+1 SPD every 2 turns.',
+      onBattleStart(p){p._oceanWandererTurns=0;},
+      onTurnEnd(p){p._oceanWandererTurns=(p._oceanWandererTurns||0)+1;if((p._oceanWandererTurns%2)===0){p.stats.spd=Math.min(20,(p.stats.spd||1)+1);}}},
   },
 
   seagull:{
@@ -970,7 +970,7 @@ const BIRDS = {
     stats:{hp:36,maxHp:36,atk:6,def:3,spd:8,dodge:24,acc:84,mdef:9,matk:14,critChance:8},
     color:'#b0c8d8',
     startAbilities:['featherFlick','diveSnatch','blindScreech','distractingChorus'],
-    passive:{id:'scavengeFlock',name:'Scavenge Flock',desc:'Summoned mobs steal 5% enemy ATK as SPD bonus (stacks). Immune to Fear.',
+    passive:{id:'scavengeFlock',name:'Scavenger\'s Instinct',desc:'+20% damage vs enemies below 60% HP. Summoned mobs steal 5% enemy ATK as SPD bonus (stacks). Immune to Fear.',
       immuneFear:true,
       onBattleStart(p){p._scavengeStacks=0;}},
   },
@@ -1007,7 +1007,7 @@ const BIRDS = {
     statBars:{HP:58/50,ATK:13/15,SPD:4/10,Dodge:.16,ACC:.78}, color:'#c84030',
     startAbilities:['fleshTear','raptorDive','predatorMark','executionTalon'],
     abilityPool:['physical'],
-    passive:{id:'warlordsPath',name:"Warlord's Path",desc:'Every boss kill permanently raises ATK by 3. Takes 15% reduced magic damage.',
+    passive:{id:'warlordsPath',name:'Talon Tyrant',desc:'+18% damage vs enemies below 40% HP. Every boss kill permanently raises ATK by 3. Takes 15% reduced magic damage.',
       magicResist:0.15,
       onBossKill(p){p.stats.atk+=3;spawnFloat('player','⚔+3 ATK','fn-crit');}},
   },
@@ -1046,9 +1046,15 @@ const BIRDS = {
     stats:{hp:72,maxHp:72,atk:12,def:8,spd:1,dodge:5,acc:70,mdef:10,matk:4},
     color:'#b89060',
     startAbilities:['powerKick','stampedeStrike','sandKick','momentumCharge'],
-    passive:{id:'rageCharge',name:'Rage Charge',desc:'Heavy attacks charge over 2–3 turns (+50% dmg/turn). Misses reset charge. Immune to Slow.',
+    passive:{id:'rageCharge',name:'Desert Strider',desc:'Dodging grants +2 SPD for 2 turns. Heavy attacks charge over 2–3 turns (+50% dmg/turn). Misses reset charge. Immune to Slow.',
       immuneSlow:true,
-      onBattleStart(p){p._rageCharge=0;}},
+      onBattleStart(p){p._rageCharge=0;},
+      onDodge(p){
+        if(p._desertStriderBonus){p.stats.spd=Math.max(1,(p.stats.spd||1)-p._desertStriderBonus);}
+        p._desertStriderBonus=2;
+        p.stats.spd=Math.min(20,(p.stats.spd||1)+2);
+        G.playerStatus.desertStrider={turns:2,spd:2};
+      }},
   },
 
   cassowary:{
@@ -5326,6 +5332,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if((G.player?.perkWarBody||false) && (G.player.stats.hp||1)<=Math.floor((G.player.stats.maxHp||1)*0.5)) dmg=Math.floor(dmg*1.10);
     if((G.player?.perkOpeningRush||false) && isAttack && !G._firstAttackUsed) dmg=Math.floor(dmg*1.15);
     if((G.player?.perkVsFearPct||0)>0 && (G.enemyStatus?.feared||0)>0) dmg=Math.floor(dmg*(1+G.player.perkVsFearPct));
+    if(G.player?.birdKey==='raven' && (G.enemyStatus?.feared||0)>0) dmg=Math.floor(dmg*1.12);
+    if(G.player?.birdKey==='harpy' && (G.enemy.stats.hp||1)<=Math.floor((G.enemy.stats.maxHp||1)*0.4)) dmg=Math.floor(dmg*1.18);
+    if(G.player?.birdKey==='seagull' && (G.enemy.stats.hp||1)<=Math.floor((G.enemy.stats.maxHp||1)*0.6)) dmg=Math.floor(dmg*1.20);
     if((G.player?.perkExecutePct||0)>0 && (G.enemy.stats.hp||1)<=Math.floor((G.enemy.stats.maxHp||1)*0.4)) dmg=Math.floor(dmg*(1+G.player.perkExecutePct));
     if((G.player?.perkFirstVsFull||false) && !G._perkFirstVsFullUsed && (G.enemy.stats.hp||0)>=(G.enemy.stats.maxHp||1)){
       dmg=Math.floor(dmg*1.15);
@@ -7258,11 +7267,18 @@ async function playerAction(ab,fromQueue=false) {
   const flybyWasCharged=G.flybyCharged && ['physical','ranged','spell'].includes(ab.btnType);
   if(flybyWasCharged){G.flybyCharged=false;delete G.playerStatus.flyby; G.actionDamageMult=1.75; G.actionDamageHitsRemaining=1;}
   const chargedDouble=G.chargeUpActive && ab.id!=='chargeUp' && ['physical','ranged','spell'].includes(ab.btnType);
+  const lyrebirdSongEcho = G.player?.birdKey==='lyrebird' && !G.player?._lyrebirdSongEchoUsed && ab.btnType==='spell';
   if(chargedDouble){G.chargeUpActive=false;delete G.playerStatus.chargeUp;logMsg('⚡ Charge Up triggers: action repeats!','system');}
+  if(lyrebirdSongEcho){G.player._lyrebirdSongEchoUsed=true;logMsg('🎵 Perfect Mimicry triggers: Song repeats at 40% power!','system');}
   // Temporarily double ATK for flyby
   if(flybyWasCharged) G.player.stats.atk*=2;
   await ACTIONS[ab.id](ab);
   if(chargedDouble && !G.battleOver && G.enemy.stats.hp>0){await ACTIONS[ab.id](ab);}
+  if(lyrebirdSongEcho && !G.battleOver && G.enemy.stats.hp>0){
+    G.actionDamageMult=0.40;
+    G.actionDamageHitsRemaining=1;
+    await ACTIONS[ab.id](ab);
+  }
   const _abKind=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
   if((_abKind==='physical'||_abKind==='ranged') && G.player?.perkIronMomentum && /heavy|slam|crusher|smash/i.test((ab.name||ab.id||'').toLowerCase())){
     addStatus(G.playerStatus,'defending',1,999);
@@ -7792,9 +7808,13 @@ function endPlayerTurn(force=false) {
     G.player._rageCharge=0;
   }
   G._lastPlayerAbility=null;
-  // Update peregrine crit from velocity stacks
-  if(G.player.birdKey==='peregrine'&&G.player._velocityStacks!==undefined){
-    G.player.stats.critChance=(BIRDS.peregrine.stats.critChance||12)+G.player._velocityStacks;
+  if(G.playerStatus.desertStrider){
+    G.playerStatus.desertStrider.turns--;
+    if(G.playerStatus.desertStrider.turns<=0){
+      G.player.stats.spd=Math.max(1,(G.player.stats.spd||1)-(G.playerStatus.desertStrider.spd||0));
+      G.player._desertStriderBonus=0;
+      delete G.playerStatus.desertStrider;
+    }
   }
   if(G.playerStatus.sittingDuck)delete G.playerStatus.sittingDuck;
   if(G.playerStatus.mdodgeSittingDuck)delete G.playerStatus.mdodgeSittingDuck;
@@ -8473,12 +8493,14 @@ function postCombat() {
       G.player.stats.hp = Math.min(G.player.stats.hp, G.player.stats.maxHp);
       logMsg('🔥 Molting Ritual: +1 ATK, -3 Max HP.', 'system');
     }
-    shinyGain += perfectBonus + fastWinBonus;
+    const magpieBonus = (G.player?.birdKey==='magpie') ? 3 : 0;
+    shinyGain += perfectBonus + fastWinBonus + magpieBonus;
     G.shinyObjects += shinyGain;
 
     const bonusParts = [];
     if (perfectBonus > 0) bonusParts.push('perfect +2');
     if (fastWinBonus > 0) bonusParts.push('fast +1');
+    if (magpieBonus > 0) bonusParts.push('shiny collector +3');
     const bonusTxt = bonusParts.length ? ` (${bonusParts.join(', ')})` : '';
     logMsg(`✨ +${shinyGain} Shiny Object${shinyGain > 1 ? 's' : ''}${bonusTxt}! (Total: ${G.shinyObjects})`, 'exp-gain');
 
