@@ -33,14 +33,14 @@
       id: 'rapidPeck',
       name: 'Rapid Peck',
       tags: [ABILITY_TAGS.BASIC, ABILITY_TAGS.PHYSICAL, ABILITY_TAGS.OFFENSIVE],
-      role: 'assassin opener',
+      role: 'striker opener',
       notes: 'Multi-hit basic with high upside and chain-stop risk.'
     },
     dart: {
       id: 'dart',
       name: 'Dart',
       tags: [ABILITY_TAGS.BASIC, ABILITY_TAGS.PHYSICAL],
-      role: 'reliable strike',
+      role: 'predator strike',
       notes: 'Stable attack profile with light weaken pressure.'
     },
     evade: {
@@ -54,14 +54,14 @@
       id: 'dirge',
       name: 'Dirge',
       tags: [ABILITY_TAGS.SPELL, ABILITY_TAGS.CONTROL],
-      role: 'control song',
+      role: 'support control song',
       notes: 'Confusion and paralysis pressure over multiple turns.'
     },
     lullaby: {
       id: 'lullaby',
       name: 'Lullaby',
       tags: [ABILITY_TAGS.SPELL, ABILITY_TAGS.CONTROL],
-      role: 'debuff song',
+      role: 'trickster debuff song',
       notes: 'ATK suppression with delayed resonance payload.'
     }
   });
@@ -88,7 +88,7 @@
   });
 
   const UPGRADE_LINES = Object.freeze({
-    assassin: ['rapidPeck', 'dart', 'evade'],
+    striker: ['rapidPeck', 'dart', 'evade'],
     trickster: ['dirge', 'lullaby', 'evade'],
     vanguard: ['dart', 'evade']
   });
