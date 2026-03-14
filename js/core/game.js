@@ -3663,6 +3663,13 @@ function updateAscentPanel(key) {
   const cls = classToRoleId(bird.class);
   const sizeClass = getUISizeClass(bird, 'panel');
   const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
+  const startAbilityDetails=(bird.startAbilities||[]).map(id=>{
+    const t=ABILITY_TEMPLATES[id];
+    if(!t) return `• <span style='color:var(--text)'>${id}</span>`;
+    const baseDesc=t.desc||'No description available.';
+    const lv1=(t.levels&&t.levels[0]&&t.levels[0].desc)?t.levels[0].desc:'No effect data.';
+    return `• <span style='color:var(--text)'>${t.name||id}</span><br><span style='color:var(--text-dim)'>Attack: ${baseDesc}</span><br><span style='color:var(--gold-light)'>Effect/Dmg (Lv1): ${lv1}</span>`;
+  }).join('<br><br>');
 
   panel.innerHTML = `
     <div class="ascent-panel-portrait">${renderBirdIconHTML(key, sizeClass, false)}</div>
@@ -3672,7 +3679,7 @@ function updateAscentPanel(key) {
     ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
     <div class="ascent-abilities">${tags}</div>
     <div style="text-align:left;font-size:.72rem;color:var(--text);background:rgba(0,0,0,.25);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px;margin:8px 0;"><strong>Full Stats:</strong> HP ${bird.stats.hp} · ATK ${bird.stats.atk} · DEF ${bird.stats.def} · SPD ${bird.stats.spd} · ACC ${bird.stats.acc}% · Dodge ${bird.stats.dodge}% · MATK ${bird.stats.matk||0} · MDEF ${bird.stats.mdef||0} · Crit ${bird.stats.critChance||0}%</div>
-    <div style="text-align:left;font-size:.7rem;color:var(--text-dim);margin:6px 0 10px;"><strong style="color:var(--gold-light)">Starting Attacks:</strong><br>${(bird.startAbilities||[]).map(id=>{const t=ABILITY_TEMPLATES[id];const lv=(t&&t.levels&&t.levels[0])?t.levels[0].desc:'';return `• <span style='color:var(--text)'>${t?t.name:id}</span> — ${lv}`;}).join('<br>')}</div>
+    <div style="text-align:left;font-size:.7rem;color:var(--text-dim);margin:6px 0 10px;"><strong style="color:var(--gold-light)">Starting Attacks:</strong><br>${startAbilityDetails}</div>
     <button class="cta" onclick="startGame()">🪽 Take Flight as ${bird.name}</button>
     <div style="margin-top:8px;">
     </div>`;
