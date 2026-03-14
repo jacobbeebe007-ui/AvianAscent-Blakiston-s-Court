@@ -1569,7 +1569,7 @@ const CLASS_ROLE_BY_CLASS = {
   ranger:'striker',
   tank:'tank',
   knight:'bruiser',
-  mage:'singer',
+  mage:'trickster',
   summoner:'trickster',
   bard:'singer',
 };
