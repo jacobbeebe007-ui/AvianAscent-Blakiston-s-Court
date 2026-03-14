@@ -1430,6 +1430,69 @@ const ENDLESS_MUTATIONS = [
 ];
 
 function isEndlessRunActive(){ return !!(G.endlessMode && (G.stage||0)>20); }
+const PASSIVE_EVOLUTION_MILESTONES = Object.freeze({ evo1:10, evo2:25 });
+const PASSIVE_EVOLUTION_TEMPLATE = Object.freeze({
+  stage1: {
+    offensive:{ name:'Swift Instinct', effect:'+15% passive evolution damage' },
+    utility:{ name:'Relentless Instinct', effect:'+1 SPD and 8% damage reduction' },
+  },
+  stage2: {
+    offensive:{ name:'Predator Instinct', effect:'+25% passive evolution damage, +10% crit, +12% pierce' },
+    utility:{ name:'Storm Instinct', effect:'+2 SPD, 15% damage reduction, +10% control chance' },
+  }
+});
+const PASSIVE_EVOLUTION_DEFS = Object.freeze({
+  comboInstinct: {
+    base:'Combo Instinct',
+    stage1:[
+      { name:'Swift Instinct', effect:'+15% combo damage' },
+      { name:'Relentless Instinct', effect:'+1 SPD after combo' },
+    ],
+    stage2:[
+      { name:'Predator Instinct', effect:'+20% combo damage ignore DEF' },
+      { name:'Storm Instinct', effect:'+SPD + crit chance after combo' },
+    ],
+  }
+});
+function getPassiveEvolutionDefinition(passive){
+  const id=String(passive?.id||'').trim();
+  const base=passive?.name||'Unknown Passive';
+  const specific=PASSIVE_EVOLUTION_DEFS[id];
+  if(specific) return specific;
+  return {
+    base,
+    stage1:[
+      {name:PASSIVE_EVOLUTION_TEMPLATE.stage1.offensive.name,effect:PASSIVE_EVOLUTION_TEMPLATE.stage1.offensive.effect,path:'offensive'},
+      {name:PASSIVE_EVOLUTION_TEMPLATE.stage1.utility.name,effect:PASSIVE_EVOLUTION_TEMPLATE.stage1.utility.effect,path:'utility'},
+    ],
+    stage2:[
+      {name:PASSIVE_EVOLUTION_TEMPLATE.stage2.offensive.name,effect:PASSIVE_EVOLUTION_TEMPLATE.stage2.offensive.effect,path:'offensive'},
+      {name:PASSIVE_EVOLUTION_TEMPLATE.stage2.utility.name,effect:PASSIVE_EVOLUTION_TEMPLATE.stage2.utility.effect,path:'utility'},
+    ],
+  };
+}
+function ensurePassiveEvolutionState(player=G.player){
+  if(!player) return null;
+  if(!player.passiveEvolution || typeof player.passiveEvolution!=='object'){
+    player.passiveEvolution={tier:0,choices:{},pathHistory:[]};
+  }
+  if(!player.passiveEvolution.choices || typeof player.passiveEvolution.choices!=='object') player.passiveEvolution.choices={};
+  if(!Array.isArray(player.passiveEvolution.pathHistory)) player.passiveEvolution.pathHistory=[];
+  player.passiveEvolution.tier=Math.max(0,Math.min(2,Number(player.passiveEvolution.tier||0)));
+  return player.passiveEvolution;
+}
+function getPassiveEvolutionBonuses(player=G.player){
+  const pe=ensurePassiveEvolutionState(player);
+  const out={damagePct:0,critFlat:0,piercePct:0,spdFlat:0,drPct:0,controlPct:0};
+  if(!pe) return out;
+  const c1=pe.choices?.[1];
+  const c2=pe.choices?.[2];
+  if(c1==='offensive'){ out.damagePct+=0.15; }
+  if(c1==='utility'){ out.spdFlat+=1; out.drPct+=0.08; }
+  if(c2==='offensive'){ out.damagePct+=0.25; out.critFlat+=10; out.piercePct+=12; }
+  if(c2==='utility'){ out.spdFlat+=1; out.drPct+=0.15; out.controlPct+=0.10; }
+  return out;
+}
 function getEndlessRewardPool(type){
   if(type==='augment') return ENDLESS_SKILL_AUGMENTS;
   if(type==='mutation') return ENDLESS_MUTATIONS;
@@ -3072,6 +3135,7 @@ function continueRun() {
   G.collectedRewards=save.collectedRewards||[];
   G.player=save.player;
   if(!Array.isArray(G.player.endlessRewards)) G.player.endlessRewards=[];
+  ensurePassiveEvolutionState(G.player);
   G.runUpgradesPurchased=new Set(save.runUpgradesPurchased||[]);
   G.codex=save.codex||{abilities:{},enemies:{},birds:{},artifacts:{},statuses:{}};
   // Re-attach passive reference (fns can't be serialized)
@@ -3612,6 +3676,7 @@ function startGame() {
     energyMax: 0,
     energy: 0,
     energyRegen: 0,
+    passiveEvolution:{tier:0,choices:{},pathHistory:[]},
   };
   G.player.class = bd.class;
   G.player.size = bd.size||'medium';
@@ -4861,6 +4926,66 @@ function maybeOfferClassPerkChoice(){
   return true;
 }
 
+function applyPassiveEvolutionChoice(tier,path){
+  if(!G.player?.passive) return false;
+  const pe=ensurePassiveEvolutionState(G.player);
+  if(!pe || pe.choices?.[tier]) return false;
+  if(!(tier===1||tier===2)) return false;
+  if(path!=='offensive'&&path!=='utility') return false;
+  pe.choices[tier]=path;
+  pe.tier=Math.max(pe.tier||0,tier);
+  pe.pathHistory.push({tier,path,atEndlessBattle:G.endlessBattle||0});
+  const bonus=getPassiveEvolutionBonuses(G.player);
+  G.player.passiveEvolutionBonuses=bonus;
+  const def=getPassiveEvolutionDefinition(G.player.passive);
+  const pick=(tier===1?def.stage1:def.stage2).find(x=>(x.path||'offensive')===path) || (tier===1?def.stage1[0]:def.stage2[0]);
+  logMsg(`🧬 Passive Evolution ${tier}: ${pick?.name||path} selected.`, 'exp-gain');
+  saveRun();
+  return true;
+}
+
+function maybeOfferPassiveEvolutionChoice(){
+  if(!isEndlessRunActive() || !G.player?.passive) return false;
+  const pe=ensurePassiveEvolutionState(G.player);
+  const eb=Math.max(0,G.endlessBattle||0);
+  let tierToOffer=0;
+  if(!pe.choices?.[1] && eb>=PASSIVE_EVOLUTION_MILESTONES.evo1) tierToOffer=1;
+  else if(!pe.choices?.[2] && eb>=PASSIVE_EVOLUTION_MILESTONES.evo2) tierToOffer=2;
+  if(!tierToOffer) return false;
+
+  const def=getPassiveEvolutionDefinition(G.player.passive);
+  const options=tierToOffer===1?def.stage1:def.stage2;
+  const [optA,optB]=options;
+  const pathA=optA?.path||'offensive';
+  const pathB=optB?.path||'utility';
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML=`<div style="width:min(760px,94vw);background:rgba(16,12,8,.98);border:1px solid var(--gold);border-radius:14px;padding:16px;">
+    <div style="font-family:Cinzel,serif;color:var(--gold);font-size:1.1rem;margin-bottom:6px;">PASSIVE EVOLUTION</div>
+    <div style="color:var(--text-dim);margin-bottom:14px;">Choose how your passive evolves · <strong style="color:var(--gold-light)">${def.base}</strong> · Evolution ${tierToOffer}</div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+      <button data-path="${pathA}" style="text-align:left;background:rgba(28,22,12,.96);border:1px solid rgba(201,168,76,.35);color:var(--text);border-radius:10px;padding:12px;cursor:pointer;">
+        <div style="font-family:Cinzel,serif;color:var(--gold-light)">Option A · ${optA?.name||'Offensive Path'}</div>
+        <div style="font-size:.82rem;color:var(--text-dim)">${optA?.effect||''}</div>
+      </button>
+      <button data-path="${pathB}" style="text-align:left;background:rgba(28,22,12,.96);border:1px solid rgba(201,168,76,.35);color:var(--text);border-radius:10px;padding:12px;cursor:pointer;">
+        <div style="font-family:Cinzel,serif;color:var(--gold-light)">Option B · ${optB?.name||'Utility Path'}</div>
+        <div style="font-size:.82rem;color:var(--text-dim)">${optB?.effect||''}</div>
+      </button>
+    </div>
+  </div>`;
+  overlay.querySelectorAll('button[data-path]').forEach(btn=>btn.addEventListener('click',()=>{
+    applyPassiveEvolutionChoice(tierToOffer, btn.getAttribute('data-path'));
+    overlay.remove();
+    if(maybeOfferPassiveEvolutionChoice()) return;
+    if(maybeOfferClassPerkChoice()) return;
+    G.phase='PLAYER';
+    loadStage();
+  }));
+  document.body.appendChild(overlay);
+  return true;
+}
+
 function applyRangerPassiveOnTurnStart(){
   if((G.player?.class||BIRDS[G.player?.birdKey]?.class||'').toLowerCase()!=='ranger') return;
   G.playerStatus.rangerFirstAttack=1;
@@ -5300,6 +5425,7 @@ function applyPlayerSlow(spdPenalty,dodgePenalty,turns){
 
 function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
   let dmg=Math.max(1,amount);
+  const passiveEvoBonus=getPassiveEvolutionBonuses(G.player);
   const activeAb=srcAbility||G._activePlayerAbility||null;
   const activeType=String(activeAb?.btnType||activeAb?.type||ABILITY_TEMPLATES?.[activeAb?.id]?.btnType||ABILITY_TEMPLATES?.[activeAb?.id]?.type||'').toLowerCase();
   if(target==='enemy' && !isMagic && !isCrit && G.player?.perkSecondAttackCrit && (G.playerActionsThisTurn||0)===2 && chance(10)) isCrit=true;
@@ -5361,6 +5487,7 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(isAttack && !G._firstAttackUsed && (G.player?.firstAttackEachBattleBonusPct||0)>0){
       dmg=Math.floor(dmg*(1+G.player.firstAttackEachBattleBonusPct));
     }
+    if((passiveEvoBonus.damagePct||0)>0) dmg=Math.floor(dmg*(1+passiveEvoBonus.damagePct));
   }
   let wasBlocked=false;
   const def=target==='enemy'?G.enemyStatus.defending:G.playerStatus.defending;
@@ -5374,7 +5501,8 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
   if (def>0){dmg=Math.floor(dmg*blockPct);wasBlocked=true;}
   // Pierce DEF: reduce dmg-reduction effect by pierce % (applied to enemy hit)
   if(target==='enemy' && G._currentPiercePct>0 && !wasBlocked){
-    const pierceBonus=Math.floor(G.player.stats.atk*(G._currentPiercePct/100));
+    const evoPierce=(passiveEvoBonus.piercePct||0);
+    const pierceBonus=Math.floor(G.player.stats.atk*((G._currentPiercePct+evoPierce)/100));
     dmg=Math.max(1, dmg+pierceBonus);
     G._currentPiercePct=0;
   } else { G._currentPiercePct=0; }
@@ -5432,6 +5560,9 @@ function dealDamage(target,amount,isCrit=false,isMagic=false,srcAbility=null) {
     if(_firstHitRed>0 && !G.player._firstHitReducedUsed){
       dmg=Math.max(1,Math.floor(dmg*(1-_firstHitRed)));
       G.player._firstHitReducedUsed=true;
+    }
+    if((passiveEvoBonus.drPct||0)>0){
+      dmg=Math.max(1,Math.floor(dmg*(1-passiveEvoBonus.drPct)));
     }
     G.player.stats.hp-=dmg;
     if((G.player?.lowHpSpdBonus||0)>0 && !G.player._lowHpSpdApplied && G.player.stats.hp<=Math.floor((G.player.stats.maxHp||1)*0.5)){
@@ -5718,7 +5849,9 @@ function tryApplyAilment(target,ailId,ab) {
   const magicShift   = (attackerMatk - targetMdef) * 1.5; // ±1.5% per point difference
   const adjusted     = Math.max(5, Math.min(95, c + magicShift));
   // Boss status resistance: 50% reduction
-  const rollPct = (target==='enemy'&&G.enemy.isBoss) ? Math.max(5,Math.floor(adjusted*0.5)) : adjusted;
+  const controlBoost=(target==='enemy') ? Math.floor((getPassiveEvolutionBonuses(G.player).controlPct||0)*100) : 0;
+  const finalAdj=Math.max(5, Math.min(95, adjusted + controlBoost));
+  const rollPct = (target==='enemy'&&G.enemy.isBoss) ? Math.max(5,Math.floor(finalAdj*0.5)) : finalAdj;
   if(!chance(rollPct)) return false;
   const stacks = (ailId==='poison' && G.player && G.player.poisonStacksPerHit)
     ? G.player.poisonStacksPerHit : 1;
@@ -5767,6 +5900,7 @@ function applyAilment(target,ailId,stacks=1) {
 function getPlayerCritChance(ab) {
   let base = G.player.stats.critChance || 5;
   if (G.playerStatus.burning&&G.playerStatus.burning>0) base+=20;
+  base += (getPassiveEvolutionBonuses(G.player).critFlat||0);
   const t=ABILITY_TEMPLATES?.[ab?.id]||ABILITY_TEMPLATES_EXTRA?.[ab?.id]||ab||{};
   const kind=String(t.btnType||t.type||ab?.btnType||ab?.type||'').toLowerCase();
   const isAttack=(kind==='physical'||kind==='ranged');
@@ -9114,6 +9248,7 @@ function advanceStage() {
     logMsg('🔓 Legendary birds unlocked: Shoebill Stork & Harpy Eagle!','boss');
   }
   saveRun();
+  if(maybeOfferPassiveEvolutionChoice()) return;
   if(maybeOfferClassPerkChoice()) return;
 
   // ── Whispering Grove: ~10% after non-boss victories, player must be >20% HP
