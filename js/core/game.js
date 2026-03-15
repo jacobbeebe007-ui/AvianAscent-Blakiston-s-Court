@@ -3552,6 +3552,9 @@ function buildBirdGrid() {
   const focusKey=ui.expandedBird||G.selected||safeBirdEntries?.[0]?.[0]||'';
   if(focusKey) updateAscentPanel(focusKey);
 
+  const focusKey=ui.expandedBird||G.selected||safeBirdEntries?.[0]?.[0]||'';
+  if(focusKey) updateAscentPanel(focusKey);
+
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
     console.error('Character select fallback: no valid bird entries detected.');
