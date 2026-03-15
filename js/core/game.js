@@ -417,7 +417,7 @@ const ABILITY_TEMPLATES = {
   // ---- NEW BIRD ABILITIES ----
   bleakBeak:{
     id:'bleakBeak', name:'Bleak Beak', type:'physical', btnType:'physical',
-    isNeutral:false, allowedClasses:['mage','bard','summoner'],
+    isNeutral:false, allowedClasses:['singer','trickster'],
     energyByLevel:[1,1,1,1], energyCost:1, cooldownByLevel:[0,0,0,0],
     desc:'Caster basic peck. Lower damage, dependable setup tool.', ailments:[],
     levels:[
@@ -430,7 +430,7 @@ const ABILITY_TEMPLATES = {
 
   shadowJab:{
     id:'shadowJab', name:'Shadow Jab', type:'physical', btnType:'physical',
-    isNeutral:false, allowedClasses:['mage'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[1,1,1,1], energyCost:1, cooldownByLevel:[0,0,0,0],
     desc:'Mage basic strike. Slightly low damage with light Fear pressure.', ailments:[],
     levels:[
@@ -443,7 +443,7 @@ const ABILITY_TEMPLATES = {
 
   pinionVolley:{
     id:'pinionVolley', name:'Pinion Volley', type:'ranged', btnType:'ranged',
-    isNeutral:false, allowedClasses:['ranger'],
+    isNeutral:false, allowedClasses:['trickster','striker'],
     energyByLevel:[1,1,1,1], cooldownByLevel:[1,1,1,1],
     piercePctByLevel:[0.25,0.30,0.35,0.40],
     desc:'Ranger payoff basic-skill hybrid. Two reliable piercing hits.',
@@ -457,9 +457,9 @@ const ABILITY_TEMPLATES = {
 
   shieldWing:{
     id:'shieldWing', name:'Shield-Wing', type:'utility', btnType:'utility',
-    isNeutral:false, allowedClasses:['tank','knight'],
+    isNeutral:false, allowedClasses:['tank','bruiser','predator'],
     energyByLevel:[1,1,1,1], cooldownByLevel:[2,2,2,2],
-    desc:'Core tank/knight setup skill. Gain Guard and stabilize.',
+    desc:'Core tank/bruiser setup skill. Gain Guard and stabilize.',
     levels:[
       {lv:1, desc:'Gain reduced damage based on DEF'},
       {lv:2, desc:'Gain more damage reduction + cleanse 1 debuff'},
@@ -483,7 +483,7 @@ const ABILITY_TEMPLATES = {
 
   dirgeOfDread:{
     id:'dirgeOfDread', name:'Dirge of Dread', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['bard'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[1,1,2,2], cooldownByLevel:[2,2,3,3],
     desc:'Control song that applies Fear + Weaken. Utility first, damage second.', ailments:[],
     levels:[
@@ -496,7 +496,7 @@ const ABILITY_TEMPLATES = {
 
   skyHymn:{
     id:'skyHymn', name:'Sky Hymn', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['bard'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[1,1,2,2], cooldownByLevel:[2,2,2,3],
     desc:'Support song with small healing and momentum. Reliable, not explosive.', ailments:[],
     levels:[
@@ -509,7 +509,7 @@ const ABILITY_TEMPLATES = {
 
   marshHex:{
     id:'marshHex', name:'Marsh Hex', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['mage'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[2,2,3,3], cooldownByLevel:[2,2,3,3],
     desc:'Mage payoff spell. Strong debuffing burst, not instant-delete damage.', ailments:[],
     levels:[
@@ -522,7 +522,7 @@ const ABILITY_TEMPLATES = {
 
   stormCall:{
     id:'stormCall', name:'Storm Call', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['mage'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[2,2,3,3], cooldownByLevel:[3,3,4,4],
     desc:'Heavy lightning spell with clear cooldown and burst role.', ailments:[],
     levels:[
@@ -535,7 +535,7 @@ const ABILITY_TEMPLATES = {
 
   nightChill:{
     id:'nightChill', name:'Night Chill', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['mage'],
+    isNeutral:false, allowedClasses:['singer'],
     energyByLevel:[1,1,2,2], cooldownByLevel:[2,2,2,2],
     desc:'Mage setup spell. Moderate damage with reliable Slow/Chilled pressure.', ailments:[],
     levels:[
@@ -674,7 +674,7 @@ const BIRDS = {
   // ── TINY ────────────────────────────────────────────────────
   sparrow:{
     name:'Sparrow', portraitKey:'sparrow', tagline:'Swift as wind, strikes like needles.',
-    size:'tiny', class:'assassin',
+    size:'tiny', class:'striker',
     stats:{hp:28,maxHp:28,atk:5,def:2,spd:9,dodge:35,acc:85,mdef:6,matk:6,critChance:10},
     statBars:{HP:28/50,ATK:5/15,SPD:9/10,Dodge:.7,ACC:.85}, color:'#6a8ae8',
     startAbilities:['rapidPeck','dart','windFeint','predatorMark'],
@@ -683,7 +683,7 @@ const BIRDS = {
   },
   hummingbird:{
     name:'Hummingbird', portraitKey:'hummingbird', tagline:'Blurred wings, needle beak. Zap & zip.',
-    size:'tiny', class:'assassin',
+    size:'tiny', class:'striker',
     unlockRequires:'unlock_hummingbird',
     unlockHint:'Defeat Stage 10 with Sparrow.',
     stats:{hp:25,maxHp:25,atk:7,def:1,spd:12,dodge:55,acc:92,mdef:4,matk:10,critChance:18},
@@ -699,7 +699,7 @@ const BIRDS = {
   // ── SMALL ───────────────────────────────────────────────────
   blackbird:{
     name:'Blackbird', portraitKey:'phainopepla', tagline:'Songs that shatter minds. Eyes like embers.',
-    size:'small', class:'mage',
+    size:'small', class:'singer',
     stats:{hp:38,maxHp:38,atk:6,def:3,spd:7,dodge:25,acc:80,mdef:8,matk:14},
     statBars:{HP:38/50,ATK:6/15,SPD:7/10,Dodge:.5,ACC:.8}, color:'#9a6ae8',
     startAbilities:['blackPeck','stormChorus','battleChorus','thunderScreech'],
@@ -708,7 +708,7 @@ const BIRDS = {
   },
   macaw:{
     name:'Macaw', portraitKey:'macaw', tagline:'Every word is a weapon.',
-    size:'small', class:'bard',
+    size:'small', class:'singer',
     stats:{hp:34,maxHp:34,atk:7,def:3,spd:8,dodge:28,acc:85,mdef:8,matk:16},
     color:'#1a6aba',
     startAbilities:['echoSong','mimicSong','confuseChorus','battleChorus'],
@@ -719,7 +719,7 @@ const BIRDS = {
   },
   peregrine:{
     name:'Peregrine Falcon', portraitKey:'peregrine', tagline:'200mph. No remorse.',
-    size:'small', class:'assassin',
+    size:'small', class:'striker',
     unlockRequires:'unlock_peregrine',
     unlockHint:'Defeat Stage 20 with Hummingbird.',
     stats:{hp:32,maxHp:32,atk:8,def:3,spd:10,dodge:28,acc:88,critChance:10,mdef:8,matk:8},
@@ -730,7 +730,7 @@ const BIRDS = {
   },
   snowyOwl:{
     name:'Snowy Owl', portraitKey:'snowyOwl', tagline:'Silent. Strike once. Gone.',
-    size:'small', class:'assassin',
+    size:'small', class:'predator',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:28,maxHp:28,atk:12,def:2,spd:9,dodge:38,acc:92,critChance:15,mdef:3,matk:3},
@@ -745,7 +745,7 @@ const BIRDS = {
   },
   kiwi:{
     name:'Kiwi', portraitKey:'kiwi', tagline:'Nocturnal probe. Beak pierces armor like butter.',
-    size:'small', class:'assassin',
+    size:'small', class:'trickster',
     unlockRequires:'unlock_kiwi',
     unlockHint:'Defeat Stage 20 with Magpie.',
     stats:{hp:34,maxHp:34,atk:8,def:3,spd:8,dodge:48,acc:88,critChance:12,mdef:5,matk:7},
@@ -756,7 +756,7 @@ const BIRDS = {
   },
   blackCockatoo:{
     name:'Black Cockatoo', portraitKey:'blackCockatoo', tagline:'Ebon omen. Pure psychic wails.',
-    size:'small', class:'mage',
+    size:'small', class:'singer',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:30,maxHp:30,atk:5,def:2,spd:6,dodge:18,acc:78,mdef:12,matk:16},
@@ -769,7 +769,7 @@ const BIRDS = {
   // ── MEDIUM ──────────────────────────────────────────────────
   crow:{
     name:'Crow', portraitKey:'crow', tagline:'Tactical. Precise. Unforgiving.',
-    size:'medium', class:'knight',
+    size:'medium', class:'bruiser',
     stats:{hp:35,maxHp:35,atk:6,def:4,spd:5,dodge:15,acc:90,mdef:10,matk:6},
     statBars:{HP:35/50,ATK:6/15,SPD:5/10,Dodge:.3,ACC:.9}, color:'#c0c8d8',
     startAbilities:['mockingPeck','stickLance','guard','battleFocus'],
@@ -779,7 +779,7 @@ const BIRDS = {
   },
   kookaburra:{
     name:'Kookaburra', portraitKey:'kookaburra', tagline:'Patient hunter. Strikes when they least expect.',
-    size:'medium', class:'bard',
+    size:'medium', class:'trickster',
     unlockRequires:'unlock_kookaburra',
     unlockHint:'Defeat Stage 10 with Macaw.',
     stats:{hp:46,maxHp:46,atk:9,def:5,spd:7,dodge:22,acc:82,mdef:10,matk:8},
@@ -792,7 +792,7 @@ const BIRDS = {
   },
   lyrebird:{
     name:'Lyrebird', portraitKey:'lyrebird', tagline:'The great deceiver. Master of all songs.',
-    size:'medium', class:'bard',
+    size:'medium', class:'trickster',
     unlockRequires:'unlock_lyrebird',
     unlockHint:'Defeat Stage 20 with Kookaburra.',
     stats:{hp:38,maxHp:38,atk:6,def:4,spd:6,dodge:20,acc:82,critChance:6,mdef:10,matk:14},
@@ -826,7 +826,7 @@ const BIRDS = {
   },
   raven:{
     name:'Raven', portraitKey:'raven', tagline:'Chaos given feathers. Roll the bones.',
-    size:'medium', class:'mage',
+    size:'medium', class:'singer',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:38,maxHp:38,atk:8,def:3,spd:7,dodge:22,acc:82,mdef:8,matk:14},
@@ -853,7 +853,7 @@ const BIRDS = {
   },
   magpie:{
     name:'Magpie', portraitKey:'magpie', tagline:'Swooping thief. Calls the murder to mob.',
-    size:'medium', class:'ranger',
+    size:'medium', class:'trickster',
     unlockRequires:'unlock_magpie',
     unlockHint:'Defeat Stage 10 with Robin.',
     stats:{hp:42,maxHp:42,atk:7,def:4,spd:8,dodge:32,acc:84,mdef:9,matk:12,critChance:8},
@@ -865,8 +865,8 @@ const BIRDS = {
 
 
   robin:{
-    name:'Robin', portraitKey:'robin', tagline:'Sharp-eyed skirmisher. Pebbles and thorns from afar.',
-    size:'small', class:'ranger',
+    name:'Robin', portraitKey:'robin', tagline:'Sharp-eyed striker. Pebbles and thorns from afar.',
+    size:'small', class:'striker',
     stats:{hp:34,maxHp:34,atk:7,def:3,spd:8,dodge:24,acc:88,mdef:8,matk:8,critChance:8},
     color:'#d86a4c',
     startAbilities:['needleJab','swoopCut','focusChirp','predatorMark'],
@@ -876,7 +876,7 @@ const BIRDS = {
   },
   bowerbird:{
     name:'Bowerbird', portraitKey:'bowerbird', tagline:'Collector of oddities. Makes every throw count.',
-    size:'medium', class:'ranger',
+    size:'medium', class:'trickster',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:40,maxHp:40,atk:8,def:4,spd:7,dodge:22,acc:86,mdef:9,matk:9},
@@ -889,7 +889,7 @@ const BIRDS = {
   // ── LARGE ───────────────────────────────────────────────────
   toucan:{
     name:'Toucan', portraitKey:'toucan', tagline:'Serrated bill, tropical fury.',
-    size:'large', class:'bard',
+    size:'large', class:'singer',
     unlockRequires:'unlock_toucan',
     unlockHint:'Enter: "Ahh Ahh Eee Eee Tookie Tookie"',
     stats:{hp:45,maxHp:45,atk:7,def:5,spd:4,dodge:12,acc:75,mdef:8,matk:10},
@@ -900,7 +900,7 @@ const BIRDS = {
   },
   swan:{
     name:'Swan', portraitKey:'swan', tagline:'Elegance in life. Devastation in death.',
-    size:'large', class:'bard',
+    size:'large', class:'tank',
     unlockRequires:'unlock_swan',
     unlockHint:'Reach Endless Stage 30 with any Bard.',
     stats:{hp:44,maxHp:44,atk:8,def:5,spd:6,dodge:20,acc:84,mdef:10,matk:12},
@@ -913,7 +913,7 @@ const BIRDS = {
   },
   flamingo:{
     name:'Flamingo', portraitKey:'flamingo', tagline:'Balance is power. Grace is terror.',
-    size:'large', class:'ranger',
+    size:'large', class:'singer',
     unlockRequires:'unlock_flamingo',
     unlockHint:'Reach Endless Stage 30 with any Ranger.',
     stats:{hp:48,maxHp:48,atk:8,def:4,spd:6,dodge:18,acc:80,mdef:12,matk:8},
@@ -939,7 +939,7 @@ const BIRDS = {
   },
   secretary:{
     name:'Secretary Bird', portraitKey:'secretary', tagline:'Serpent stomper. Justice on stilts.',
-    size:'large', class:'knight',
+    size:'large', class:'bruiser',
     unlockRequires:'unlock_secretary',
     unlockHint:'Defeat Stage 10 with Crow.',
     stats:{hp:48,maxHp:48,atk:9,def:6,spd:5,dodge:10,acc:80,critChance:8,mdef:10,matk:6},
@@ -951,7 +951,7 @@ const BIRDS = {
   },
   albatross:{
     name:'Albatross', tagline:'Ocean courier. Wind-carved arcs and storm songs.',
-    size:'large', class:'summoner',
+    size:'large', class:'singer',
     unlockRequires:'unlock_albatross',
     unlockHint:'Reach Endless Stage 50 with any bird.',
     stats:{hp:54,maxHp:54,atk:8,def:6,spd:7,dodge:14,acc:82,mdef:11,matk:15,critChance:8},
@@ -964,9 +964,9 @@ const BIRDS = {
 
   seagull:{
     name:'Seagull', portraitKey:'seagull', tagline:'Screeching scavenger. Flock dive-bombs trash & foes.',
-    size:'medium', class:'summoner',
+    size:'medium', class:'trickster',
     unlockRequires:'unlock_seagull',
-    unlockHint:'Reach level 21 in Endless mode with any Mage.',
+    unlockHint:'Reach level 21 in Endless mode with any Singer.',
     stats:{hp:36,maxHp:36,atk:6,def:3,spd:8,dodge:24,acc:84,mdef:9,matk:14,critChance:8},
     color:'#b0c8d8',
     startAbilities:['featherFlick','diveSnatch','blindScreech','distractingChorus'],
@@ -1000,7 +1000,7 @@ const BIRDS = {
   },
   harpy:{
     name:'Harpy Eagle', portraitKey:'harpy', tagline:'Warlord of the canopy. No mercy.',
-    size:'xl', class:'tank',
+    size:'xl', class:'predator',
     unlockRequires:'unlock_harpy',
     unlockHint:'Defeat Stage 20 with Hummingbird.',
     stats:{hp:58,maxHp:58,atk:13,def:6,spd:4,dodge:8,acc:78,critChance:15,mdef:8,matk:6},
@@ -1013,12 +1013,12 @@ const BIRDS = {
   },
   baldEagle:{
     name:'Bald Eagle', portraitKey:'baldEagle', tagline:'Unbreakable. Undying. Undefeated.',
-    size:'xl', class:'knight',
+    size:'xl', class:'predator',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:60,maxHp:60,atk:11,def:7,spd:4,dodge:10,acc:78,mdef:10,matk:6},
     color:'#e8e4d8',
-    startAbilities:['skyTalon','rendingStrike','predatorMark','freedomCry'],
+    startAbilities:['skyTalon','guard','predatorMark','freedomCry'],
     passive:{id:'lastStand',name:'Last Stand',
       desc:'First time per battle you would die, survive at 1 HP and gain +5 ATK for 3 turns. Immune to Paralysis.',
       immuneParalyze:true,
@@ -1040,7 +1040,7 @@ const BIRDS = {
   },
   ostrich:{
     name:'Ostrich', portraitKey:'ostrich', tagline:'Flightless thunder. Charges build to earth-shaking fury.',
-    size:'xl', class:'tank',
+    size:'xl', class:'bruiser',
     unlockRequires:'unlock_ostrich',
     unlockHint:'Defeat Stage 20 with Shoebill.',
     stats:{hp:72,maxHp:72,atk:12,def:8,spd:1,dodge:5,acc:70,mdef:10,matk:4},
@@ -1059,7 +1059,7 @@ const BIRDS = {
 
   cassowary:{
     name:'Cassowary', tagline:'Jungle juggernaut. Bone-crushing kicks and armored hide.',
-    size:'xl', class:'tank',
+    size:'xl', class:'bruiser',
     unlockRequires:'juvenileWin',
     unlockHint:'Defeat Stage 20 on Normal mode to unlock.',
     stats:{hp:74,maxHp:74,atk:13,def:9,spd:3,dodge:8,acc:74,mdef:11,matk:4},
@@ -1072,7 +1072,7 @@ const BIRDS = {
   },
   emu:{
     name:'Emu', portraitKey:'emu', tagline:'Flightless brute. Kicks and stomps with terrifying force.',
-    size:'xl', class:'tank',
+    size:'xl', class:'bruiser',
     unlockRequires:'unlock_emu',
     unlockHint:'Reach Endless Stage 40 with any Tank.',
     stats:{hp:80,maxHp:80,atk:14,def:10,spd:2,dodge:20,acc:72,mdef:10,matk:4},
@@ -1085,7 +1085,7 @@ const BIRDS = {
   },
   dukeBlakiston:{
     name:'Duke Blakiston', portraitKey:'duke_blakiston', tagline:'Lord of the court. Commanding, relentless, imperial.',
-    size:'xl', class:'knight',
+    size:'xl', class:'predator',
     unlockRequires:'unlock_duke_blakiston',
     unlockHint:"Enter code 'Blakiston' on the selection screen.",
     stats:{hp:68,maxHp:68,atk:11,def:9,spd:6,dodge:12,acc:84,mdef:14,matk:14,critChance:8},
@@ -1130,16 +1130,16 @@ runPassiveIntegrityAudit();
 // ============================================================
 function inferAIPersonalityFromStyle(style='tactical', name=''){
   const n=String(name||'').toLowerCase();
-  if(/duke blakiston/.test(n)) return 'tyrant';
+  if(/duke blakiston/.test(n)) return 'predator';
   if(/seraph/.test(n)) return 'duelist';
   if(/khar/.test(n)) return 'executioner';
-  if(/marshal stride/.test(n)) return 'defender';
+  if(/marshal stride/.test(n)) return 'tank';
   if(/mistmother koro/.test(n)) return 'seer';
   if(/gravecaller skarn/.test(n)) return 'reaper';
   if(/ashwing pyre/.test(n)) return 'scavenger';
   const s=String(style||'').toLowerCase();
   if(['berserker','aggressive'].includes(s)) return 'aggressive';
-  if(['cautious','defensive'].includes(s)) return 'defender';
+  if(['cautious','defensive'].includes(s)) return 'tank';
   if(['trickster'].includes(s)) return 'control';
   if(['predator'].includes(s)) return 'executioner';
   return 'tactical';
@@ -1152,7 +1152,7 @@ function inferEnemyClassFromStyle(style='tactical'){
   if(['cautious','defensive'].includes(s)) return 'tank';
   if(['trickster'].includes(s)) return 'trickster';
   if(['predator'].includes(s)) return 'predator';
-  return 'support';
+  return 'singer';
 }
 
 function makeEnemy(name, emoji, hp, atk, def, spd, style, isBoss=false, bossTitle='', opts={}) {
@@ -1176,7 +1176,7 @@ function makeEnemy(name, emoji, hp, atk, def, spd, style, isBoss=false, bossTitl
 
 function makeDukeBlakiston(){
   return {
-    id:'duke_blakiston', name:'Duke Blakiston', portraitKey:'duke_blakiston', isBoss:true, size:'xl', aiType:'boss_duke', aiPersonality:'tyrant',
+    id:'duke_blakiston', name:'Duke Blakiston', portraitKey:'duke_blakiston', isBoss:true, size:'xl', aiType:'boss_duke', aiPersonality:'predator',
     enemyClass:'predator',
     enemyTier:'boss',
     stats:{maxHp:360,hp:360,atk:16,matk:16,def:9,mdef:9,spd:7,acc:85,dodge:8,en:6,cc:0.12,cd:1.7,critChance:12,critMult:1.7},
@@ -1218,7 +1218,7 @@ const ENEMIES = [
   makeEnemy('Blackbird','',26,5,2,7,'cautious',false,'',{acc:72,dodge:18,size:'small',abilities:['eFear'],portraitKey:'blackbird'}),
   makeEnemy('Wood Pigeon','🕊️',30,6,3,5,'cautious',false,'',{acc:70,dodge:12,size:'medium',abilities:['eWeaken'],portraitKey:'dove'}),
   // Tier 1 Boss
-  makeEnemy('Storm Falcon','🦅',55,12,6,7,'berserker',true,'⚡ Stage Boss',{acc:80,dodge:18,size:'large',abilities:['eStun','eWeaken','eRage'],portraitKey:'peregrine'}),
+  makeEnemy('Storm Falcon','🦅',55,12,6,7,'berserker',true,'⚡ Stage Boss',{acc:76,dodge:18,size:'large',abilities:['eStun','eWeaken','eRage'],portraitKey:'peregrine'}),
   // Tier 2 — Stages 5-9
   makeEnemy('Barn Owl','🦉',38,9,4,5,'cautious',false,'',{acc:75,dodge:12,size:'medium',abilities:['eFear','eHeal'],portraitKey:'snowyOwl'}),
   makeEnemy('Kite','🦅',44,11,4,6,'aggressive',false,'',{acc:77,dodge:20,size:'medium',abilities:['eBurn','eVenom'],portraitKey:'peregrine'}),
@@ -1565,14 +1565,37 @@ const REWARD_TIERS = {
 };
 
 const CLASS_ROLE_BY_CLASS = {
-  assassin:'striker',
-  ranger:'striker',
+  striker:'striker',
+  bruiser:'bruiser',
   tank:'tank',
-  knight:'bruiser',
-  mage:'support',
-  summoner:'trickster',
-  bard:'support',
+  trickster:'trickster',
+  predator:'predator',
+  singer:'singer',
 };
+
+
+const LEGACY_CLASS_FALLBACK = {
+  support:'singer',
+  mage:'singer',
+  bard:'singer',
+  summoner:'trickster',
+  defender:'tank',
+  vanguard:'bruiser',
+  skirmisher:'striker',
+  assassin:'striker',
+  ranger:'trickster',
+  knight:'bruiser',
+  tyrant:'predator',
+};
+
+function resolveFinalClass(rawClass='', birdKey=''){
+  const cls=String(rawClass||'').toLowerCase();
+  const key=String(birdKey||'');
+  const birdClass=BIRDS?.[key]?.class;
+  if(birdClass && CLASS_ROLE_BY_CLASS[birdClass]) return birdClass;
+  return CLASS_ROLE_BY_CLASS[cls] || LEGACY_CLASS_FALLBACK[cls] || 'singer';
+}
+
 
 const CLASS_PERK_DEFS = {
   striker:[
@@ -1580,35 +1603,30 @@ const CLASS_PERK_DEFS = {
     {id:'openingRush',name:'Opening Rush',desc:'First attack each battle deals +15% damage.',apply:p=>{p.perkOpeningRush=true;}},
     {id:'predatorRhythm',name:'Predator Rhythm',desc:'Second attack each turn gains +10% crit chance.',apply:p=>{p.perkSecondAttackCrit=true;}},
   ],
+  bruiser:[
+    {id:'crushingForce',name:'Crushing Force',desc:'Heavy attacks gain +10% penetration.',apply:p=>{p.perkHeavyPierce=(p.perkHeavyPierce||0)+0.10;}},
+    {id:'warBody',name:'War Body',desc:'Below 50% HP, deal +10% damage.',apply:p=>{p.perkWarBody=true;}},
+    {id:'ironMomentum',name:'Iron Momentum',desc:'After heavy attack, gain +1 DEF for 1 turn.',apply:p=>{p.perkIronMomentum=true;}},
+  ],
   tank:[
     {id:'ironCore',name:'Iron Core',desc:'First hit each battle deals 15% less damage to you.',apply:p=>{p.perkIronCore=true;}},
     {id:'holdTheLine',name:'Hold the Line',desc:'After Guard, next attack deals +10% damage.',apply:p=>{p.perkHoldTheLine=true;}},
     {id:'heavyFrame',name:'Heavy Frame',desc:'+1 DEF and +4 Max HP.',apply:p=>{p.stats.def+=1;p.stats.maxHp+=4;p.stats.hp=Math.min(p.stats.maxHp,p.stats.hp+4);}},
-  ],
-  mage:[
-    {id:'arcFocus',name:'Arc Focus',desc:'Spells gain +8% accuracy.',apply:p=>{p.perkSpellAcc=(p.perkSpellAcc||0)+8;}},
-    {id:'venomLore',name:'Venom Lore',desc:'Poison you apply deals +1 damage per tick.',apply:p=>{p.perkPoisonTickBonus=(p.perkPoisonTickBonus||0)+1;}},
-    {id:'dreadVerse',name:'Dread Verse',desc:'First spell each battle applies Fear(1).',apply:p=>{p.perkFirstSpellFear=true;}},
   ],
   trickster:[
     {id:'slipstream',name:'Slipstream',desc:'Dodging grants +1 SPD next turn.',apply:p=>{p.perkSlipstream=true;}},
     {id:'falseOpening',name:'False Opening',desc:'Debuffed enemies have -6% dodge.',apply:p=>{p.perkVsDebuffedAcc=(p.perkVsDebuffedAcc||0)+6;}},
     {id:'quickTheft',name:'Quick Theft',desc:'First utility skill each battle refunds 1 EN.',apply:p=>{p.perkUtilityRefund=true;}},
   ],
-  bruiser:[
-    {id:'crushingForce',name:'Crushing Force',desc:'Heavy attacks gain +10% penetration.',apply:p=>{p.perkHeavyPierce=(p.perkHeavyPierce||0)+0.10;}},
-    {id:'warBody',name:'War Body',desc:'Below 50% HP, deal +10% damage.',apply:p=>{p.perkWarBody=true;}},
-    {id:'ironMomentum',name:'Iron Momentum',desc:'After heavy attack, gain +1 DEF for 1 turn.',apply:p=>{p.perkIronMomentum=true;}},
-  ],
   predator:[
     {id:'markedForDeath',name:'Marked for Death',desc:'+15% damage to Feared enemies.',apply:p=>{p.perkVsFearPct=(p.perkVsFearPct||0)+0.15;}},
     {id:'patientHunter',name:'Patient Hunter',desc:'First attack vs full HP target deals +15% damage.',apply:p=>{p.perkFirstVsFull=true;}},
     {id:'executionLine',name:'Execution Line',desc:'+20% damage to enemies below 40% HP.',apply:p=>{p.perkExecutePct=(p.perkExecutePct||0)+0.20;}},
   ],
-  support:[
+  singer:[
+    {id:'arcFocus',name:'Arc Focus',desc:'Spells gain +8% accuracy.',apply:p=>{p.perkSpellAcc=(p.perkSpellAcc||0)+8;}},
     {id:'songline',name:'Songline',desc:'Buffs you apply last 1 extra turn.',apply:p=>{p.perkBuffDuration=(p.perkBuffDuration||0)+1;}},
     {id:'restorativeRhythm',name:'Restorative Rhythm',desc:'Healing skills restore +3 HP.',apply:p=>{p.perkHealFlat=(p.perkHealFlat||0)+3;}},
-    {id:'graceUnderFlight',name:'Grace Under Flight',desc:'After utility skill, gain +8% accuracy next turn.',apply:p=>{p.perkUtilityAcc=true;}},
   ],
 };
 
@@ -1777,7 +1795,7 @@ const ABILITY_TEMPLATES_LEARNABLE = {
   },
   bowedWing:{
     id:'bowedWing', name:'Bowed Wing', type:'ranged', btnType:'ranged',
-    desc:'Shoot a stick with a bowed wing. Reliable ranger poke with slow pressure.',
+    desc:'Shoot a stick with a bowed wing. Reliable trickster poke with slow pressure.',
     baseMissChance:14, baseDmgMult:0.95,
     levels:[
       {lv:1, desc:'95% dmg, 14% miss. Slow 15% for 2t.', newAilment:'slow', ailChance:100},
@@ -1810,7 +1828,7 @@ const ABILITY_TEMPLATES_LEARNABLE = {
   },
   wingStorm:{
     id:'wingStorm', name:'Wing Storm', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['summoner'],
+    isNeutral:false, allowedClasses:['trickster'],
     energyByLevel:[2,2,2,3], cooldownByLevel:[3,3,4,4],
     desc:'Summoner gale magic. Control-oriented spell with modest damage and SPD gain.',
     levels:[
@@ -2194,7 +2212,7 @@ const ABILITY_TEMPLATES_EXTRA = {
   },
   murderMurmuration:{
     id:'murderMurmuration', name:'Murder Murmuration', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['summoner'],
+    isNeutral:false, allowedClasses:['trickster'],
     energyByLevel:[2,2,3,3], cooldownByLevel:[5,5,4,4],
     desc:'Summoner flock surge. Multi-hit control spell, lower damage than direct nukes.',
     levels:[
@@ -2267,7 +2285,7 @@ const ABILITY_TEMPLATES_MAGIC = {
   },
   mobSwarm:{
     id:'mobSwarm', name:'Mob Swarm', type:'spell', btnType:'spell',
-    isNeutral:false, allowedClasses:['summoner'],
+    isNeutral:false, allowedClasses:['trickster'],
     energyByLevel:[2,3,3,3], cooldownByLevel:[5,5,4,4],
     desc:'Call a chaotic flock to harass the enemy. Persistent pressure, not burst abuse.',
     levels:[
@@ -2437,7 +2455,7 @@ function normalizeAbilityTemplates(){
 
     if(!Array.isArray(t.tags)) t.tags=[];
     if(t.codexType==='spell' && !t.tags.includes('magic')) t.tags.push('magic');
-    if(t.codexType==='song' && !t.tags.includes('support')) t.tags.push('support');
+    if(t.codexType==='song' && !t.tags.includes('singer')) t.tags.push('singer');
     if(!t.shortDesc) t.shortDesc=t.desc||'No description yet.';
   }
 }
@@ -2512,7 +2530,7 @@ function removeMimicEverywhere(){
   if(typeof BIRDS!=='undefined') Object.values(BIRDS).forEach(b=>{ if(Array.isArray(b.extraAbilities)) b.extraAbilities=b.extraAbilities.filter(id=>id!=='mimic'); });
 }
 
-const MAGIC_CLASSES = new Set(['mage','bard','summoner']);
+const MAGIC_CLASSES = new Set(['singer','trickster']);
 // removeMimicEverywhere(); // moved to after G init
 const ABILITY_MAIN_ATTACK = {
   id:'mainAttack',
@@ -2568,9 +2586,9 @@ const STAGE_CLEAR_UNLOCKS = {
 const SPECIAL_UNLOCKS = [
   { id:'unlock_penguin', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='tank'), bird:'penguin', label:'Emperor Penguin' },
   { id:'unlock_emu', test:()=> G.endlessMode && (G.endlessBattle||0) >= 40 && (BIRDS[G.player?.birdKey]?.class==='tank'), bird:'emu', label:'Emu' },
-  { id:'unlock_swan', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='bard'), bird:'swan', label:'Swan' },
-  { id:'unlock_flamingo', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='ranger'), bird:'flamingo', label:'Flamingo' },
-  { id:'unlock_seagull', test:()=> G.endlessMode && (G.player?.birdLevel||1) >= 21 && (BIRDS[G.player?.birdKey]?.class==='mage'), bird:'seagull', label:'Seagull' },
+  { id:'unlock_swan', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='tank'), bird:'swan', label:'Swan' },
+  { id:'unlock_flamingo', test:()=> G.endlessMode && (G.endlessBattle||0) >= 30 && (BIRDS[G.player?.birdKey]?.class==='singer'), bird:'flamingo', label:'Flamingo' },
+  { id:'unlock_seagull', test:()=> G.endlessMode && (G.player?.birdLevel||1) >= 21 && (BIRDS[G.player?.birdKey]?.class==='trickster'), bird:'seagull', label:'Seagull' },
   { id:'unlock_albatross', test:()=> G.endlessMode && (G.endlessBattle||0) >= 50, bird:'albatross', label:'Albatross' },
 ];
 
@@ -3137,6 +3155,7 @@ function continueRun() {
   G.stage=save.stage||1;
   G.collectedRewards=save.collectedRewards||[];
   G.player=save.player;
+  G.player.class = resolveFinalClass(G.player?.class, G.player?.birdKey);
   if(!Array.isArray(G.player.endlessRewards)) G.player.endlessRewards=[];
   ensurePassiveEvolutionState(G.player);
   G.runUpgradesPurchased=new Set(save.runUpgradesPurchased||[]);
@@ -3204,13 +3223,14 @@ function showNextStagePreview() {
 // ============================================================
 const SIZE_ORDER = ['tiny','small','medium','large','xl'];
 const SIZE_LABELS = {tiny:'Tiny',small:'Small',medium:'Medium',large:'Large',xl:'X-Large'};
-const ROLE_ORDER = ['striker','bruiser','tank','trickster','predator','support'];
-const ROLE_LABELS = {striker:'⚔️ Striker',bruiser:'🛡️ Bruiser',tank:'🪨 Tank',trickster:'🎭 Trickster',predator:'🦅 Predator',support:'✨ Support'};
-const ROLE_FLAVOR = {striker:'Burst damage, crit fishing, evasive pressure.',bruiser:'Balanced physical pressure with DEF/ACC stability.',tank:'Sustain bricks with high HP and mitigation.',trickster:'Tempo, control, and utility-driven setups.',predator:'Execution pressure, pierce and finishing power.',support:'Songs/spells, buffs, and control synergy.'};
+const ROLE_ORDER = ['striker','bruiser','tank','trickster','predator','singer'];
+const ROLE_LABELS = {striker:'⚔️ Striker',bruiser:'🛡️ Bruiser',tank:'🪨 Tank',trickster:'🎭 Trickster',predator:'🦅 Predator',singer:'🎵 Singer'};
+const ROLE_FLAVOR = {striker:'Burst damage, crit fishing, evasive pressure.',bruiser:'Balanced physical pressure with DEF/ACC stability.',tank:'Sustain bricks with high HP and mitigation.',trickster:'Tempo, control, and utility-driven setups.',predator:'Execution pressure, pierce and finishing power.',singer:'Song-focused buffs, debuffs, healing, and vocal damage.'};
 let shopPurchaseMade = false;
 
 function initSelection() {
   const ui=ensureUIState();
+  ui.selectionView='all';
   migrateLegacySelectionView(ui);
   if(!ui.expandedBird && G.selected) ui.expandedBird=G.selected;
   applyUIStateToDOM();
@@ -3259,8 +3279,8 @@ function setGameMode(mode,btn){
   buildGameModeToggle();
 }
 
-function classToRoleId(cls){
-  return CLASS_ROLE_BY_CLASS[String(cls||'').toLowerCase()]||'support';
+function classToRoleId(cls,birdKey=''){
+  return resolveFinalClass(cls,birdKey);
 }
 function migrateLegacySelectionView(ui=ensureUIState()){
   const raw=String(ui?.selectionView||'all');
@@ -3334,7 +3354,14 @@ function initSelectionSafe(){
 
     // If init did not throw but produced no cards (mobile/content:// edge), recover anyway.
     const cards=document.querySelectorAll('.bird-card').length;
-    if(cards===0){
+    if(cards<=1){
+      const ui=ensureUIState();
+      ui.selectionView='all';
+      buildSelectionViewButtons();
+      buildBirdGrid();
+    }
+    const postRepairCards=document.querySelectorAll('.bird-card').length;
+    if(postRepairCards===0){
       renderStarterFallbackGrid('initSelectionSafe empty grid');
       failsafeAdvance('initSelectionSafe empty grid');
     }
@@ -3377,7 +3404,7 @@ function selectDifficulty(id) {
 
 function setSelView(view, btn) {
   const ui=ensureUIState();
-  ui.selectionView = String(view||'size');
+  ui.selectionView = String(view||'all');
   migrateLegacySelectionView(ui);
   buildSelectionViewButtons();
   buildBirdGrid();
@@ -3385,9 +3412,10 @@ function setSelView(view, btn) {
 
 function buildBirdGrid() {
   const ui=ensureUIState();
+  if(!ui.selectionView) ui.selectionView='all';
   migrateLegacySelectionView(ui);
   const selectedView=ui.selectionView;
-  const view = String(selectedView).startsWith('role:') ? 'all' : selectedView;
+  const view = String(selectedView).startsWith('role:') ? 'all' : (selectedView==='size' ? 'size' : 'all');
   const classFilter = String(selectedView).startsWith('role:') ? (String(selectedView).split(':')[1]||'all') : 'all';
 
   const grid = document.getElementById('bird-grid');
@@ -3397,23 +3425,8 @@ function buildBirdGrid() {
   let safeBirdEntries = Object.entries(BIRDS).filter(([,b])=>{
     return !!(b && b.stats && Number.isFinite(b.stats.hp) && Number.isFinite(b.stats.atk) && Number.isFinite(b.stats.def));
   });
-  if(classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([,b])=>classToRoleId(b.class)===classFilter);
+  if(classFilter!=='all') safeBirdEntries = safeBirdEntries.filter(([key,b])=>classToRoleId(b.class,key)===classFilter);
   const fallbackStarters = ['sparrow','goose','blackbird','crow','macaw','robin'];
-
-  // Compute global max stats for bars
-  const globalMax={HP:1,ATK:1,DEF:1,SPD:1,Dodge:1,MDodge:1,ACC:1,Crit:1,MATK:1,MDEF:1};
-  safeBirdEntries.forEach(([,b])=>{
-    if(b.stats.hp>globalMax.HP)globalMax.HP=b.stats.hp;
-    if(b.stats.atk>globalMax.ATK)globalMax.ATK=b.stats.atk;
-    if(b.stats.def>globalMax.DEF)globalMax.DEF=b.stats.def;
-    if(b.stats.spd>globalMax.SPD)globalMax.SPD=b.stats.spd;
-    if(b.stats.dodge>globalMax.Dodge)globalMax.Dodge=b.stats.dodge;
-    if((b.stats.dodge||0)>globalMax.MDodge)globalMax.MDodge=b.stats.dodge;
-    if(b.stats.acc>globalMax.ACC)globalMax.ACC=b.stats.acc;
-    if(b.stats.critChance&&b.stats.critChance>globalMax.Crit)globalMax.Crit=b.stats.critChance;
-    if(b.stats.matk&&b.stats.matk>globalMax.MATK)globalMax.MATK=b.stats.matk;
-    if(b.stats.mdef&&b.stats.mdef>globalMax.MDEF)globalMax.MDEF=b.stats.mdef;
-  });
 
   const groups = {};
   const orderedKeys = view==='size' ? SIZE_ORDER : ROLE_ORDER;
@@ -3422,7 +3435,7 @@ function buildBirdGrid() {
   orderedKeys.forEach(k => groups[k]=[]);
 
   safeBirdEntries.forEach(([key, bird]) => {
-    const groupKey = view==='size' ? (bird.size||'medium') : classToRoleId(bird.class);
+    const groupKey = view==='size' ? (bird.size||'medium') : classToRoleId(bird.class,key);
     if(!groups[groupKey]) groups[groupKey]=[];
     groups[groupKey].push([key, bird]);
   });
@@ -3441,7 +3454,7 @@ function buildBirdGrid() {
       totalBirds++;
       const locked = bird.unlockRequires && !isUnlocked(bird.unlockRequires);
       if(!locked) totalUnlocked++;
-      row.appendChild(buildBirdCard(key,bird,locked,globalMax));
+      row.appendChild(buildBirdCard(key,bird,locked));
     });
     section.appendChild(row);
     grid.appendChild(section);
@@ -3469,7 +3482,7 @@ function buildBirdGrid() {
       totalBirds++;
       const locked = bird.unlockRequires && !isUnlocked(bird.unlockRequires);
       if(!locked) totalUnlocked++;
-      const card = buildBirdCard(key, bird, locked, globalMax);
+      const card = buildBirdCard(key, bird, locked);
       row.appendChild(card);
     });
 
@@ -3479,6 +3492,9 @@ function buildBirdGrid() {
 
   const label = document.getElementById('bird-count-label');
   if(label) label.textContent = `${totalUnlocked}/${totalBirds} available${classFilter!=='all' ? ` · ${idToClassLabel(classFilter)}`:''}`;
+
+  const focusKey=ui.expandedBird||G.selected||safeBirdEntries?.[0]?.[0]||'';
+  if(focusKey) updateAscentPanel(focusKey);
 
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
@@ -3490,7 +3506,7 @@ function buildBirdGrid() {
     fallbackStarters.forEach(key=>{
       const bird=BIRDS[key];
       if(!bird||!bird.stats) return;
-      row.appendChild(buildBirdCard(key,bird,false,globalMax));
+      row.appendChild(buildBirdCard(key,bird,false));
     });
     section.appendChild(row);
     grid.appendChild(section);
@@ -3506,22 +3522,7 @@ document.addEventListener('click', (e)=>{
 });
 
 
-function buildBirdExpandedContent(key, bird){
-  const cls = classToRoleId(bird.class);
-  const sizeClass = getUISizeClass(bird, 'panel');
-  const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
-  return `
-    <div class="bird-card-expanded">
-      <div class="ascent-panel-tagline">${bird.tagline||''}</div>
-      <div class="ascent-panel-class"><span class="class-badge class-${cls}">${idToClassLabel(cls).toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
-      ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
-      <div class="ascent-abilities">${tags}</div>
-      <div style="text-align:left;font-size:.72rem;color:var(--text);background:rgba(0,0,0,.25);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px;margin:8px 0;"><strong>Full Stats:</strong> HP ${bird.stats.hp} · ATK ${bird.stats.atk} · DEF ${bird.stats.def} · SPD ${bird.stats.spd} · ACC ${bird.stats.acc}% · Dodge ${bird.stats.dodge}% · MATK ${bird.stats.matk||0} · MDEF ${bird.stats.mdef||0} · Crit ${bird.stats.critChance||0}%</div>
-      <button class="cta" onclick="event.stopPropagation();startGame()">🪽 Take Flight as ${bird.name}</button>
-    </div>`;
-}
-
-function buildBirdCard(key, bird, locked, globalMax) {
+function buildBirdCard(key, bird, locked) {
   const card = document.createElement('div');
   const ui=ensureUIState();
   card.className = 'bird-card' + (locked ? ' bird-locked' : '') + (ui.expandedBird===key?' selected':'');
@@ -3529,24 +3530,6 @@ function buildBirdCard(key, bird, locked, globalMax) {
 
   const cls = classToRoleId(bird.class);
   const sizeClass = getUISizeClass(bird, 'select');
-
-  const keyStats = [
-    {k:'HP', v:bird.stats.hp, max:globalMax.HP, suffix:''},
-    {k:'ATK', v:bird.stats.atk, max:globalMax.ATK, suffix:''},
-    {k:'DEF', v:bird.stats.def, max:globalMax.DEF, suffix:''},
-    {k:'SPD', v:bird.stats.spd, max:globalMax.SPD, suffix:''},
-    {k:'Dodge', v:bird.stats.dodge, max:globalMax.Dodge, suffix:'%'},
-    {k:'MDodge', v:(bird.stats.mdodge??bird.stats.dodge??0), max:globalMax.MDodge, suffix:'%'},
-    {k:'ACC', v:bird.stats.acc, max:globalMax.ACC, suffix:'%'},
-    {k:'MATK', v:(bird.stats.matk||0), max:globalMax.MATK, suffix:''},
-    {k:'MDEF', v:(bird.stats.mdef||0), max:globalMax.MDEF, suffix:''},
-    {k:'Crit', v:(bird.stats.critChance||0), max:Math.max(globalMax.Crit||1,1), suffix:'%'},
-  ];
-  const bars = keyStats.map(({k,v,max,suffix})=>{
-    const pct=Math.min(100,(v/Math.max(max||1,1))*100);
-    const fill=locked?'#333':(k==='Dodge'||k==='MDodge'||k==='ACC'||k==='Crit'?'#c9a84c':(bird.color||'#6a8ae8'));
-    return `<div class="stat-row compact"><div class="stat-lbl">${k}</div><div class="stat-bg"><div class="stat-fill" style="width:${pct}%;background:${fill}"></div></div><div class="stat-val" style="${locked?'color:#444':''}">${v}${suffix}</div></div>`;
-  }).join('');
 
   const unlockLabel = bird.unlockHint || '🔒 Locked';
 
@@ -3560,16 +3543,14 @@ function buildBirdCard(key, bird, locked, globalMax) {
       <div class="bird-nm" style="color:#555;font-size:.8rem;">${bird.name}</div>
       <div class="lock-overlay"><span class="lock-icon" style="font-size:1rem;">🔒</span><div class="lock-label" style="font-size:.6rem;color:#555;line-height:1.3;">${unlockLabel}</div></div>`;
   } else {
-    const expanded = (ui.expandedBird===key) ? buildBirdExpandedContent(key,bird) : '';
     card.innerHTML = `
       <div class="bird-card-head">
         <span class="class-badge class-${cls}">${idToClassLabel(cls).toUpperCase()}</span>
         <span class="bird-size-chip">${SIZE_LABELS[bird.size||'medium']||bird.size}</span>
       </div>
-      <div style="display:flex;justify-content:center;margin:2px auto 6px;">${renderBirdIconHTML(key,sizeClass,false)}</div>
+      <div style="display:flex;justify-content:center;margin:4px auto 8px;">${renderBirdIconHTML(key,sizeClass,false)}</div>
       <div class="bird-nm">${bird.name}</div>
-      <div class="stat-bars">${bars}</div>
-      ${expanded}`;
+      <div class="bird-tagline-mini">${bird.tagline||''}</div>`;
   }
   return card;
 }
@@ -3578,8 +3559,9 @@ function selectBird(key, el) {
   const ui=ensureUIState();
   G.selected = key;
   ui.expandedBird = key;
-  // Re-render cards so the selected card expands inline (no side panel/auto-scroll).
-  initSelectionSafe();
+  document.querySelectorAll('#bird-grid .bird-card.selected').forEach(n=>n.classList.remove('selected'));
+  if(el && el.classList) el.classList.add('selected');
+  updateAscentPanel(key);
 }
 
 
@@ -3641,27 +3623,82 @@ function updateAscentPanel(key) {
     return;
   }
 
+  G.selected = key;
+
   const cls = classToRoleId(bird.class);
   const sizeClass = getUISizeClass(bird, 'panel');
-  const tags = (bird.startAbilities||[]).map(id=>`<span class="ascent-ab-tag">${ABILITY_TEMPLATES[id]?ABILITY_TEMPLATES[id].name:id}</span>`).join('');
+  const classLabel=idToClassLabel(cls);
+  const sizeLabel=SIZE_LABELS[bird.size||'medium']||bird.size;
+  const startEn=(ENERGY_BY_SIZE[(bird.size||'medium').toLowerCase()] ?? 3);
+  const maxEn=startEn;
+  const cc=bird.stats.critChance||5;
+  const cd=1.5;
+  const roleSummary={
+    striker:'Fast combo attacker',
+    bruiser:'Heavy bruiser with hit pressure',
+    tank:'Defensive frontliner',
+    trickster:'Debuff-focused trickster',
+    predator:'Execute-focused predator',
+    singer:'Song-based controller',
+  }[cls]||'Adaptive fighter';
+
+  const startAbilityDetails=(bird.startAbilities||[]).map((id,idx)=>{
+    const t=ABILITY_TEMPLATES[id]||{};
+    const en=Array.isArray(t.energyByLevel)?(t.energyByLevel[0]??t.energyCost??0):(t.energyCost??0);
+    const type=String(t.btnType||t.type||'utility').toUpperCase();
+    const tagOrder=['BASIC','SIGNATURE','UTILITY','CLASS'];
+    const slotTag=tagOrder[idx]||'CLASS';
+    const short=((t.levels&&t.levels[0]&&t.levels[0].desc)||t.desc||'No description').trim();
+    return `<div class="ascent-ability-row"><div class="ascent-ability-top"><span class="ascent-ability-name">${t.name||id}</span><span class="ascent-ability-en">${en} EN</span></div><div class="ascent-ability-tags">${slotTag} · ${type}</div><div class="ascent-ability-desc">${short}</div></div>`;
+  }).join('');
 
   panel.innerHTML = `
-    <div class="ascent-panel-portrait">${renderBirdIconHTML(key, sizeClass, false)}</div>
-    <div class="ascent-panel-name">${bird.name}</div>
-    <div class="ascent-panel-tagline">${bird.tagline}</div>
-    <div class="ascent-panel-class"><span class="class-badge class-${cls}">${idToClassLabel(cls).toUpperCase()}</span> · ${SIZE_LABELS[bird.size||'medium']||bird.size}</div>
-    ${bird.passive?`<div class="ascent-panel-passive"><strong>★ ${bird.passive.name}:</strong> ${bird.passive.desc}</div>`:''}
-    <div class="ascent-abilities">${tags}</div>
-    <div style="text-align:left;font-size:.72rem;color:var(--text);background:rgba(0,0,0,.25);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px;margin:8px 0;"><strong>Full Stats:</strong> HP ${bird.stats.hp} · ATK ${bird.stats.atk} · DEF ${bird.stats.def} · SPD ${bird.stats.spd} · ACC ${bird.stats.acc}% · Dodge ${bird.stats.dodge}% · MATK ${bird.stats.matk||0} · MDEF ${bird.stats.mdef||0} · Crit ${bird.stats.critChance||0}%</div>
-    <div style="text-align:left;font-size:.7rem;color:var(--text-dim);margin:6px 0 10px;"><strong style="color:var(--gold-light)">Starting Attacks:</strong><br>${(bird.startAbilities||[]).map(id=>{const t=ABILITY_TEMPLATES[id];const lv=(t&&t.levels&&t.levels[0])?t.levels[0].desc:'';return `• <span style='color:var(--text)'>${t?t.name:id}</span> — ${lv}`;}).join('<br>')}</div>
-    <button class="cta" onclick="startGame()">🪽 Take Flight as ${bird.name}</button>
-    <div style="margin-top:8px;">
+    <div class="showcase-top">
+      <div class="ascent-panel-portrait">${renderBirdIconHTML(key, sizeClass, false)}</div>
+      <div class="showcase-head">
+        <div class="ascent-panel-name">${bird.name}</div>
+        <div class="ascent-panel-tagline">${bird.tagline||''}</div>
+        <div class="showcase-meta">
+          <span class="class-badge class-${cls}">${classLabel.toUpperCase()}</span>
+          <span class="bird-size-chip">${sizeLabel}</span>
+          <span class="bird-size-chip">EN ${startEn}/${maxEn}</span>
+        </div>
+      </div>
+    </div>
+    <div class="showcase-bottom">
+      <div class="showcase-section"><div class="showcase-title">★ Passive</div><div class="ascent-panel-passive"><strong>${bird.passive?.name||'—'}:</strong> ${bird.passive?.desc||'No passive listed.'}</div></div>
+      <div class="showcase-lower">
+      <div class="showcase-section"><div class="showcase-title">🪶 Starting Abilities</div><div class="ascent-ability-list">${startAbilityDetails}</div></div>
+      <div class="showcase-section"><div class="showcase-title">📊 Full Stats</div>
+        <div class="showcase-stats-grid">
+          <div><span>HP</span><strong>${bird.stats.hp}</strong></div>
+          <div><span>ATK</span><strong>${bird.stats.atk}</strong></div>
+          <div><span>MATK</span><strong>${bird.stats.matk||0}</strong></div>
+          <div><span>DEF</span><strong>${bird.stats.def}</strong></div>
+          <div><span>MDEF</span><strong>${bird.stats.mdef||0}</strong></div>
+          <div><span>SPD</span><strong>${bird.stats.spd}</strong></div>
+          <div><span>ACC</span><strong>${bird.stats.acc}%</strong></div>
+          <div><span>CC</span><strong>${cc}%</strong></div>
+          <div><span>CD</span><strong>${cd.toFixed(1)}×</strong></div>
+          <div><span>Starting EN</span><strong>${startEn}</strong></div>
+          <div><span>Max EN</span><strong>${maxEn}</strong></div>
+        </div>
+      </div>
+      <div class="showcase-section"><div class="showcase-title">🧭 Playstyle</div><div class="showcase-summary">${roleSummary}</div></div>
+      <button class="cta showcase-cta" onclick="startSelectedBird('${key}')">🪽 Select ${bird.name}</button>
+      </div>
     </div>`;
   panel.classList.remove('is-empty');
   panel.classList.add('is-filled');
 }
 
 
+
+
+function startSelectedBird(key){
+  if(key && BIRDS[key]) G.selected = key;
+  return startGame();
+}
 
 function beginRun(){ return startGame(); }
 // ============================================================
@@ -4623,7 +4660,7 @@ function renderActions() {
       btnCostText=G.crowDefendCooldown>0?`Cooldown:${G.crowDefendCooldown}t`:'Ready';
       cdisabled=G.crowDefendCooldown>0;
     }
-    if (ab.id==='swoop') {
+    if (ab.id==='swoop' || ab.id==='sonicDash') {
       btnCostText=G.swoopCooldown>0?`Cooldown:${G.swoopCooldown}t`:'Ready';
       cdisabled=G.swoopCooldown>0;
     }
@@ -4737,19 +4774,47 @@ function showActionTooltip(e,ab) {
   const hitClass=hit===null?'':(hit>=80?'tt-hit-great':hit>=55?'tt-hit-good':'tt-hit-bad');
   const energy=getEnergyCost(ab);
   const cooldown=getTemplateCooldown(ab);
-  // Show actual dmg range based on current ATK/MATK when possible
+
+  // Show actual damage range whenever this is a damaging action.
   const pAtk=G.player?(G.player.stats.atk||0):0;
   const pMatk=G.player?(G.player.stats.matk||0):0;
-  const scaleStat=(tmpl.btnType==='spell'||tmpl.type==='spell')?pMatk:pAtk;
-  const dmgMult=tmpl.baseDmgMult!==undefined?tmpl.baseDmgMult+0.1*(lv-1):null;
-  const dmgLow=dmgMult?Math.floor(scaleStat*0.8*dmgMult):null;
-  const dmgHigh=dmgMult?Math.floor(scaleStat*1.2*dmgMult):null;
+  const btnType=String(tmpl.btnType||tmpl.type||'').toLowerCase();
+  const isDamaging=['physical','ranged','spell'].includes(btnType);
+  const scaleStat=(btnType==='spell')?pMatk:pAtk;
+
+  const estimateMultiplierFromText=(txt='')=>{
+    const s=String(txt||'');
+    // Prefer multi-hit patterns first, e.g. "2×52%" or "3x 40%"
+    const multi=s.match(/(\d+)\s*[x×]\s*(\d+(?:\.\d+)?)\s*%/i);
+    if(multi){
+      const hits=Math.max(1,Number(multi[1])||1);
+      const pct=Math.max(0,Number(multi[2])||0);
+      return (hits*pct)/100;
+    }
+    // Fallback: first percent value in text
+    const pct=s.match(/(\d+(?:\.\d+)?)\s*%/);
+    if(pct) return (Number(pct[1])||0)/100;
+    return null;
+  };
+
+  let dmgMult = (tmpl.baseDmgMult!==undefined)
+    ? (Number(tmpl.baseDmgMult)||0) + 0.1*(lv-1)
+    : null;
+  if(!(dmgMult>0)){
+    dmgMult = estimateMultiplierFromText(lvData?.desc||'') ?? estimateMultiplierFromText(tmpl?.desc||'');
+  }
+
+  const dmgLow=(isDamaging && dmgMult>0)?Math.max(1,Math.floor(scaleStat*0.8*dmgMult)):null;
+  const dmgHigh=(isDamaging && dmgMult>0)?Math.max(dmgLow,Math.floor(scaleStat*1.2*dmgMult)):null;
   const effectList=(ab.ailmentIds||[]).length?ab.ailmentIds.map(a=>a.replace(/_/g,' ')).join(', '):'—';
+
   let html=`<div class="tt-name">${tmpl.name}</div><div class="tt-type">${tmpl.type} · Lv${ab.level}</div>`;
   html+=`<div class="tt-row"><span class="tt-lbl">Energy</span><span class="tt-val">${energy}</span></div>`;
   html+=`<div class="tt-row"><span class="tt-lbl">Cooldown</span><span class="tt-val">${cooldown>0?cooldown+' turn'+(cooldown>1?'s':''):'None'}</span></div>`;
   if (hit!==null) html+=`<div class="tt-row"><span class="tt-lbl">Hit</span><span class="tt-val ${hitClass}">${hit}%</span></div>`;
-  if (dmgLow!==null) html+=`<div class="tt-row"><span class="tt-lbl">Damage</span><span class="tt-val">${dmgLow}–${dmgHigh}</span></div>`;
+  if (isDamaging) {
+    html+=`<div class="tt-row"><span class="tt-lbl">Damage</span><span class="tt-val">${dmgLow!==null?`${dmgLow}–${dmgHigh}`:'Varies'}</span></div>`;
+  }
   html+=`<div class="tt-row"><span class="tt-lbl">Effects</span><span class="tt-val">${effectList}</span></div>`;
   html+=`<div class="tt-desc">${lvData.desc}</div>`;
   if(window._isTouchDevice) html+=`<div style="text-align:right;margin-top:8px"><button onclick="hideTooltip()" style="background:rgba(201,168,76,.2);border:1px solid var(--gold);border-radius:4px;color:var(--gold);padding:2px 10px;cursor:pointer;font-size:.75rem;">✕ Close</button></div>`;
@@ -4824,7 +4889,7 @@ function getAbilityCooldown(abId){
 
 function getClassCooldownAdjustment(ab, player){
   const bd=BIRDS[player?.birdKey]||{};
-  const cls=String(player?.class||bd.class||'knight').toLowerCase();
+  const cls=String(player?.class||bd.class||'bruiser').toLowerCase();
   const lv=player?.birdLevel||1;
   const t=ABILITY_TEMPLATES[ab.id]||ab||{};
   const kind=String(t.type||t.btnType||ab.type||ab.btnType||'').toLowerCase();
@@ -4835,11 +4900,11 @@ function getClassCooldownAdjustment(ab, player){
   // Tank/Knight: defensive/utility tools smooth out later
   // Assassin/Ranger: attack buttons mostly keep their pace
   if(kind==='spell'){
-    if((cls==='mage' || cls==='bard') && lv>=8) return -1;
-    if(cls==='summoner' && /murmuration|swarm|summon|flock|wing\s*storm|wingStorm|mobSwarm/i.test(t.id||t.name||'')) return 1;
+    if((cls==='singer' || cls==='trickster') && lv>=8) return -1;
+    if(cls==='trickster' && /murmuration|swarm|summon|flock|wing\s*storm|wingStorm|mobSwarm/i.test(t.id||t.name||'')) return 1;
   }
   if(kind==='utility'){
-    if((cls==='tank' || cls==='knight' || cls==='bard') && lv>=10) return -1;
+    if((cls==='tank' || cls==='bruiser' || cls==='singer') && lv>=10) return -1;
   }
   return 0;
 }
@@ -4875,7 +4940,7 @@ function setAbilityCooldown(ab){
 
 function reduceOtherSpellCooldownsOnCast(usedAbId){
   const cls=(G.player?.class || BIRDS[G.player?.birdKey]?.class || '').toLowerCase();
-  const isCaster = (cls==='mage' || cls==='bard' || cls==='summoner');
+  const isCaster = MAGIC_CLASSES.has(cls);
   if(!isCaster) return;
 
   // once per action
@@ -4926,7 +4991,7 @@ function getPlayerPiercePctForAbility(ab){
 
 function getPlayerClassRole(player=G.player){
   const cls=(player?.class || BIRDS[player?.birdKey]?.class || '').toLowerCase();
-  return CLASS_ROLE_BY_CLASS[cls]||'striker';
+  return classToRoleId(cls, player?.birdKey) || 'striker';
 }
 function getOwnedPerkIds(){
   return new Set([...(G.runClassPerks||[]), ...((G.classPerksByBird||{})[G.player?.birdKey]||[])]);
@@ -5029,7 +5094,8 @@ function maybeOfferPassiveEvolutionChoice(){
 }
 
 function applyRangerPassiveOnTurnStart(){
-  if((G.player?.class||BIRDS[G.player?.birdKey]?.class||'').toLowerCase()!=='ranger') return;
+  const cls=(G.player?.class||BIRDS[G.player?.birdKey]?.class||'').toLowerCase();
+  if(!['striker','trickster'].includes(cls)) return;
   G.playerStatus.rangerFirstAttack=1;
 }
 
@@ -5183,13 +5249,13 @@ const SIZE_MDODGE = {tiny:70, small:60, medium:50, large:45, xl:40};
 
 // Accuracy is fixed by bird traits (class + size), not level growth.
 const BASE_ACC_BY_CLASS = {
-  tank:74, knight:80, assassin:82, ranger:86, mage:78, bard:80, summoner:79,
+  striker:86, bruiser:80, tank:74, trickster:84, predator:82, singer:80,
 };
 const BASE_ACC_BY_SIZE = {tiny:2, small:1, medium:0, large:-1, xl:-2};
 
 function getPlayerBaseAcc(){
   const bd=BIRDS[G.player?.birdKey]||{};
-  const cls=bd.class||'knight';
+  const cls=bd.class||'bruiser';
   const size=G.player?.size||bd.size||'medium';
   const base=(BASE_ACC_BY_CLASS[cls]??80)+(BASE_ACC_BY_SIZE[size]??0);
   return Math.max(65,Math.min(90,base));
@@ -5227,26 +5293,26 @@ function applyGrowthStageTransition(p, fromStage, toStage){
   const cls=(p.class || (BIRDS[p.birdKey]?.class) || '').toLowerCase();
   p.growthStage = toStage;
 
-  if(cls==='assassin'){
+  if(cls==='striker'){
     p.passiveCritBonus = (toStage===GROWTH.FLETCHLING)?0.15:(toStage===GROWTH.JUVENILE)?0.25:0.35;
     p.passiveBleedOnCrit = (toStage===GROWTH.JUVENILE)?1:((toStage===GROWTH.ADULT||toStage===GROWTH.APEX)?2:0);
   }
   if(cls==='tank'){
     p.guardBlockPct = (toStage===GROWTH.ADULT||toStage===GROWTH.APEX)?0.75:0.50;
   }
-  if(cls==='mage'){
+  if(cls==='singer'){
     p.spellAilmentEvery = (toStage===GROWTH.FLETCHLING)?4:3;
     p.spellAilmentDouble = (toStage===GROWTH.ADULT||toStage===GROWTH.APEX);
   }
-  if(cls==='knight'){
+  if(cls==='bruiser' || cls==='predator'){
     p.afterDefendPierce = (toStage===GROWTH.FLETCHLING)?0.0:0.25;
     if(toStage===GROWTH.ADULT||toStage===GROWTH.APEX) p.afterDefendAtkBuff = 2;
   }
-  if(cls==='bard'){
+  if(cls==='singer'){
     p.buffDurationPlus = 1;
     p.buffEchoPct = (toStage===GROWTH.JUVENILE||toStage===GROWTH.ADULT||toStage===GROWTH.APEX)?0.5:0;
   }
-  if(cls==='ranger'){
+  if(cls==='trickster'){
     p.firstAttackBonusPct = (toStage===GROWTH.FLETCHLING)?0.30:(toStage===GROWTH.JUVENILE)?0.50:0.20;
     p.firstAttackEachTurn = (toStage===GROWTH.ADULT||toStage===GROWTH.APEX);
   }
@@ -5280,12 +5346,12 @@ const ENEMY_SIZE_MODIFIERS = {
 
 const ENEMY_CLASS_MODIFIERS = {
   striker:{atk:1.2,matk:0.9,def:0.85,mdef:1.0,spd:1.15,acc:1.05,ccAdd:0.08,cdSet:1.6},
-  mage:{atk:0.9,matk:1.25,def:1.0,mdef:1.15,spd:1.0,acc:1.02,ccAdd:0.03},
+  singer:{atk:0.9,matk:1.25,def:1.0,mdef:1.15,spd:1.0,acc:1.02,ccAdd:0.03},
   tank:{atk:1.0,matk:1.0,def:1.35,mdef:1.25,spd:0.85,acc:0.95,ccAdd:0.0},
   trickster:{atk:1.0,matk:1.0,def:1.0,mdef:1.0,spd:1.2,acc:1.08,ccAdd:0.05},
   bruiser:{atk:1.25,matk:1.0,def:1.1,mdef:1.0,spd:1.0,acc:1.0,ccAdd:0.04},
   predator:{atk:1.15,matk:1.0,def:1.0,mdef:1.0,spd:1.1,acc:1.05,ccAdd:0.10,cdSet:1.7},
-  support:{atk:1.0,matk:1.1,def:1.0,mdef:1.1,spd:1.0,acc:1.05,ccAdd:0.0},
+
 };
 
 function getEnemyBaseStats(base){
@@ -5329,8 +5395,8 @@ function buildScaledEnemy(enemyBase, stage, opts={}){
   const base=getEnemyBaseStats(enemyBase);
   const sizeKey=String(enemyBase?.size||'medium').toLowerCase();
   const sizeMod=ENEMY_SIZE_MODIFIERS[sizeKey]||ENEMY_SIZE_MODIFIERS.medium;
-  const classKey=String(enemyBase?.enemyClass||inferEnemyClassFromStyle(enemyBase?.aiStyle)||'support').toLowerCase();
-  const classMod=ENEMY_CLASS_MODIFIERS[classKey]||ENEMY_CLASS_MODIFIERS.support;
+  const classKey=String(enemyBase?.enemyClass||inferEnemyClassFromStyle(enemyBase?.aiStyle)||'singer').toLowerCase();
+  const classMod=ENEMY_CLASS_MODIFIERS[classKey]||ENEMY_CLASS_MODIFIERS.singer;
 
   // Base -> Size -> Class -> Stage -> Tier -> Endless
   let hpBase=base.hp*sizeMod.hp;
@@ -5814,7 +5880,7 @@ function getPlayerMissChance(ab) {
   const tookiePenalty = G.tookieActive && G.playerStatus.tookie ? G.playerStatus.tookie.missPen : 0;
   const bClass=(BIRDS[G.player.birdKey]&&BIRDS[G.player.birdKey].class)||'';
   const bSize=(G.player&&G.player.size)||'medium';
-  const classAdj=(tmpl.type==='physical'&&bClass==='assassin')?-2:(tmpl.type==='ranged'&&bClass==='ranger')?-2:(tmpl.type==='spell'&&MAGIC_CLASSES.has(bClass))?-1:0;
+  const classAdj=(tmpl.type==='physical'&&bClass==='striker')?-2:(tmpl.type==='ranged'&&bClass==='trickster')?-2:(tmpl.type==='spell'&&MAGIC_CLASSES.has(bClass))?-1:0;
   const sizeAdj=(tmpl.type==='physical'&&bSize==='xl')?2:(tmpl.type==='physical'&&bSize==='tiny')?-1:0;
   const missReduce=((G.player&&G.player.missReduce)||0)*100;
   let extra=0;
@@ -7281,7 +7347,7 @@ registerAbilityAlias('dreadCall','dirge','Dread Call',{type:'utility',btnType:'u
 registerAbilityAlias('swoopCut','dart','Swoop Cut',{isBasic:true,desc:'Striker basic. Quick cut with clean tempo pressure.'});
 registerAbilityAlias('glintJab','dart','Glint Jab',{isBasic:true,desc:'Trickster basic. Fast jab with slight setup pressure.'});
 registerAbilityAlias('mockingPeck','dart','Mocking Peck',{isBasic:true,desc:'Trickster basic. Reliable peck that taunts tempo.'});
-registerAbilityAlias('fruitSpit','mudshot','Fruit Spit',{isBasic:true,desc:'Mage/support basic. Light magic shot with soft control.',energyByLevel:[1,1,1,1],energyCost:1});
+registerAbilityAlias('fruitSpit','mudshot','Fruit Spit',{isBasic:true,desc:'Singer/trickster basic. Light magic shot with soft control.',energyByLevel:[1,1,1,1],energyCost:1});
 registerAbilityAlias('bracePeck','gooseHonk','Brace Peck',{isBasic:true,desc:'Tank basic. Heavy peck that steadies the line.'});
 registerAbilityAlias('icebreakerHonk','gooseHonk','Icebreaker Honk',{isBasic:true,desc:'Tank basic. Chilling honk that cracks defenses.'});
 registerAbilityAlias('huntersJab','dart',"Hunter's Jab",{isBasic:true,desc:'Predator basic. Precise jab for clean finishing lines.'});
@@ -7311,7 +7377,7 @@ registerAbilityAlias('piercingScreech','sonicDirge','Piercing Screech',{type:'sp
 registerAbilityAlias('stormChorus','owlPsyche','Storm Chorus',{type:'spell',btnType:'spell'});
 registerAbilityAlias('battleChorus','victoryChant','Battle Chorus',{type:'utility',btnType:'utility'});
 registerAbilityAlias('thunderScreech','sonicDirge','Thunder Screech',{type:'spell',btnType:'spell'});
-registerAbilityAlias('nightTalon','deathDive','Night Talon',{isBasic:true,type:'physical',btnType:'physical'});
+registerAbilityAlias('nightTalon','deathDive','Night Talon',{isBasic:true,type:'physical',btnType:'physical',energyCost:3,energyByLevel:[3,3,3,3]});
 registerAbilityAlias('huntersCry','victoryChant',"Hunter's Cry",{type:'utility',btnType:'utility'});
 registerAbilityAlias('fleshTear','fleshRipper','Flesh Tear',{isBasic:true,type:'physical',btnType:'physical'});
 registerAbilityAlias('raptorDive','deathDive','Raptor Dive',{type:'physical',btnType:'physical'});
@@ -7338,7 +7404,6 @@ registerAbilityAlias('laughingCall','theJoker','Laughing Call',{type:'spell',btn
 registerAbilityAlias('dizzyChorus','dirge','Dizzy Chorus',{type:'utility',btnType:'utility'});
 registerAbilityAlias('echoLaugh','shriekwave','Echo Laugh',{type:'spell',btnType:'spell'});
 registerAbilityAlias('skyTalon','skyStrike','Sky Talon',{isBasic:true,type:'physical',btnType:'physical'});
-registerAbilityAlias('rendingStrike','deathDive','Rending Strike',{type:'physical',btnType:'physical'});
 registerAbilityAlias('freedomCry','victoryChant','Freedom Cry',{type:'utility',btnType:'utility'});
 registerAbilityAlias('galeStrike','supersonic','Gale Strike',{isBasic:true,type:'physical',btnType:'physical'});
 registerAbilityAlias('oceanCall','wingStorm','Ocean Call',{type:'spell',btnType:'spell'});
@@ -7349,17 +7414,12 @@ registerAbilityAlias('courtSummon','dukeWardens','Court Summon',{type:'utility',
 registerAbilityAlias('verdict','dukeRiverGrip','Verdict',{type:'spell',btnType:'spell'});
 
 const RELIABLE_ONE_EN_ATTACK_BY_CLASS = Object.freeze({
-  assassin:'rapidPeck',
   striker:'rapidPeck',
-  predator:'silentPierce',
-  ranger:'silentPierce',
   bruiser:'bracePeck',
   tank:'bracePeck',
-  knight:'bracePeck',
-  support:'mockingPeck',
-  bard:'mockingPeck',
-  summoner:'mockingPeck',
-  mage:'blackPeck',
+  trickster:'silentPierce',
+  predator:'blackPeck',
+  singer:'mockingPeck',
 });
 function getAbilityLevel1EnergyCost(id){
   const t=ABILITY_TEMPLATES?.[id];
@@ -7389,7 +7449,7 @@ function ensureStarterKitEnergySmoothing(){
       bd.startAbilities=ids;
       continue;
     }
-    const cls=String(bd.class||'support').toLowerCase();
+    const cls=String(bd.class||'singer').toLowerCase();
     const fallback=RELIABLE_ONE_EN_ATTACK_BY_CLASS[cls] || 'rapidPeck';
     const fallbackOk=ABILITY_TEMPLATES?.[fallback] && getAbilityLevel1EnergyCost(fallback)<=1 && isAbilityLikelyDamaging(fallback);
     const pick=fallbackOk?fallback:'rapidPeck';
@@ -7451,6 +7511,7 @@ async function playerAction(ab,fromQueue=false) {
     logMsg(`🪵 Stick dropped — Stick Lance reset.`,'miss');
   }
   if(getAbilityCooldown(ab.id)>0){logMsg(`${ab.name} on cooldown! (${getAbilityCooldown(ab.id)}t)`,'miss');return;}
+  if((ab.id==='swoop' || ab.id==='sonicDash') && (G.swoopCooldown||0)>0){logMsg(`${ab.name} on cooldown! (${G.swoopCooldown}t)`,'miss');return;}
   if(!canUseAbility(G.player,ab)){logMsg(`Not enough energy for ${ab.name}!`,'miss');return;}
   const _abk=String(ab?.btnType||ab?.type||ABILITY_TEMPLATES?.[ab?.id]?.btnType||ABILITY_TEMPLATES?.[ab?.id]?.type||'').toLowerCase();
   const _defSkill=(_abk==='utility' || ab?.id==='crowDefend');
@@ -8081,13 +8142,13 @@ const AI_PERSONALITY_PROFILES = {
   tactical:{damageBias:1.10,heavyBias:1.00,controlBias:1.10,buffBias:1.00,guardBias:0.90,healBias:0.80,finisherBias:1.05,repeatBias:0.80},
   opportunistic:{damageBias:1.15,heavyBias:1.10,controlBias:0.95,buffBias:0.70,guardBias:0.70,healBias:0.65,finisherBias:1.50,repeatBias:0.80},
   control:{damageBias:0.95,heavyBias:0.85,controlBias:1.40,buffBias:1.00,guardBias:0.85,healBias:0.75,finisherBias:1.00,repeatBias:0.75},
-  defender:{damageBias:0.95,heavyBias:0.90,controlBias:1.00,buffBias:0.95,guardBias:1.35,healBias:1.15,finisherBias:0.95,repeatBias:0.80},
+  tank:{damageBias:0.95,heavyBias:0.90,controlBias:1.00,buffBias:0.95,guardBias:1.35,healBias:1.15,finisherBias:0.95,repeatBias:0.80},
   duelist:{damageBias:1.25,heavyBias:1.20,controlBias:0.95,buffBias:0.70,guardBias:0.60,healBias:0.50,finisherBias:1.30,repeatBias:0.90},
   executioner:{damageBias:1.25,heavyBias:1.30,controlBias:1.05,buffBias:0.55,guardBias:0.50,healBias:0.45,finisherBias:1.65,repeatBias:0.95},
   seer:{damageBias:0.95,heavyBias:0.80,controlBias:1.45,buffBias:1.25,guardBias:0.85,healBias:0.70,finisherBias:0.95,repeatBias:0.70},
   reaper:{damageBias:1.05,heavyBias:0.95,controlBias:1.20,buffBias:1.10,guardBias:0.75,healBias:1.25,finisherBias:1.15,repeatBias:0.80},
   scavenger:{damageBias:1.10,heavyBias:1.10,controlBias:1.00,buffBias:0.75,guardBias:0.65,healBias:0.60,finisherBias:1.45,repeatBias:0.80},
-  tyrant:{damageBias:1.20,heavyBias:1.15,controlBias:1.20,buffBias:0.90,guardBias:0.75,healBias:0.65,finisherBias:1.40,repeatBias:0.85},
+  predator:{damageBias:1.20,heavyBias:1.15,controlBias:1.20,buffBias:0.90,guardBias:0.75,healBias:0.65,finisherBias:1.40,repeatBias:0.85},
 };
 
 function getAIPersonalityProfile(enemy){
@@ -8185,12 +8246,12 @@ function getBossIntentCycle(e){
 function getEnemyArchetype(e){
   const cls=String(e?.enemyClass||'').toLowerCase();
   const persona=String(e?.aiPersonality||'').toLowerCase();
-  if(['striker','assassin','ranger'].includes(cls)) return 'striker';
+  if(['striker'].includes(cls)) return 'striker';
   if(['predator'].includes(cls) || ['executioner','reaper'].includes(persona)) return 'predator';
   if(['bruiser'].includes(cls) || ['duelist'].includes(persona)) return 'bruiser';
-  if(['tank','knight'].includes(cls) || ['defender'].includes(persona)) return 'tank';
+  if(['tank'].includes(cls) || ['tank'].includes(persona)) return 'tank';
   if(['trickster'].includes(cls) || ['control','seer','scavenger','opportunistic'].includes(persona)) return 'trickster';
-  if(['support','singer','bard','summoner'].includes(cls)) return 'singer';
+  if(['singer'].includes(cls)) return 'singer';
   return 'striker';
 }
 const ARCHETYPE_INTENT_WEIGHTS = Object.freeze({
@@ -8279,9 +8340,9 @@ function getEnemyOpeningBias(enemy,turnNumber){
   if(turnNumber>1) return {};
   if(['aggressive','duelist','executioner'].includes(p)) return {damage:1.25,heavy:1.20,control:0.9};
   if(['control','seer'].includes(p)) return {control:1.35,buff:1.2,damage:0.9};
-  if(['defender'].includes(p)) return {guard:1.25,heal:1.15,damage:0.9};
+  if(['tank'].includes(p)) return {guard:1.25,heal:1.15,damage:0.9};
   if(['scavenger','opportunistic'].includes(p)) return {control:1.2,damage:1.05};
-  if(['tyrant'].includes(p)) return {control:1.25,damage:1.1};
+  if(['predator'].includes(p)) return {control:1.25,damage:1.1};
   return {};
 }
 function getEnemyActionComboBonus(enemy,action,cat){
@@ -8292,7 +8353,7 @@ function getEnemyActionComboBonus(enemy,action,cat){
   if(['duelist','executioner'].includes(p) && ['eWeaken','eFear','eBlind'].includes(prev) && (cat==='heavy'||cat==='damage')) return 1.30;
   if(['seer','control'].includes(p) && prev==='eBlind' && cat==='damage') return 1.25;
   if(['reaper','scavenger'].includes(p) && ['ePoison','eVenom'].includes(prev) && (cat==='damage'||cat==='heavy')) return 1.25;
-  if(p==='tyrant' && ['eShield','eRage','eWeaken','eFear'].includes(prev) && (cat==='heavy'||cat==='damage')) return 1.35;
+  if(p==='predator' && ['eShield','eRage','eWeaken','eFear'].includes(prev) && (cat==='heavy'||cat==='damage')) return 1.35;
   return 1;
 }
 function planEnemyTurn(e,p){
@@ -8371,11 +8432,11 @@ function planEnemyTurn(e,p){
         if(mem.openingSetupUsed && cat==='control') w*=0.75;
         if(hasDebuffs && (cat==='damage'||cat==='heavy')) w*=1.15;
       }
-      if((e.aiPersonality||'')==='defender' && eHp<0.5 && (cat==='guard'||cat==='heal')) w*=1.2;
+      if((e.aiPersonality||'')==='tank' && eHp<0.5 && (cat==='guard'||cat==='heal')) w*=1.2;
       if((e.aiPersonality||'')==='reaper' && eHp<0.7 && cat==='heal') w*=1.3;
       if((e.aiPersonality||'')==='reaper' && (G.playerStatus.poison?.stacks||0)>0 && (cat==='damage'||cat==='heavy')) w*=1.2;
       if(['scavenger','opportunistic'].includes((e.aiPersonality||'')) && pHp<0.5 && (cat==='heavy'||cat==='damage')) w*=1.25;
-      if((e.aiPersonality||'')==='tyrant' && mem.utilityStreak>=1 && (cat==='damage'||cat==='heavy')) w*=1.4;
+      if((e.aiPersonality||'')==='predator' && mem.utilityStreak>=1 && (cat==='damage'||cat==='heavy')) w*=1.4;
       if(getEnemyActionComboBonus(e,cand,cat)>1) w*=getEnemyActionComboBonus(e,cand,cat);
       const cost=getEnemyActionEnergyCost(cand);
       if(cost===energy) w*=1.1;
@@ -9210,12 +9271,11 @@ const ENDLESS_RARE_LEVELUP_CHOICES = [
 ];
 const LEVELUP_ARCHETYPE_WEIGHT = {
   striker:{atk:3.0,spd:2.8,matk:0.9,mdef:0.9,maxHp:0.9,def:1.0,acc:1.2,critChance:1.3,goldCritMult:1.1},
-  mage:{atk:0.9,spd:1.0,matk:3.0,mdef:2.8,maxHp:1.0,def:0.9,acc:1.1,critChance:1.0,goldCritMult:1.0},
+  bruiser:{atk:3.0,spd:1.2,matk:0.9,mdef:1.0,maxHp:1.1,def:2.6,acc:1.0,critChance:1.1,goldCritMult:1.0},
   tank:{atk:1.0,spd:0.8,matk:0.9,mdef:1.4,maxHp:3.0,def:3.0,acc:0.9,critChance:0.8,goldCritMult:0.9},
   trickster:{atk:1.3,spd:3.0,matk:1.0,mdef:1.0,maxHp:0.9,def:1.0,acc:2.6,critChance:1.1,goldCritMult:1.0},
-  bruiser:{atk:3.0,spd:1.2,matk:0.9,mdef:1.0,maxHp:1.1,def:2.6,acc:1.0,critChance:1.1,goldCritMult:1.0},
   predator:{atk:2.8,spd:2.0,matk:0.9,mdef:0.9,maxHp:1.0,def:1.0,acc:1.4,critChance:2.8,goldCritMult:2.0},
-  support:{atk:0.9,spd:1.1,matk:2.5,mdef:2.5,maxHp:1.1,def:1.0,acc:1.2,critChance:0.9,goldCritMult:0.9},
+  singer:{atk:0.9,spd:1.1,matk:2.5,mdef:2.5,maxHp:1.1,def:1.0,acc:1.2,critChance:0.9,goldCritMult:0.9},
 };
 
 function isMainAttackAbility(ab){
@@ -9260,14 +9320,14 @@ function applyMainAttackAutoLevel(){
 }
 
 function getPlayerLevelArchetype(){
-  const cls=String(BIRDS[G.player?.birdKey]?.class||'knight').toLowerCase();
-  if(['assassin'].includes(cls)) return 'striker';
-  if(['mage','summoner'].includes(cls)) return 'mage';
+  const cls=String(BIRDS[G.player?.birdKey]?.class||'bruiser').toLowerCase();
+  if(['striker'].includes(cls)) return 'striker';
+  if(['trickster'].includes(cls)) return 'trickster';
   if(['tank'].includes(cls)) return 'tank';
-  if(['bard'].includes(cls)) return 'support';
-  if(['ranger'].includes(cls)) return 'predator';
-  if(['knight'].includes(cls)) return 'bruiser';
-  return 'support';
+  if(['singer'].includes(cls)) return 'singer';
+  if(['predator'].includes(cls)) return 'predator';
+  if(['bruiser'].includes(cls)) return 'bruiser';
+  return 'singer';
 }
 
 function weightedPickUniqueOptions(pool,count,getWeight){
@@ -9286,7 +9346,7 @@ function weightedPickUniqueOptions(pool,count,getWeight){
 
 function buildLevelUpStatChoices(){
   const arch=getPlayerLevelArchetype();
-  const bias=LEVELUP_ARCHETYPE_WEIGHT[arch]||LEVELUP_ARCHETYPE_WEIGHT.support;
+  const bias=LEVELUP_ARCHETYPE_WEIGHT[arch]||LEVELUP_ARCHETYPE_WEIGHT.singer;
   const basePool=[...LEVELUP_STAT_POOL];
   if(isEndlessRunActive() && chance(18)){
     const rare=ENDLESS_RARE_LEVELUP_CHOICES[Math.floor(Math.random()*ENDLESS_RARE_LEVELUP_CHOICES.length)];
@@ -9303,7 +9363,7 @@ function getBirdExclusiveLearnPool(birdKey){
   const birdClass=bd.class||'';
   const uniqueFromStarts=(bd.startAbilities||[]).filter(id=>id!=='mainAttack'&&id!=='skipTurn'&&id!=='sittingDuck');
   let classSpecific=[];
-  if(birdClass==='ranger') classSpecific=[...ABILITY_POOL_RANGED];
+  if(birdClass==='trickster') classSpecific=[...ABILITY_POOL_RANGED];
   else if(MAGIC_CLASSES.has(birdClass)) classSpecific=[...ABILITY_POOL_MAGIC];
   else classSpecific=[...ABILITY_POOL_PHYSICAL];
   return [...new Set([...uniqueFromStarts,...classSpecific,...ABILITY_POOL_UTILITY])];
@@ -10102,7 +10162,7 @@ const ABILITIES_REFERENCE = {
   stormCall:{desc:'High-impact spell cast.',effect:'Heavy magic damage with setup payoff.'},
   dirgeOfDread:{desc:'Control song pattern.',effect:'Fear and weaken pressure over short windows.'},
   pinionVolley:{desc:'Predator multi-hit tool.',effect:'Repeated hits with armor-piercing pressure.'},
-  bleakBeak:{desc:'Support spell/basic hybrid.',effect:'Reliable low-cost spell chip and setup.'},
+  bleakBeak:{desc:'Singer spell/basic hybrid.',effect:'Reliable low-cost spell chip and setup.'},
 };
 
 const ENEMY_BIRD_DATA = [
@@ -10231,9 +10291,9 @@ function buildRefGuide() {
 
   const mechanics=`<div class="ref-skills-grid">
     ${card('Energy & Cooldowns','Main attacks are free unless spells. Abilities spend energy and many skills have cooldowns.',true,'core')}
-    ${card('Role Taxonomy','Birds are grouped by roles: Striker, Bruiser, Tank, Trickster, Predator, Support.',true,'roles')}
+    ${card('Role Taxonomy','Birds are grouped by roles: Striker, Bruiser, Tank, Trickster, Predator, Singer.',true,'roles')}
     ${card('Passive Evolution (Endless)','In Endless mode, passives evolve at milestones with offensive vs utility choices.',true,'endless')}
-    ${card('Enemy AI Profiles','Enemy personalities (aggressive, tactical, control, defender, etc.) bias action planning.',true,'ai')}
+    ${card('Enemy AI Profiles','Enemy personalities (aggressive, tactical, control, tank, predator, etc.) bias action planning.',true,'ai')}
     ${card('Codex Unlocks','Entries unlock when seen/used during runs. Use search and Show Locked to browse all.',true,'codex')}
   </div>`;
 
@@ -10383,8 +10443,22 @@ function generateShopItems() {
   const used=new Set();
   const mode=G._shopMode||'boss';
   const goldCapReached = getGoldCardCount()>=getGoldCardLimit();
+
+  // Healing shelf always appears first in Stork shop.
+  const healOffers=SHOP_HEALING_ITEMS
+    .filter(it=>!SHOP_STATE.healingPurchasesThisVisit?.has(it.id))
+    .map(it=>({
+      ...it,
+      apply(p){
+        const heal=Math.max(1,Math.floor((p.stats.maxHp||1)*(it.healPct||0)));
+        p.stats.hp=Math.min((p.stats.maxHp||1),(p.stats.hp||0)+heal);
+        spawnFloat('player',`+${heal} 🩹`,'fn-heal');
+      }
+    }));
+  _shopItems.push(...healOffers);
+
   if(mode==='grey'){
-    // Regular shop: 1 ability item, 2 upgrade cards, 1 utility
+    // Regular shop: abilities/cards/utility after healing shelf
     _shopItems.push(makeAbilityOffer(false));
     for(let i=0;i<2;i++){
       const tier=goldCapReached?rollShopTier({grey:52,green:30,blue:16,purple:2}):rollShopTier({grey:50,green:28,blue:16,purple:5,gold:1});
@@ -10393,7 +10467,7 @@ function generateShopItems() {
     }
     _shopItems.push(makeUtilityOffer('regular'));
   } else {
-    // Boss shop: 1 high-quality ability item, 3 high-tier cards, 1 utility
+    // Boss shop: abilities/cards/utility after healing shelf
     _shopItems.push(makeAbilityOffer(true));
     for(let i=0;i<3;i++){
       const tier=goldCapReached?rollShopTier({blue:56,purple:44}):rollShopTier({blue:50,purple:38,gold:12});
@@ -10401,15 +10475,6 @@ function generateShopItems() {
       if(pick) _shopItems.push(pick);
     }
     _shopItems.push(makeUtilityOffer('boss'));
-  }
-  const healChoices=SHOP_HEALING_ITEMS.filter(it=>!SHOP_STATE.healingPurchasesThisVisit?.has(it.id));
-  if(healChoices.length){
-    const pick=healChoices[Math.floor(Math.random()*healChoices.length)];
-    _shopItems.push({...pick, apply(p){
-      const heal=Math.max(1,Math.floor((p.stats.maxHp||1)*(pick.healPct||0)));
-      p.stats.hp=Math.min((p.stats.maxHp||1),(p.stats.hp||0)+heal);
-      spawnFloat('player',`+${heal} 🩹`,'fn-heal');
-    }});
   }
   renderShopItems();
 }
@@ -10423,7 +10488,7 @@ function canOfferAbilityInShop(p, tmpl){
   if(Array.isArray(tmpl.allowedClasses) && tmpl.allowedClasses.length) return tmpl.allowedClasses.includes(cls);
   if(tmpl.isNeutral) return true;
   const bt=tmpl.btnType||tmpl.type;
-  if(bt==='ranged') return cls==='ranger';
+  if(bt==='ranged') return ['striker','trickster'].includes(cls);
   if(bt==='spell') return MAGIC_CLASSES.has(cls);
   if(bt==='physical') return !MAGIC_CLASSES.has(cls);
   return bt==='utility';
@@ -10480,22 +10545,13 @@ function resolveShopAbilityTemplate(item){
   return (ABILITY_TEMPLATES && ABILITY_TEMPLATES[learnId]) || null;
 }
 
-function formatAbilityLevelPathway(tmpl){
-  if(!tmpl||!Array.isArray(tmpl.levels)||!tmpl.levels.length) return '';
-  return tmpl.levels.map((lv,i)=>{
-    const en=Array.isArray(tmpl.energyByLevel)?(tmpl.energyByLevel[i] ?? tmpl.energyByLevel[0] ?? tmpl.energyCost ?? 0):(tmpl.energyCost ?? 0);
-    const cd=Array.isArray(tmpl.cooldownByLevel)?(tmpl.cooldownByLevel[i] ?? tmpl.cooldownByLevel[0] ?? 0):0;
-    return `Lv${i+1}: ${lv?.desc||''}${Number.isFinite(en)?` [EN ${en}]`:''}${cd>0?` [CD ${cd}]`:''}`;
-  }).join('\n');
-}
-
 function buildShopItemTooltip(item){
   const tmpl=resolveShopAbilityTemplate(item);
   if(!tmpl) return item?.desc || item?.description || '';
+  const lv1=(Array.isArray(tmpl.levels) && tmpl.levels[0]?.desc) ? tmpl.levels[0].desc : '';
   const parts=[];
-  if(tmpl.desc) parts.push(tmpl.desc);
-  const path=formatAbilityLevelPathway(tmpl);
-  if(path) parts.push(path);
+  if(tmpl.desc) parts.push(`Base: ${tmpl.desc}`);
+  if(lv1) parts.push(`Effects: ${lv1}`);
   return parts.join('\n');
 }
 
@@ -10930,7 +10986,7 @@ applyUIStateToDOM();
    ============================================================ */
 (function(){
   const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','hummingbird','shoebill','secretarybird','secretary','magpie','kookaburra','kiwi','penguin','robin','flamingo','seagull','emu','dukeblakiston','albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary']);
-  const CASTERS = new Set(['mage','bard','summoner']);
+  const CASTERS = new Set(['singer','trickster']);
 
   function normKey(k){ return String(k||'').toLowerCase().replace(/[^a-z]/g,''); } // secretaryBird -> secretarybird
   function whoEl(who){ return document.getElementById(`${who}-avatar`); }
@@ -11223,7 +11279,7 @@ SPRITE_KEYS_ALL.add('magpie');
    ============================================================ */
 (function(){
   const SPRITE_KEYS = new Set(['sparrow','goose','blackbird','crow','macaw','robin','hummingbird','shoebill','secretarybird','secretary','magpie','kookaburra','flamingo','seagull','emu','penguin','dukeblakiston','albatross','harpy','harpyeagle','baldeagle','blackcockatoo','ostrich','cassowary']);
-  const CASTERS = new Set(['mage','bard']);
+  const CASTERS = new Set(['singer','trickster']);
 
   function normKey(k){ return String(k||'').toLowerCase().replace(/[^a-z]/g,''); }
   function whoEl(who){ return document.getElementById(`${who}-avatar`); }
@@ -11522,7 +11578,6 @@ SPRITE_KEYS_ALL.add('magpie');
     const isBoss = !!entity?.isBoss;
     if(isBoss && context==='battle') return 'boss';
     if(key === 'penguin') return 'xl';
-    if(key === 'robin') return 'tiny';
     if(key === 'seagull') return 'medium';
     if(sz.includes('tiny')) return 'tiny';
     if(sz.includes('small')) return 'small';
@@ -11556,7 +11611,6 @@ SPRITE_KEYS_ALL.add('magpie');
     const sz = String(entity?.size || entity?.birdSize || '').toLowerCase();
     if(entity?.isBoss && context === 'battle') return 'boss';
     if(key === 'penguin') return 'xl';
-    if(key === 'robin') return 'tiny';
     if(key === 'seagull') return 'medium';
     if(sz.includes('tiny')) return 'tiny';
     if(sz.includes('small')) return 'small';
@@ -11571,7 +11625,6 @@ SPRITE_KEYS_ALL.add('magpie');
     const entity = (sizeOrEntity && typeof sizeOrEntity === 'object') ? sizeOrEntity : { size: String(sizeOrEntity || 'medium') };
     let sizeClass = (typeof sizeOrEntity === 'string') ? sizeOrEntity : globalThis.getUISizeClass(entity, 'general');
     if(key === 'penguin') sizeClass = 'small';
-    if(key === 'robin') sizeClass = 'tiny';
     if(key === 'seagull') sizeClass = 'medium';
     if(spriteBirds.has(key)){
       return '<div class="sprite4 ' + sizeClass + ' sprite-' + key + ' frame-0 ' + (locked ? 'locked' : '') + '"></div>';

@@ -79,19 +79,18 @@
 </div>
 <!-- TWO COLUMN LAYOUT -->
 <div class="sel-layout">
-<div class="sel-left">
-<!-- VIEW TOGGLE -->
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-<div class="view-toggle" id="view-toggle"></div>
-<span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
-</div>
-
-<div id="bird-grid"></div>
-</div>
-<div class="sel-right">
+<div class="sel-showcase sel-left">
 <div class="ascent-panel is-empty" id="ascent-panel">
 <div class="ascent-empty">← Select a bird to begin your ascent</div>
 </div>
+</div>
+<div class="sel-roster sel-right">
+<!-- VIEW TOGGLE -->
+<div class="sel-roster-controls">
+<div class="view-toggle" id="view-toggle"></div>
+<span id="bird-count-label" style="font-size:.7rem;color:var(--text-dim);font-style:italic;"></span>
+</div>
+<div id="bird-grid"></div>
 </div>
 </div>
 <div class="run-history" id="run-history" style="display:none">
