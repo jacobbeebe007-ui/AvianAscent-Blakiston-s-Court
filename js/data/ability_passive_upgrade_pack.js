@@ -54,7 +54,7 @@
       id: 'dirge',
       name: 'Dirge',
       tags: [ABILITY_TAGS.SPELL, ABILITY_TAGS.CONTROL],
-      role: 'support control song',
+      role: 'singer control song',
       notes: 'Confusion and paralysis pressure over multiple turns.'
     },
     lullaby: {
@@ -90,7 +90,7 @@
   const UPGRADE_LINES = Object.freeze({
     striker: ['rapidPeck', 'dart', 'evade'],
     trickster: ['dirge', 'lullaby', 'evade'],
-    vanguard: ['dart', 'evade']
+    bruiser: ['dart', 'evade']
   });
 
   const PACK_NOTES = Object.freeze({
