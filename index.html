@@ -108,22 +108,23 @@
 <!-- BATTLE -->
 <div class="screen" id="screen-battle">
 <div class="battle-layout">
-<div class="menu-row">
-<button class="menu-btn" onclick="goMainMenu()">🏠 Menu</button>
-<button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button>
-<button class="nest-btn" onclick="openNest()">🪺 Nest</button>
-<button class="menu-btn" onclick="openAbandonModal()" style="color:var(--red-light);border-color:rgba(201,76,76,.4)">⛔ Abandon</button>
-</div>
-<div class="battle-top">
+<div class="battle-top tactical-topbar">
+<div class="topbar-left">
 <div class="level-badge" id="level-label">STAGE 1</div>
-<div style="display:flex;align-items:center;gap:14px;">
 <span class="bird-lv" id="bird-lv-label">Lv.1</span>
 <span class="passive-badge" id="passive-badge" title="Passive Trait"></span>
-<button class="sound-btn" id="sound-toggle-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
 </div>
+<div class="topbar-center">
+<div class="battle-caption" id="battle-caption"></div>
 <div class="turn-lbl" id="turn-label">Your Turn</div>
 </div>
-<!-- Stage progress bar -->
+<div class="topbar-right">
+<div class="shiny-topbar">✨ Shinies: <strong id="battle-shiny-count">0</strong></div>
+<button class="menu-btn" onclick="goMainMenu()">⏸ Menu</button>
+<button class="sound-btn" id="sound-toggle-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+</div>
+</div>
+
 <div class="stage-progress-wrap" id="stage-progress-wrap" style="display:none">
 <span style="font-size:.72rem;color:var(--text-dim);white-space:nowrap">Stage</span>
 <div class="stage-progress-bg">
@@ -132,26 +133,26 @@
 </div>
 <span id="stage-progress-txt" style="font-size:.72rem;color:var(--text-dim);white-space:nowrap">1/20</span>
 </div>
+
 <div id="combo-meter" style="display:none;">
 <span class="combo-label">🔥 COMBO</span>
 <div class="combo-pips" id="combo-pips"></div>
 <span class="combo-txt" id="combo-txt"></span>
 </div>
-<div class="exp-row">
-<span class="exp-label">EXP</span>
-<div class="exp-bg"><div class="exp-fill" id="exp-bar" style="width:0%"></div></div>
-<span class="exp-txt" id="exp-txt">0 / 100</span>
-</div>
-<div class="combatants">
+
+<div class="combatants tactical-battlefield">
 <div class="combatant-panel player" id="player-panel">
 <div class="shield-overlay" id="player-shield-overlay"></div>
 <div class="combatant-name" id="player-name">—</div>
-<div class="avatar-wrap" id="player-avatar-wrap">
-<div class="avatar-inner" id="player-avatar"></div>
-</div>
+<div class="combatant-meta"><span id="player-class-label">—</span></div>
+<div class="avatar-wrap" id="player-avatar-wrap"><div class="avatar-inner" id="player-avatar"></div></div>
 <div class="hp-bar-wrap">
 <div class="hp-label"><span>HP</span><span id="player-hp-text">—</span></div>
 <div class="hp-bar-bg"><div class="hp-bar-fill" id="player-hp-bar"></div></div>
+</div>
+<div class="hp-bar-wrap en-bar-wrap">
+<div class="hp-label"><span>EN</span><span id="player-en-text">—</span></div>
+<div class="hp-bar-bg en-bar-bg"><div class="hp-bar-fill en-bar-fill" id="player-en-bar"></div></div>
 </div>
 <div class="status-effects" id="player-status"></div>
 <details class="combat-stats-dropdown" id="player-stats-drop" open>
@@ -159,33 +160,53 @@
 <div class="stats-mini" id="player-stats-mini"></div>
 </details>
 </div>
-<div class="vs-separator">VS</div>
+
+<div class="vs-separator tactical-center">
+<div class="center-banner">Battlefield</div>
+<div class="exp-row tactical-exp-row">
+<span class="exp-label">EXP</span>
+<div class="exp-bg"><div class="exp-fill" id="exp-bar" style="width:0%"></div></div>
+<span class="exp-txt" id="exp-txt">0 / 100</span>
+</div>
+</div>
+
 <div class="combatant-panel enemy" id="enemy-panel">
 <div class="shield-overlay" id="enemy-shield-overlay"></div>
 <div class="combatant-name" id="enemy-name">—</div>
-<div class="avatar-wrap" id="enemy-avatar-wrap">
-<div class="avatar-inner" id="enemy-avatar"></div>
-</div>
+<div class="combatant-meta"><span id="enemy-class-label">—</span></div>
+<div class="avatar-wrap" id="enemy-avatar-wrap"><div class="avatar-inner" id="enemy-avatar"></div></div>
 <div class="hp-bar-wrap">
 <div class="hp-label"><span>HP</span><span id="enemy-hp-text">—</span></div>
 <div class="hp-bar-bg"><div class="hp-bar-fill" id="enemy-hp-bar"></div></div>
 </div>
+<div class="hp-bar-wrap en-bar-wrap">
+<div class="hp-label"><span>EN</span><span id="enemy-en-text">—</span></div>
+<div class="hp-bar-bg en-bar-bg"><div class="hp-bar-fill en-bar-fill" id="enemy-en-bar"></div></div>
+</div>
 <div class="phase-banner" id="boss-phase-banner"></div>
 <div class="status-effects" id="enemy-status"></div>
+<div class="enemy-intent enemy-plan" id="enemy-intent-panel">🤔 Thinking...</div>
 <details class="combat-stats-dropdown" id="enemy-stats-drop" open>
 <summary>Enemy Stats</summary>
 <div class="enemy-stats-mini" id="enemy-stats-mini"></div>
 </details>
 <div class="enemy-abilities-list" id="enemy-abilities-list"></div>
-<div class="enemy-intent enemy-plan" id="enemy-intent-panel">🤔 Thinking...</div>
 </div>
 </div>
-<div class="battle-caption" id="battle-caption"></div>
-<div class="battle-log" id="battle-log"></div>
-<div class="action-panel">
-<h3>⚔ CHOOSE YOUR ACTION</h3>
+
+<div class="action-panel tactical-action-tray">
+<h3>⚔ Action Tray</h3>
 <div class="energy-orbs" id="energy-orbs"></div><div class="energy-text" id="energy-text"></div>
 <div class="actions-grid" id="actions-grid"></div>
+</div>
+
+<div class="battle-support-area">
+<div class="battle-log" id="battle-log"></div>
+<div class="menu-row tactical-utility-row">
+<button class="nest-btn" onclick="openNest()">🪺 Nest</button>
+<button class="menu-btn" onclick="openSettingsModal()">⚙ Settings</button>
+<button class="menu-btn" onclick="openAbandonModal()" style="color:var(--red-light);border-color:rgba(201,76,76,.4)">⟨ Abandon</button>
+</div>
 </div>
 </div>
 </div>

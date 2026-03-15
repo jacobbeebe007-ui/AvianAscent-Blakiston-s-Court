@@ -3552,9 +3552,6 @@ function buildBirdGrid() {
   const focusKey=ui.expandedBird||G.selected||safeBirdEntries?.[0]?.[0]||'';
   if(focusKey) updateAscentPanel(focusKey);
 
-  const focusKey=ui.expandedBird||G.selected||safeBirdEntries?.[0]?.[0]||'';
-  if(focusKey) updateAscentPanel(focusKey);
-
   // Hard fallback: never allow an empty/brick select screen.
   if(totalBirds===0){
     console.error('Character select fallback: no valid bird entries detected.');
@@ -4062,6 +4059,12 @@ function refreshBattleUI() {
   document.getElementById('player-name').textContent = G.player.name;
   document.getElementById('player-avatar').innerHTML = renderEntityAvatarHTML(G.player, 'battle');
   setHpBar('player', p.hp, p.maxHp);
+  setEnergyBar('player', G.player.energy, G.player.energyMax);
+  const pclsEl=document.getElementById('player-class-label');
+  if(pclsEl){
+    const pcls=idToClassLabel(resolveFinalClass(G.player.class||BIRDS[G.player.birdKey]?.class||'striker',G.player.birdKey));
+    pclsEl.textContent=`${pcls}`;
+  }
 
   document.getElementById('enemy-name').innerHTML = G.enemy.name + (G.enemy.isBoss?`<span class="boss-crown">👑</span>`:'');
   const ep = getPanel('enemy');
@@ -4080,10 +4083,17 @@ function refreshBattleUI() {
     document.getElementById('enemy-avatar').style.fontSize='3.8rem';
   }
   setHpBar('enemy', G.enemy.stats.hp, G.enemy.stats.maxHp);
+  setEnergyBar('enemy', G.enemy.energy, G.enemy.energyMax||3);
+  const eclsEl=document.getElementById('enemy-class-label');
+  if(eclsEl){
+    const ecls=idToClassLabel(resolveFinalClass(G.enemy.class||inferEnemyClassFromStyle(G.enemy)||'predator',G.enemy.birdKey||''));
+    eclsEl.textContent = `${G.enemy.isBoss?'Boss · ':''}${ecls}`;
+  }
 
   document.getElementById('level-label').textContent = `STAGE ${G.stage}`;
   document.getElementById('turn-label').textContent = G.turn==='player'?`🟢 Your Turn · EN ${G.player.energy}/${G.player.energyMax}`:'🔴 Enemy Turn';
   document.getElementById('bird-lv-label').textContent = `Lv.${G.player.birdLevel}`;
+  const shinyEl=document.getElementById('battle-shiny-count'); if(shinyEl) shinyEl.textContent=String(G.shinyObjects||0);
 
   // EXP bar
   const needed = expForLevel(G.player.birdLevel+1);
@@ -4122,9 +4132,9 @@ function refreshBattleUI() {
 
   document.getElementById('player-stats-mini').innerHTML =
     `${statCell('stat-atk','ATK',_effAtk,{title:_statNote('ATK',_effAtk-(p.atk||0),_atkNote,'Debuffs reducing ATK effect.'),trend:_trendTag(_effAtk-(p.atk||0))})}
-     ${statCell('stat-matk','M.ATK',_effMatk,{title:'Magic Attack — improves spell/ailment potency',trend:_trendTag(_effMatk-(p.matk||8))})}
+     ${statCell('stat-matk','MATK',_effMatk,{title:'Magic Attack — improves spell/ailment potency',trend:_trendTag(_effMatk-(p.matk||8))})}
      ${statCell('stat-def','DEF',_effDef,{title:_statNote('DEF',_effDef-(p.def||0),'Battle Hymn increased DEF.','Debuffs reducing DEF.'),trend:_trendTag(_effDef-p.def)})}
-     ${statCell('stat-mdef','M.DEF',_effMdef,{title:'Magic Defence — resists enemy spells and ailments',trend:_trendTag(_effMdef-(p.mdef||8))})}
+     ${statCell('stat-mdef','MDEF',_effMdef,{title:'Magic Defence — resists enemy spells and ailments',trend:_trendTag(_effMdef-(p.mdef||8))})}
      ${statCell('stat-dodge','Dodge',_effDodge,{suffix:'%',title:`Physical Dodge. ${_statNote('Dodge',_effDodge-(p.dodge||0),'Evasion buffs active.','Debuffs reduced dodge.')}`,trend:_trendTag(_effDodge-p.dodge)})}
      ${statCell('stat-mdodge','M.Dodge',_effMDodge,{suffix:'%',title:'Magic Dodge — deflects enemy spells',trend:_trendTag(_effMDodge-getBaseMdodge(G.player))})}
      ${statCell('stat-acc','ACC',_effAcc,{suffix:'%',title:_statNote('ACC',_effAcc-(p.acc||0),'Battle Hymn increased ACC.','Blind/ruffle reduced ACC.'),trend:_trendTag(_effAcc-p.acc)})}
@@ -4140,9 +4150,9 @@ function refreshBattleUI() {
     `<div class="est ${klass}" title="${title}"><span class="stat-k">${label}</span><span class="stat-v">${val}${suffix}</span></div>`;
   document.getElementById('enemy-stats-mini').innerHTML =
     `${enemyCell('stat-atk','ATK',ep2.atk,{title:'Physical attack'})}
-     ${enemyCell('stat-matk','M.ATK',ep2.matk||6,{title:'Magic attack'})}
+     ${enemyCell('stat-matk','MATK',ep2.matk||6,{title:'Magic attack'})}
      ${enemyCell('stat-def','DEF',ep2.def,{title:'Physical defence'})}
-     ${enemyCell('stat-mdef','M.DEF',ep2.mdef||8,{title:'Magic defence'})}
+     ${enemyCell('stat-mdef','MDEF',ep2.mdef||8,{title:'Magic defence'})}
      ${enemyCell('stat-dodge','Dodge',ep2.dodge||0,{suffix:'%',title:'Physical dodge'})}
      ${enemyCell('stat-mdodge','M.Dodge',ep2.mdodge??ep2.dodge??0,{suffix:'%',title:'Magic dodge'})}
      ${enemyCell('stat-acc','ACC',ep2.acc||70,{suffix:'%',title:'Accuracy'})}
@@ -4322,6 +4332,15 @@ function renderStatuses(id, statuses) {
 
 
 
+function setEnergyBar(side,cur,max){
+  const fill=document.getElementById(`${side}-en-bar`);
+  const txt=document.getElementById(`${side}-en-text`);
+  const c=Math.max(0, Number(cur)||0);
+  const m=Math.max(1, Number(max)||1);
+  if(fill) fill.style.width = `${Math.max(0,Math.min(100,(c/m)*100))}%`;
+  if(txt) txt.textContent = `${c}/${m}`;
+}
+
 function renderEnergyOrbs(){
   const el=document.getElementById('energy-orbs');
   if(!el||!G?.player) return;
@@ -4383,16 +4402,20 @@ function renderEnemyPlan(){
   const used=(G.turnPhase===TURN.ENEMY) ? Math.max(0,(G.enemyActionsThisTurn||0)) : 0;
   let label='🤔 Thinking...';
   let title='';
+  let intentCategory='Plan';
   if(G.enemyNextAction){
     label=G.enemyNextAction.label||'Enemy Plan';
     if(G.enemyNextAction.type==='plan'){
+      intentCategory='Pressure';
       const arr=(G.enemyNextAction.actions||[]).slice(0,2).map(a=>a.type==='ability'?(ENEMY_ABILITY_POOL[a.abilityId]?.name||a.abilityId):(a.label||a.type)).join(' → ');
       title=`Planned: ${arr}${(G.enemyNextAction.actions||[]).length>2?' +':''}`;
     } else if(G.enemyNextAction.type==='ability'){
+      intentCategory='Control';
       const eab=ENEMY_ABILITY_POOL[G.enemyNextAction.abilityId];
       title=eab?`${eab.name} — ${eab.desc||'Enemy ability'}
 Estimated effect: ${eab.dmg||'special'}`:'';
     } else if(G.enemyNextAction.type==='strike'){
+      intentCategory='Attack';
       const low=Math.max(1,Math.floor((G.enemy.stats.atk||8)*0.8));
       const high=Math.max(low,Math.floor((G.enemy.stats.atk||8)*1.2));
       title=`Basic Attack — physical hit
@@ -4406,7 +4429,7 @@ Estimated damage: ${low}-${high}`;
     return `<span class="intent-chip${i<used?' spent':''}">${icon} ${nm}<span class="intent-cost-sm">${cost}AP</span></span>`;
   }).join('') : '<span class="intent-chip wait">🤔 Planning</span>';
   const headCost=(plan[0] && Number.isFinite(plan[0].energyCost)) ? plan[0].energyCost : (plan[0] ? getEnemyActionEnergyCost(plan[0]) : 0);
-  host.innerHTML=`<div class="intent-row"><span class="intent-name">${label}</span><span class="intent-meta">${headCost?`<span class="intent-cost">${headCost} AP</span>`:''}<span class="intent-ap">EN ${curE}/${maxE}</span></span></div><div class="intent-list">${chips}</div>`;
+  host.innerHTML=`<div class="intent-row"><span class="intent-name">${label}</span><span class="intent-meta"><span class="intent-type">${intentCategory}</span>${headCost?`<span class="intent-cost">${headCost} AP</span>`:''}<span class="intent-ap">EN ${curE}/${maxE}</span></span></div><div class="intent-list">${chips}</div>`;
   host.title=title;
   if(title){
     host.onmouseenter=(e)=>showTooltip(e,title,e.clientX+10,e.clientY+10);
@@ -4699,17 +4722,9 @@ function renderActions() {
     const aq=G.player.abilities.find(x=>x.id===autoQueued);
     if(!aq||!canUseAbility(G.player,aq)){G.autoQueuedAbilityId=null;autoQueued=null;}
   }
-  let _prevType=null;
   allAbilities.forEach((ab,idx)=>{
-    if(_prevType!==ab.btnType){
-      const h=document.createElement('div');h.style.cssText='grid-column:1/-1;font-size:.68rem;letter-spacing:.08em;color:var(--text-dim);margin:2px 0 0;padding-top:6px;border-top:1px dashed rgba(120,140,170,.25)';
-      h.textContent=(ab.btnType==='physical'?'— PHYSICAL —':ab.btnType==='ranged'?'— RANGED —':ab.btnType==='spell'?'— MAGIC —':'— UTILITY —');
-      grid.appendChild(h);
-    }
     const btn=document.createElement('button');
     btn.className=`action-btn ${ab.btnType}`;
-    if(_prevType!==null&&_prevType!==ab.btnType) btn.classList.add('type-sep');
-    _prevType=ab.btnType;
     btn.setAttribute('data-ab-idx',idx);
     btn.setAttribute('data-ab-id',ab.id||'');
     const energyCost=syncAbilityEnergyCost(ab);
@@ -4756,10 +4771,12 @@ function renderActions() {
       if(G.playerStatus?.battleHymn) mods.push('⬆ Hymn buff');
       if(mods.length) modTxt=`<span class=\"btn-mod\" title=\"${mods.join(' | ')}\">${mods.join(' · ')}</span>`;
     }
+    const shortDesc=((ab.levels&&ab.levels[(ab.level||1)-1]?.desc)||ab.desc||'').replace(/<[^>]+>/g,'').slice(0,88);
     btn.innerHTML=`
       <span class="btn-name">${ab.name}</span>
       <span class="btn-type">${getAbilityDisplayTags(ab).map(t=>`[${t}]`).join('')}</span>
       <span class="btn-cost">${btnCostText}</span>
+      <span class="btn-desc">${shortDesc}</span>
       ${modTxt}
       ${ab.level>1?`<span class="ab-lv-badge">Lv${ab.level}</span>`:''}
       ${ailDots?`<div class="ailment-icons">${ailDots}</div>`:''}
@@ -5168,7 +5185,10 @@ function logMsg(msg,cls='') {
   const log=document.getElementById('battle-log');
   const d=document.createElement('div');
   d.className=`log-entry ${cls}`; d.textContent=msg;
-  log.appendChild(d); log.scrollTop=log.scrollHeight;
+  log.appendChild(d);
+  const entries=log.querySelectorAll('.log-entry');
+  if(entries.length>5){ for(let i=0;i<entries.length-5;i++) entries[i].remove(); }
+  log.scrollTop=log.scrollHeight;
 }
 
 // ============================================================
