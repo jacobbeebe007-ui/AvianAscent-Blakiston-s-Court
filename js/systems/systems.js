@@ -904,7 +904,7 @@ cooldown('chargeUp',3);
     }
   }
 
-  // Albatross passive support inside spell hit chance if its stack exists.
+  // Albatross passive singer inside spell hit chance if its stack exists.
   const _oldSpellMissChance = globalThis.spellMissChance;
   if(typeof _oldSpellMissChance === 'function'){
     globalThis.spellMissChance = function(){
@@ -920,7 +920,7 @@ cooldown('chargeUp',3);
 
 // ===== 23_script_23.js =====
 
-/* ===== Ranger identity + ability scaling pass ===== */
+/* ===== Trickster identity + ability scaling pass ===== */
 (function(){
   const T = globalThis.ABILITY_TEMPLATES || {};
   function setLevels(id, desc, levels){
@@ -929,11 +929,11 @@ cooldown('chargeUp',3);
     T[id].levels = levels;
   }
 
-  /* Rangers focus: accuracy + poison/burn + steady pressure */
+  /* Tricksters focus: accuracy + poison/burn + steady pressure */
 
-  // Robin / ranger tools
+  // Robin / trickster tools
   setLevels('dart',
-    'Fast reliable strike. Ranger/assassin basic with strong accuracy and steady pressure.',
+    'Fast reliable strike. Trickster/Striker basic with strong accuracy and steady pressure.',
     [
       {lv:1, desc:'100% dmg, 12% miss'},
       {lv:2, desc:'112% dmg, 10% miss — Weaken 12%', newAilment:'weaken', ailChance:12},
@@ -943,7 +943,7 @@ cooldown('chargeUp',3);
   );
 
   setLevels('mudshot',
-    'Fling heavy mud. Accurate ranger control shot with slow pressure, not burst.',
+    'Fling heavy mud. Accurate trickster control shot with slow pressure, not burst.',
     [
       {lv:1, desc:'90% dmg, 14% miss — Mud 2t'},
       {lv:2, desc:'100% dmg, 12% miss — Mud 2t, Weaken 12%', newAilment:'mud', ailChance:100, newAilment2:'weaken', ailChance2:12},
@@ -982,9 +982,9 @@ cooldown('chargeUp',3);
     ]
   );
 
-  // Flamingo ranger
+  // Flamingo trickster
   setLevels('mudLash',
-    'Whip-like strike. Ranger pressure tool focused on poison and steady sustain.',
+    'Whip-like strike. Trickster pressure tool focused on poison and steady sustain.',
     [
       {lv:1, desc:'95% dmg, 15% miss — 1 Poison stack, 10% Confuse', newAilment:'poison', ailChance:100},
       {lv:2, desc:'106% dmg, 12% miss — 1-2 Poison stacks, heal 8% of damage', ailChance:100},
@@ -993,7 +993,7 @@ cooldown('chargeUp',3);
     ]
   );
 
-  // Bowerbird / ranger utility
+  // Bowerbird / trickster utility
   setLevels('stickLance',
     'Use twice in a row: first gather a stick, then strike for heavy ranged damage.',
     [
@@ -1004,7 +1004,7 @@ cooldown('chargeUp',3);
     ]
   );
 
-  // Seagull/Magpie summon support slightly flatter
+  // Seagull/Magpie summon singer slightly flatter
   setLevels('mobSwarm',
     'Call a mob of birds. Multi-hit pressure with steady ailment scaling.',
     [
@@ -1027,7 +1027,7 @@ cooldown('chargeUp',3);
   );
 
   setLevels('diveBomb',
-    'Heavy diving strike with stun chance. Ranger/assassin burst kept under control.',
+    'Heavy diving strike with stun chance. Trickster/Striker burst kept under control.',
     [
       {lv:1, desc:'150% dmg, 18% miss, 20% stun'},
       {lv:2, desc:'165% dmg, 16% miss, 24% stun'},
@@ -1067,11 +1067,11 @@ cooldown('chargeUp',3);
     ]
   );
 
-  // Ranger class minor identity bump: more accuracy, poison/burn synergy.
+  // Trickster class minor identity bump: more accuracy, poison/burn synergy.
   if(globalThis.BIRDS){
     ['robin','bowerbird','flamingo','magpie'].forEach(k=>{
       const b = BIRDS[k];
-      if(b?.class === 'ranger' && b.stats){
+      if(b?.class === 'trickster' && b.stats){
         b.stats.acc = Math.min(95, (b.stats.acc||80) + 2);
       }
     });
@@ -1100,7 +1100,7 @@ cooldown('chargeUp',3);
 
   /* ASSASSIN */
   setLevels('rapidPeck',
-    'Multi-hit assassin basic. High-roll pressure with smoother scaling.',
+    'Multi-hit striker basic. High-roll pressure with smoother scaling.',
     [
       {lv:1, desc:'2-3 hits, 8% miss each, 50% dmg, Pierce 20% DEF'},
       {lv:2, desc:'2-4 hits, 8% miss each, 56% dmg, Pierce 24% DEF — Poison 15%', newAilment:'poison', ailChance:15},
@@ -1151,7 +1151,7 @@ cooldown('chargeUp',3);
   );
 
   setLevels('serpentCrusher',
-    'Precise anti-poison finisher. Smooth knight scaling.',
+    'Precise anti-poison finisher. Smooth bruiser scaling.',
     [
       {lv:1, desc:'115% dmg, 12% miss. +30% dmg vs Poisoned. 15% Paralysis', newAilment:'paralyzed', ailChance:15},
       {lv:2, desc:'128% dmg, 10% miss. +30% dmg vs Poisoned. 18% Paralysis', ailChance:18},
@@ -1262,7 +1262,7 @@ cooldown('chargeUp',3);
   );
 
   setLevels('supersonic',
-    'Speed-scaled sonic strike. Reliable summoner tempo tool.',
+    'Speed-scaled sonic strike. Reliable trickster tempo tool.',
     [
       {lv:1, desc:'100% SPD-scaled dmg. Ignores dodge.'},
       {lv:2, desc:'112% SPD-scaled dmg. Ignores dodge.'},
@@ -1313,7 +1313,7 @@ cooldown('chargeUp',3);
   );
 
   setLevels('serratedSlash',
-    'Rake with a comb-edged beak. Bleed-focused bard bruiser strike.',
+    'Rake with a comb-edged beak. Bleed-focused singer bruiser strike.',
     [
       {lv:1, desc:'105% dmg, 12% miss. 1 Bleed stack. Heal 10% HP over 2t', newAilment:'bleed', ailChance:100},
       {lv:2, desc:'116% dmg, 10% miss. 2 Bleed stacks. Cleanse 1 debuff', ailChance:100},
